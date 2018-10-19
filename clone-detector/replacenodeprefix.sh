@@ -1,5 +1,9 @@
 #!/bin/bash
-scriptPATH=`realpath $0`
+
+realpath() {
+    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
+scriptPATH=$(realpath "$0")
 rootPATH=`dirname $scriptPATH`
 num_nodes="${1:-0}"
 src_text="NODE_PREFIX=NODE"
