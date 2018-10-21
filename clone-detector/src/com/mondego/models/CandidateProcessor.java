@@ -1,5 +1,12 @@
 package com.mondego.models;
 
+import com.mondego.indexbased.CustomCollectorFwdIndex;
+import com.mondego.indexbased.SearchManager;
+import com.mondego.indexbased.TermSearcher;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.lucene.document.Document;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -7,23 +14,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.Duration;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.lucene.document.Document;
-
-import com.mondego.indexbased.CustomCollectorFwdIndex;
-import com.mondego.indexbased.SearchManager;
-import com.mondego.indexbased.TermSearcher;
-
 public class CandidateProcessor implements IListener, Runnable {
     private QueryCandidates qc;
     private static final Logger logger = LogManager.getLogger(CandidateProcessor.class);
+
     public CandidateProcessor(QueryCandidates qc) {
-        // TODO Auto-generated constructor stub
         this.qc = qc;
     }
 
@@ -33,42 +28,27 @@ public class CandidateProcessor implements IListener, Runnable {
             // System.out.println( "QCQ size: "+
             // SearchManager.queryCandidatesQueue.size() + Util.debug_thread());
             this.processResultWithFilter();
-        } catch (NoSuchElementException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            // TODO Auto-generated catch block
+        } catch (NoSuchElementException
+                | InstantiationException
+                | IllegalArgumentException
+                | IllegalAccessException
+                | SecurityException
+                | NoSuchMethodException
+                | InvocationTargetException e) {
             e.printStackTrace();
         }
 
     }
 
     private void processResultWithFilter()
-            throws InterruptedException, InstantiationException, IllegalAccessException, IllegalArgumentException,
+            throws InstantiationException, IllegalAccessException, IllegalArgumentException,
             InvocationTargetException, NoSuchMethodException, SecurityException {
         // System.out.println("HERE, thread_id: " + Util.debug_thread() +
         // ", query_id "+ queryBlock.getId());
-	TermSearcher result = this.qc.termSearcher;
-	QueryBlock queryBlock = this.qc.queryBlock;
-	int shard = queryBlock.getShardId();
-	
+        TermSearcher result = this.qc.termSearcher;
+        QueryBlock queryBlock = this.qc.queryBlock;
+        int shard = queryBlock.getShardId();
+
         long sstart_time = System.currentTimeMillis();
         Map<Long, CandidateSimInfo> codeBlockIds = result.getSimMap();
         if (SearchManager.isGenCandidateStats) {
@@ -113,7 +93,7 @@ public class CandidateProcessor implements IListener, Runnable {
                         entry = null;
                     } else {
                         logger.error(SearchManager.NODE_PREFIX + "ERROR: more than one doc found. some error here."
-                                        + "," + doc.get("functionId") + ", " + doc.get("id"));
+                                + "," + doc.get("functionId") + ", " + doc.get("id"));
                     }
 
                 } else {

@@ -1,31 +1,23 @@
 /**
- * 
+ *
  */
 package com.mondego.indexbased;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.lucene.index.AtomicReaderContext;
-import org.apache.lucene.index.DocsAndPositionsEnum;
-import org.apache.lucene.index.DocsEnum;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.MultiFields;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.document.Document;
-
 import com.mondego.models.CandidateSimInfo;
 import com.mondego.utility.Util;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author vaibhavsaini
- * 
  */
 public class TermSearcher {
     private long queryId;
@@ -38,9 +30,10 @@ public class TermSearcher {
     private int computedThreshold;
     private int shard;
     private static final Logger logger = LogManager.getLogger(TermSearcher.class);
+
     public TermSearcher(int shard, long qid) {
-        this.earlierDocs = new ArrayList<Long>();
-        this.simMap = new HashMap<Long, CandidateSimInfo>();
+        this.earlierDocs = new ArrayList<>();
+        this.simMap = new HashMap<>();
         this.shard = shard;
         this.queryId = qid;
     }
@@ -61,15 +54,15 @@ public class TermSearcher {
                                                     .reader()), "tokens", term
                                                     .bytes());
                             if (null != docEnum) {
-                                int doc = DocsEnum.NO_MORE_DOCS;
+                                int doc;
                                 while ((doc = docEnum.nextDoc()) != DocsEnum.NO_MORE_DOCS) {
                                     long docId = doc + base;
-                                    CandidateSimInfo simInfo = null;
+                                    CandidateSimInfo simInfo;
                                     if (this.simMap.containsKey(docId)) {
                                         simInfo = this.simMap.get(docId);
                                         simInfo.similarity = simInfo.similarity
                                                 + Math.min(freqTerm,
-                                                        docEnum.freq());
+                                                docEnum.freq());
 
                                     } else {
                                         if (earlierDocs.contains(docId))
@@ -154,8 +147,7 @@ public class TermSearcher {
     }
 
     /**
-     * @param searchTerm
-     *            the searchTerm to set
+     * @param searchTerm the searchTerm to set
      */
     public void setSearchTerm(String searchTerm) {
         // System.out.println(Util.debug_thread() + "setting searchTerm: "+
@@ -171,8 +163,7 @@ public class TermSearcher {
     }
 
     /**
-     * @param freqTerm
-     *            the freqTerm to set
+     * @param freqTerm the freqTerm to set
      */
     public void setFreqTerm(int freqTerm) {
         this.freqTerm = freqTerm;
@@ -186,8 +177,7 @@ public class TermSearcher {
     }
 
     /**
-     * @param reader
-     *            the reader to set
+     * @param reader the reader to set
      */
     public void setReader(IndexReader reader) {
         this.reader = reader;
@@ -201,8 +191,7 @@ public class TermSearcher {
     }
 
     /**
-     * @param simMap
-     *            the simMap to set
+     * @param simMap the simMap to set
      */
     public void setSimMap(ConcurrentMap<Long, CandidateSimInfo> simMap) {
         this.simMap = simMap;

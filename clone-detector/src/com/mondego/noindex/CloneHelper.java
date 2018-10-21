@@ -1,77 +1,51 @@
 package com.mondego.noindex;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Writer;
-import java.text.ParseException;
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Scanner;
-import java.util.Set;
-import java.util.TreeMap;
-
+import com.mondego.indexbased.CustomCollectorFwdIndex;
+import com.mondego.indexbased.SearchManager;
+import com.mondego.models.*;
+import com.mondego.utility.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
 
-import com.mondego.indexbased.CustomCollectorFwdIndex;
-import com.mondego.indexbased.SearchManager;
-import com.mondego.models.Bag;
-import com.mondego.models.CandidateProcessor;
-import com.mondego.models.QueryBlock;
-import com.mondego.models.Shard;
-import com.mondego.models.Token;
-import com.mondego.models.TokenFrequency;
-import com.mondego.models.TokenInfo;
-import com.mondego.utility.Util;
-
-/**
- * 
- */
+import java.io.*;
+import java.text.ParseException;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * @author vaibhavsaini
- * 
  */
 public class CloneHelper {
     private Writer clonesWriter; // writer to write the output
     private Bag previousBag; // the previous bag whose clones we were finding in
-                             // other set
+    // other set
     private float threshold; // threshold for matching the clones.e.g. 80% or
-                             // 90%
+    // 90%
     private long comparisions;
     private int numClonesFound;
     private float th;
     private final Integer MUL_FACTOR = 100;
     private Map<String, Integer> globalIdentifierMap;
     private static final Logger logger = LogManager.getLogger(CloneHelper.class);
+
     /**
-     * 
+     *
      */
     public CloneHelper() {
         super();
         this.comparisions = 0;
         this.numClonesFound = 0;
-        this.globalIdentifierMap = new HashMap<String, Integer>();
+        this.globalIdentifierMap = new HashMap<>();
     }
 
     /**
      * outputs the bagB as a clone of bagA
-     * 
-     * @param bagA
-     * @param bagB
      */
     public void reportClone(Bag bagA, Bag bagB, Bag previousBag) {
         this.numClonesFound += 1;
         if (bagA.equals(previousBag)) { // TODO: can be optimized if we do not
-                                        // compare here
+            // compare here
             // System.out.println("equal");
             Util.writeToFile(this.clonesWriter, " ," + bagB.getId(), false);
         } else {
@@ -91,8 +65,7 @@ public class CloneHelper {
     }
 
     /**
-     * @param threshold
-     *            the threshold to set
+     * @param threshold the threshold to set
      */
     public void setThreshold(float threshold) {
         this.threshold = threshold;
@@ -102,11 +75,9 @@ public class CloneHelper {
      * setA and setB represents two projects. Each element of the set is a Bag.
      * Each Bag is a Map that has Token as a key and token's frequency in the
      * method as value. the method compares two sets and outputs the clones.
-     * 
-     * @param setA
-     *            set of Bags
-     * @param setB
-     *            set of Bags
+     *
+     * @param setA set of Bags
+     * @param setB set of Bags
      */
     public void detectClones(Set<Bag> setA, Set<Bag> setB, boolean useJaccardSimilarity) {
         // iterate on setA
@@ -125,22 +96,18 @@ public class CloneHelper {
 
     /**
      * the method compares two maps and reports if they are clones.
-     * 
-     * @param bagA
-     *            map of token as key and it's frequency in a method as value
-     * @param bagB
-     *            map of token as key and it's frequency in a method as value
+     *
+     * @param bagA map of token as key and it's frequency in a method as value
+     * @param bagB map of token as key and it's frequency in a method as value
      */
     public void detectClones(Bag bagA, Bag bagB, boolean useJaccardSimilarity) {
-        int computedThreshold = 0;
+        int computedThreshold;
         if (useJaccardSimilarity) {
-            int computedThreshold_jaccard = (int) Math
+            computedThreshold = (int) Math
                     .ceil((this.th * (bagA.getSize() + bagB.getSize())) / (10 * this.MUL_FACTOR + this.th));
-            computedThreshold = computedThreshold_jaccard;
         } else {
             int maxLength = Math.max(bagA.getSize(), bagB.getSize());
-            int computedThreshold_overlap = (int) Math.ceil((this.th * maxLength) / (10 * this.MUL_FACTOR));
-            computedThreshold = computedThreshold_overlap;
+            computedThreshold = (int) Math.ceil((this.th * maxLength) / (10 * this.MUL_FACTOR));
         }
         // threshold.
         // System.out.println("threshold is "+ computedThreshold +
@@ -159,7 +126,7 @@ public class CloneHelper {
                     this.reportClone(bagA, bagB, this.previousBag);
                     this.previousBag = bagA;
                     break; // no need to iterate on other keys clone has been
-                           // found
+                    // found
                 }
             }
         }
@@ -167,16 +134,13 @@ public class CloneHelper {
 
     /**
      * returns the string for the insuptSet.
-     * 
-     * @param inputSet
-     * @return String
      */
     public String stringify(Set<Bag> inputSet) {
-        String returnString = "";
+        StringBuilder returnString = new StringBuilder();
         for (Bag bag : inputSet) {
-            returnString += bag.toString();
+            returnString.append(bag.toString());
         }
-        return returnString;
+        return returnString.toString();
     }
 
     public Bag deserialise(String s) throws ParseException {
@@ -265,27 +229,23 @@ public class CloneHelper {
                 String[] bagMetadata = bagAndTokens[0].split(",");
                 String functionId = bagMetadata[0];
                 String bagId = bagMetadata[1];
-                QueryBlock queryBlock = null;
-                try {
-                    int bagSize = Integer.parseInt(bagMetadata[2]);
-                    if (bagSize < SearchManager.min_tokens || bagSize > SearchManager.max_tokens) {
-                        return null; // do not process it further. we need
-                                           // to discard this query
-                    }
-                    queryBlock = new QueryBlock(Long.parseLong((bagId)), bagSize);
-                    queryBlock.setFunctionId(Long.parseLong(functionId));
-		    Shard shard = SearchManager.getShard(queryBlock);
-		    if (shard == null) {
-			logger.warn(SearchManager.NODE_PREFIX + " unable to find shard for query block " + queryBlock);
-			return null;
-		    }
-
-		    queryBlock.setShardId(shard.getId()); 
-
-                } catch (NumberFormatException e) {
-                    throw e;
+                QueryBlock queryBlock;
+                int bagSize = Integer.parseInt(bagMetadata[2]);
+                if (bagSize < SearchManager.min_tokens || bagSize > SearchManager.max_tokens) {
+                    return null; // do not process it further. we need
+                    // to discard this query
                 }
-                String tokenString = null;// bagAndTokens[1];
+                queryBlock = new QueryBlock(Long.parseLong((bagId)), bagSize);
+                queryBlock.setFunctionId(Long.parseLong(functionId));
+                Shard shard = SearchManager.getShard(queryBlock);
+                if (shard == null) {
+                    logger.warn(SearchManager.NODE_PREFIX + " unable to find shard for query block " + queryBlock);
+                    return null;
+                }
+
+                queryBlock.setShardId(shard.getId());
+
+                String tokenString;// bagAndTokens[1];
                 CustomCollectorFwdIndex collector = SearchManager.fwdSearcher.get(queryBlock.getShardId()).search(bagId);
                 List<Integer> blocks = collector.getBlocks();
                 if (!blocks.isEmpty()) {
@@ -313,13 +273,13 @@ public class CloneHelper {
     }
 
     private void parseAndPopulateQueryBlock(List<Entry<String, TokenInfo>> listOfTokens, String inputString,
-            String delimeterTokenFreq, String delimeterTokenAndFreq) {
+                                            String delimeterTokenFreq, String delimeterTokenAndFreq) {
         // int queryBlockSize = 0;
         Scanner scanner = new Scanner(inputString);
         scanner.useDelimiter(delimeterTokenFreq);
-        String tokenFreq = null;
-        String[] tokenAndFreq = null;
-        String tokenStr = null;
+        String tokenFreq;
+        String[] tokenAndFreq;
+        String tokenStr;
         while (scanner.hasNext()) {
             tokenFreq = scanner.next();
             tokenAndFreq = tokenFreq.split(delimeterTokenAndFreq);
@@ -327,7 +287,7 @@ public class CloneHelper {
             if (tokenStr.length() > 0) {
                 try {
                     TokenInfo tokenInfo = new TokenInfo(Integer.parseInt(tokenAndFreq[1]));
-                    Entry<String, TokenInfo> entry = new AbstractMap.SimpleEntry<String, TokenInfo>(tokenStr,
+                    Entry<String, TokenInfo> entry = new AbstractMap.SimpleEntry<>(tokenStr,
                             tokenInfo);
                     listOfTokens.add(entry);
                     // queryBlockSize += tokenInfo.getFrequency();
@@ -347,7 +307,7 @@ public class CloneHelper {
     }
 
     private String strip(String str) {
-        return str.replaceAll("(\'|\"|\\\\)", "");
+        return str.replaceAll("(['\"\\\\])", "");
     }
 
     /**
@@ -358,8 +318,7 @@ public class CloneHelper {
     }
 
     /**
-     * @param clonesWriter
-     *            the clonesWriter to set
+     * @param clonesWriter the clonesWriter to set
      */
     public void setClonesWriter(Writer clonesWriter) {
         this.clonesWriter = clonesWriter;
@@ -375,29 +334,14 @@ public class CloneHelper {
         Util.writeToFile(inputSetsWriter, setBString, true);
     }
 
-    public void parseInputFileAndPopulateSet(File filename, Set<Bag> bagsSet) {
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(filename));
+    public void parseInputFileAndPopulateSet(File fileName, Set<Bag> bagsSet) {
+        try (var reader = new BufferedReader(new FileReader(fileName))) {
             String line;
-            while ((line = br.readLine()) != null && line.trim().length() > 0) {
+            while ((line = reader.readLine()) != null && line.trim().length() > 0) {
                 bagsSet.add(this.deserialise(line));
             }
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
+        } catch (IOException | ParseException e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } finally {
-            try {
-                br.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
         }
 
     }
@@ -419,8 +363,7 @@ public class CloneHelper {
     }
 
     /**
-     * @param comparisions
-     *            the comparisions to set
+     * @param comparisions the comparisions to set
      */
     public void setComparisions(long comparisions) {
         this.comparisions = comparisions;
@@ -434,8 +377,7 @@ public class CloneHelper {
     }
 
     /**
-     * @param numClonesFound
-     *            the numClonesFound to set
+     * @param numClonesFound the numClonesFound to set
      */
     public void setNumClonesFound(int numClonesFound) {
         this.numClonesFound = numClonesFound;

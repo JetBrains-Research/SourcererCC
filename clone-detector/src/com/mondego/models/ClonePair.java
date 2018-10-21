@@ -16,6 +16,6 @@ public class ClonePair {
 
     @Override
     public String toString() {
-        return q_pid+","+qid+","+c_pid+","+cid;
+        return q_pid + "," + qid + "," + c_pid + "," + cid;
     }
 }

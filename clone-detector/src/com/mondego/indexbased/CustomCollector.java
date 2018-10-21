@@ -1,26 +1,18 @@
 /**
- * 
+ *
  */
 package com.mondego.indexbased;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.lucene.index.AtomicReaderContext;
-import org.apache.lucene.index.DocsEnum;
-import org.apache.lucene.index.MultiFields;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.index.Terms;
-import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Scorer;
-import org.apache.lucene.util.BytesRef;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author vaibhavsaini
- * 
  */
 public class CustomCollector extends Collector {
     private Map<Integer, Long> codeBlockIds;
@@ -30,7 +22,7 @@ public class CustomCollector extends Collector {
     private int freqSearchTerm;
 
     public CustomCollector(IndexSearcher searcher) {
-        this.codeBlockIds = new HashMap<Integer, Long>();
+        this.codeBlockIds = new HashMap<>();
         this.searcher = searcher;
     }
 
@@ -40,10 +32,10 @@ public class CustomCollector extends Collector {
     }
 
     @Override
-    public void collect(int doc) throws IOException {
+    public void collect(int doc) {
         Integer docId = doc + docBase;
         if (this.codeBlockIds.containsKey(docId)) {
-            
+
             //this.codeBlockIds.put(docId, this.codeBlockIds.get(docId) + Math.min(this.freqSearchTerm, this.getTermFrequency(docId)));
         } else {
             //this.codeBlockIds.put(docId, Math.min(this.freqSearchTerm, this.getTermFrequency(docId)));
@@ -52,14 +44,14 @@ public class CustomCollector extends Collector {
 
 
     @Override
-    public void setNextReader(AtomicReaderContext context) throws IOException {
+    public void setNextReader(AtomicReaderContext context) {
         this.docBase = context.docBase;
     }
-    
-    @Override
-    public void setScorer(Scorer arg0) throws IOException {
-        // TODO Auto-generated method stub
 
+    @Override
+    public void setScorer(Scorer arg0) {
+        // todo
+        // throw new UnsupportedOperationException("Operation not implemented");
     }
 
     /**
@@ -70,8 +62,7 @@ public class CustomCollector extends Collector {
     }
 
     /**
-     * @param codeBlockIds
-     *            the codeBlockIds to set
+     * @param codeBlockIds the codeBlockIds to set
      */
     public void setCodeBlockIds(Map<Integer, Long> codeBlockIds) {
         this.codeBlockIds = codeBlockIds;
@@ -85,8 +76,7 @@ public class CustomCollector extends Collector {
     }
 
     /**
-     * @param searchTerm
-     *            the searchTerm to set
+     * @param searchTerm the searchTerm to set
      */
     public void setSearchTerm(String searchTerm) {
         this.searchTerm = searchTerm;
@@ -94,6 +84,6 @@ public class CustomCollector extends Collector {
 
     public void setFreqOfSearchTerm(int frequency) {
         this.freqSearchTerm = frequency;
-        
+
     }
 }

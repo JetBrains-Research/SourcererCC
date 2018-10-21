@@ -1,57 +1,38 @@
 package com.mondego.noindex;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import com.mondego.models.Bag;
 import com.mondego.models.Token;
 import com.mondego.models.TokenFrequency;
 import com.mondego.utility.Util;
 
-/**
- * 
- */
+import java.util.*;
 
 /**
  * @author vaibhavsaini
- * 
  */
 public class CloneTestHelper {
 
     /**
      * returns a set of 10 bags
-     * 
+     *
      * @return Set<Bag>
      */
     public static HashSet<Bag> getTestSet(int start, int stop) {
-        HashSet<Bag> set = new HashSet<Bag>();
+        HashSet<Bag> set = new HashSet<>();
         for (int i = start; i < stop; i++) {
             set.add(getTestBag(i));
         }
         return set;
     }
 
-    /**
-     * 
-     * @param i
-     *            integer to create value of a token
-     * @return Token
-     */
     public static Token getTestToken() {
         return new Token("t" + Util.getRandomNumber(21, 1));
     }
 
     /**
      * creates and return a bag of 10 tokens
-     * 
-     * @param i
-     *            id of the bag
+     *
+     * @param i id of the bag
      * @return Bag
      */
     public static Bag getTestBag(int i) {
@@ -68,16 +49,12 @@ public class CloneTestHelper {
 
     public static Map<String, Integer> getGlobalTokenPositionMap(
             Set<Bag> setA, Set<Bag> setB) {
-        Map<String, Integer> tokenPositionMap = new HashMap<String, Integer>();
-        Map<TokenFrequency, TokenFrequency> map = new HashMap<TokenFrequency, TokenFrequency>();
+        Map<String, Integer> tokenPositionMap = new HashMap<>();
+        Map<TokenFrequency, TokenFrequency> map = new HashMap<>();
         fetchTokenFrequencyList(map, setA);
         fetchTokenFrequencyList(map, setB);
-        List<TokenFrequency> list = new ArrayList<TokenFrequency>( map.values());
-        Collections.sort(list, new Comparator<TokenFrequency>() {
-            public int compare(TokenFrequency tfFirst, TokenFrequency tfSecond) {
-                return tfFirst.getFrequency() - tfSecond.getFrequency();
-            }
-        });
+        List<TokenFrequency> list = new ArrayList<>(map.values());
+        list.sort(Comparator.comparingInt(TokenFrequency::getFrequency));
         int position = 0;
         for (TokenFrequency tokenFrequency : list) {
             tokenPositionMap.put(tokenFrequency.getToken().getValue(), position);

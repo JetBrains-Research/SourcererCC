@@ -1,14 +1,13 @@
 package com.mondego.postprocessing;
 
+import com.mondego.utility.Util;
+
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.mondego.utility.Util;
 
 public class SummaryProcessor {
     int INDEX_PROJECT_NAME = 0;
@@ -27,7 +26,7 @@ public class SummaryProcessor {
     Map<String, SummaryProcessor.Project> projects;
 
     public SummaryProcessor() throws IOException {
-        this.projects = new HashMap<String, SummaryProcessor.Project>();
+        this.projects = new HashMap<>();
         this.inputDir = "output";
         Util.createDirs("summaryFolder");
         this.processedSummryWriter_time = Util.openFile(
@@ -42,9 +41,9 @@ public class SummaryProcessor {
         float i = 7.5f;
         int j = 8;
         boolean isThisInt = false;
-        String threshold = "";
-        while (true) {
-            String name = null;
+        String threshold;
+        do {
+            String name;
             if (isThisInt) {
                 name = this.inputDir + j;
                 threshold = j + "";
@@ -58,39 +57,30 @@ public class SummaryProcessor {
             }
             String filename = name + "/summary.csv";
             this.processFile(filename, threshold);
-            if (j > 10) {
-                break;
-            }
-        }
+        } while (j <= 10);
         this.writeOutput();
         System.out.println("Done");
     }
 
     private void writeOutput() {
         String header = "project_name,7.5, 8," + "8.5,9,9.5,10";
-        
+
         Util.writeToFile(this.processedSummryWriter_time, header, true);
         for (Project project : this.projects.values()) {
             StringBuilder sb = new StringBuilder();
-            sb.append(project.name + ",");
+            sb.append(project.name).append(",");
             sb.append(project.thresholdToAttribtueMap.get("7.5").get(
-                    this.TIME_WITH_FILTER)
-                    + ",");
+                    this.TIME_WITH_FILTER)).append(",");
             sb.append(project.thresholdToAttribtueMap.get("8").get(
-                    this.TIME_WITH_FILTER)
-                    + ",");
+                    this.TIME_WITH_FILTER)).append(",");
             sb.append(project.thresholdToAttribtueMap.get("8.5").get(
-                    this.TIME_WITH_FILTER)
-                    + ",");
+                    this.TIME_WITH_FILTER)).append(",");
             sb.append(project.thresholdToAttribtueMap.get("9").get(
-                    this.TIME_WITH_FILTER)
-                    + ",");
+                    this.TIME_WITH_FILTER)).append(",");
             sb.append(project.thresholdToAttribtueMap.get("9.5").get(
-                    this.TIME_WITH_FILTER)
-                    + ",");
+                    this.TIME_WITH_FILTER)).append(",");
             sb.append(project.thresholdToAttribtueMap.get("10").get(
-                    this.TIME_WITH_FILTER)
-                    + ",");
+                    this.TIME_WITH_FILTER)).append(",");
             System.out.println("hello " + sb);
             Util.writeToFile(this.processedSummryWriter_time, sb.toString(),
                     true);
@@ -100,59 +90,43 @@ public class SummaryProcessor {
         // comparisions
         Util.writeToFile(this.processedSummryWriter_comparisions, header, true);
         for (Project project : this.projects.values()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(project.name + ",");
-            sb.append(project.thresholdToAttribtueMap.get("7.5").get(
-                    this.COMPARISION_WITH_FILTER)
-                    + ",");
-            sb.append(project.thresholdToAttribtueMap.get("8").get(
-                    this.COMPARISION_WITH_FILTER)
-                    + ",");
-            sb.append(project.thresholdToAttribtueMap.get("8.5").get(
-                    this.COMPARISION_WITH_FILTER)
-                    + ",");
-            sb.append(project.thresholdToAttribtueMap.get("9").get(
-                    this.COMPARISION_WITH_FILTER)
-                    + ",");
-            sb.append(project.thresholdToAttribtueMap.get("9.5").get(
-                    this.COMPARISION_WITH_FILTER)
-                    + ",");
-            sb.append(project.thresholdToAttribtueMap.get("10").get(
-                    this.COMPARISION_WITH_FILTER)
-                    + ",");
-            Util.writeToFile(this.processedSummryWriter_comparisions,
-                    sb.toString(), true);
+            String sb = project.name + "," +
+                    project.thresholdToAttribtueMap.get("7.5").get(this.COMPARISION_WITH_FILTER) +
+                    "," +
+                    project.thresholdToAttribtueMap.get("8").get(this.COMPARISION_WITH_FILTER) +
+                    "," +
+                    project.thresholdToAttribtueMap.get("8.5").get(this.COMPARISION_WITH_FILTER) +
+                    "," +
+                    project.thresholdToAttribtueMap.get("9").get(this.COMPARISION_WITH_FILTER) +
+                    "," +
+                    project.thresholdToAttribtueMap.get("9.5").get(this.COMPARISION_WITH_FILTER) +
+                    "," +
+                    project.thresholdToAttribtueMap.get("10").get(this.COMPARISION_WITH_FILTER) +
+                    ",";
+            Util.writeToFile(this.processedSummryWriter_comparisions, sb, true);
 
         }
         Util.closeOutputFile(this.processedSummryWriter_comparisions);
         // clones
 
-        
+
         Util.writeToFile(this.processedSummryWriter_clones, header, true);
         for (Project project : this.projects.values()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(project.name + ",");
-            sb.append(project.thresholdToAttribtueMap.get("7.5").get(
-                    this.CLONES_COUNT)
-                    + ",");
-            sb.append(project.thresholdToAttribtueMap.get("8").get(
-                    this.CLONES_COUNT)
-                    + ",");
-            sb.append(project.thresholdToAttribtueMap.get("8.5").get(
-                    this.CLONES_COUNT)
-                    + ",");
-            sb.append(project.thresholdToAttribtueMap.get("9").get(
-                    this.CLONES_COUNT)
-                    + ",");
-            sb.append(project.thresholdToAttribtueMap.get("9.5").get(
-                    this.CLONES_COUNT)
-                    + ",");
-            sb.append(project.thresholdToAttribtueMap.get("10").get(
-                    this.CLONES_COUNT)
-                    + ",");
 
-            Util.writeToFile(this.processedSummryWriter_clones, sb.toString(),
-                    true);
+            String sb = project.name + "," +
+                    project.thresholdToAttribtueMap.get("7.5").get(this.CLONES_COUNT) +
+                    "," +
+                    project.thresholdToAttribtueMap.get("8").get(this.CLONES_COUNT) +
+                    "," +
+                    project.thresholdToAttribtueMap.get("8.5").get(this.CLONES_COUNT) +
+                    "," +
+                    project.thresholdToAttribtueMap.get("9").get(this.CLONES_COUNT) +
+                    "," +
+                    project.thresholdToAttribtueMap.get("9.5").get(this.CLONES_COUNT) +
+                    "," +
+                    project.thresholdToAttribtueMap.get("10").get(this.CLONES_COUNT) +
+                    ",";
+            Util.writeToFile(this.processedSummryWriter_clones, sb, true);
 
         }
         Util.closeOutputFile(this.processedSummryWriter_clones);
@@ -169,16 +143,12 @@ public class SummaryProcessor {
             while ((line = br.readLine()) != null && line.trim().length() > 0) {
                 this.processRow(line, threshold);
             }
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             try {
                 br.close();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -187,7 +157,7 @@ public class SummaryProcessor {
     private void processRow(String line, String threshold) {
         String[] cells = line.split(",");
         String projectName = cells[this.INDEX_PROJECT_NAME];
-        Project project = null;
+        Project project;
         if (this.projects.containsKey(projectName)) {
             project = this.projects.get(projectName);
         } else {
@@ -195,11 +165,11 @@ public class SummaryProcessor {
             project.name = projectName;
             this.projects.put(projectName, project);
         }
-        Map<String, String> properties = null;
+        Map<String, String> properties;
         if (project.thresholdToAttribtueMap.containsKey(threshold)) {
             properties = project.thresholdToAttribtueMap.get(threshold);
         } else {
-            properties = new HashMap<String, String>();
+            properties = new HashMap<>();
             project.thresholdToAttribtueMap.put(threshold, properties);
 
         }
@@ -215,7 +185,7 @@ public class SummaryProcessor {
         Map<String, Map<String, String>> thresholdToAttribtueMap;
 
         public Project() {
-            this.thresholdToAttribtueMap = new HashMap<String, Map<String, String>>();
+            this.thresholdToAttribtueMap = new HashMap<>();
         }
     }
 

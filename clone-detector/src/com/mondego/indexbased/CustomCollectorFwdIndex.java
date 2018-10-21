@@ -1,27 +1,21 @@
-/**
- * 
- */
 package com.mondego.indexbased;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.Scorer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author vaibhavsaini
- * 
  */
 public class CustomCollectorFwdIndex extends Collector {
     private List<Integer> blocks;
     private int docBase;
 
     public CustomCollectorFwdIndex() {
-        this.blocks = new ArrayList<Integer>();
+        this.blocks = new ArrayList<>();
     }
 
     @Override
@@ -30,20 +24,20 @@ public class CustomCollectorFwdIndex extends Collector {
     }
 
     @Override
-    public void collect(int doc) throws IOException {
+    public void collect(int doc) {
         Integer docId = doc + docBase;
         this.blocks.add(docId);
     }
 
     @Override
-    public void setNextReader(AtomicReaderContext context) throws IOException {
+    public void setNextReader(AtomicReaderContext context) {
         this.docBase = context.docBase;
     }
 
     @Override
-    public void setScorer(Scorer arg0) throws IOException {
-        // TODO Auto-generated method stub
-
+    public void setScorer(Scorer arg0) {
+        // todo:
+        // throw new UnsupportedOperationException("Operation not implemented");
     }
 
     /**

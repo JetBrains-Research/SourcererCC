@@ -1,27 +1,18 @@
-/**
- * 
- */
 package com.mondego.indexbased;
-
-import java.io.IOException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.FieldType;
-import org.apache.lucene.document.StoredField;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.Term;
 
 import com.mondego.models.Bag;
 import com.mondego.models.TokenFrequency;
 import com.mondego.utility.BlockInfo;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.lucene.document.*;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.Term;
+
+import java.io.IOException;
 
 /**
  * @author vaibhavsaini
- * 
  */
 public class DocumentMaker {
     private IndexWriter indexWriter;
@@ -34,12 +25,13 @@ public class DocumentMaker {
      * @param isPrefixIndex
      */
     private static final Logger logger = LogManager.getLogger(DocumentMaker.class);
+
     public DocumentMaker(IndexWriter indexWriter) {
         super();
         this.indexWriter = indexWriter;
     }
-    
-    public DocumentMaker(){
+
+    public DocumentMaker() {
         super();
     }
 
@@ -74,26 +66,26 @@ public class DocumentMaker {
     private Document wfmEntry;
     private StringField wordField;
     private StoredField freqField;
+
     public void indexWFMEntry(String word, long frequency) {
-	// Create the document and fields only once, for no GC
-	if (wfmEntry == null) {
-	    wfmEntry = new Document();
-	    wordField = new StringField("key", word,
-					       Field.Store.NO);
-	    wfmEntry.add(wordField);
-	    freqField = new StoredField("frequency", frequency);
-	    wfmEntry.add(freqField);
-	}
-	else {
-	    wordField.setStringValue(word);
-	    freqField.setLongValue(frequency);
-	}
+        // Create the document and fields only once, for no GC
+        if (wfmEntry == null) {
+            wfmEntry = new Document();
+            wordField = new StringField("key", word,
+                    Field.Store.NO);
+            wfmEntry.add(wordField);
+            freqField = new StoredField("frequency", frequency);
+            wfmEntry.add(freqField);
+        } else {
+            wordField.setStringValue(word);
+            freqField.setLongValue(frequency);
+        }
 
         try {
-	    this.indexWriter.updateDocument(new Term("key", word), wfmEntry);
+            this.indexWriter.updateDocument(new Term("key", word), wfmEntry);
         } catch (IOException e) {
             logger.error("EXCEPTION caught while indexing document for wfm entry "
-                            + word + ":" + frequency);
+                    + word + ":" + frequency);
             e.printStackTrace();
         }
     }
@@ -105,12 +97,12 @@ public class DocumentMaker {
         //idField.fieldType().setIndexed(true);
         //idField.fieldType().freeze();
         document.add(idField);
-        
+
         StringBuilder tokenString = new StringBuilder();
         for (TokenFrequency tf : bag) {
             // System.out.println(tf.getToken().getValue() +
             // ":"+tf.getFrequency());
-            tokenString.append(tf.getToken().getValue() + ":" + tf.getFrequency() + "::");
+            tokenString.append(tf.getToken().getValue()).append(":").append(tf.getFrequency()).append("::");
         }
         StoredField strField = new StoredField("tokens", tokenString.toString().trim());
         document.add(strField);
@@ -140,7 +132,7 @@ public class DocumentMaker {
         int prefixLength = BlockInfo.getPrefixSize(bag.getSize(), ct);
         for (TokenFrequency tf : bag) {
             for (int i = 0; i < tf.getFrequency(); i++) {
-                tokenString.append(tf.getToken().getValue() + " ");
+                tokenString.append(tf.getToken().getValue()).append(" ");
                 // System.out.println(tf.getToken().getValue());
             }
             prefixLength -= tf.getFrequency();
@@ -151,14 +143,14 @@ public class DocumentMaker {
 
         @SuppressWarnings("deprecation")
         //Field field = new Field("tokens", tokenString.trim(), Field.Store.NO,
-          //      Field.Index.ANALYZED, Field.TermVector.WITH_POSITIONS);
-        FieldType fieldType = new FieldType();
+                //      Field.Index.ANALYZED, Field.TermVector.WITH_POSITIONS);
+                FieldType fieldType = new FieldType();
         fieldType.setIndexed(true);
         fieldType.setStoreTermVectorPositions(true);
         fieldType.setStoreTermVectors(true);
         fieldType.setTokenized(true);
         fieldType.freeze();
-        Field field = new Field("tokens",tokenString.toString().trim(),fieldType);
+        Field field = new Field("tokens", tokenString.toString().trim(), fieldType);
        /* TextField textField = new TextField("tokens", tokenString.trim(), Field.Store.NO);
         textField.fieldType().setIndexed(true);
         textField.fieldType().setStoreTermVectorPositions(true);

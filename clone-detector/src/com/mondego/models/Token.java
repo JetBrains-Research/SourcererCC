@@ -1,16 +1,12 @@
 package com.mondego.models;
-/**
- * 
- */
 
 /**
  * @author vaibhavsaini
- * 
  */
 public class Token {
     private String value; // this is the face value of a token, e.g. 'for'
     private int id; // unique id of a token
-    
+
     /**
      * @return the id
      */
@@ -54,18 +50,13 @@ public class Token {
         }
         Token other = (Token) obj;
         if (value == null) {
-            if (other.value != null) {
-                return false;
-            }
-        } else if (!value.equals(other.value)) {
-            return false;
-        }
-        return true;
+            return other.value == null;
+        } else return value.equals(other.value);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override
@@ -86,6 +77,6 @@ public class Token {
     public void setValue(String value) {
         this.value = value;
     }
-    
+
 
 }

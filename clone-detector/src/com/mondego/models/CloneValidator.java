@@ -1,20 +1,19 @@
 package com.mondego.models;
 
+import com.mondego.indexbased.SearchManager;
+import com.mondego.utility.Util;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.mondego.indexbased.SearchManager;
-import com.mondego.utility.Util;
-
 public class CloneValidator implements IListener, Runnable {
     private CandidatePair candidatePair;
     private static final Logger logger = LogManager.getLogger(CloneValidator.class);
+
     public CloneValidator(CandidatePair candidatePair) {
-        // TODO Auto-generated constructor stub
         this.candidatePair = candidatePair;
     }
 
@@ -22,33 +21,19 @@ public class CloneValidator implements IListener, Runnable {
     public void run() {
         try {
             this.validate(this.candidatePair);
-        } catch (NoSuchElementException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            // TODO Auto-generated catch block
+        } catch (NoSuchElementException
+                | InstantiationException
+                | IllegalArgumentException
+                | IllegalAccessException
+                | SecurityException
+                | InvocationTargetException
+                | NoSuchMethodException e) {
             e.printStackTrace();
         }
     }
 
     private void validate(CandidatePair candidatePair)
-            throws InterruptedException, InstantiationException, IllegalAccessException, IllegalArgumentException,
+            throws InstantiationException, IllegalAccessException, IllegalArgumentException,
             InvocationTargetException, NoSuchMethodException, SecurityException {
         /*
          * System.out.println(SearchManager.NODE_PREFIX + "validating, " +
@@ -81,7 +66,7 @@ public class CloneValidator implements IListener, Runnable {
                  * e) { e.printStackTrace(); }
                  */
                 long estimatedTime = System.nanoTime() - startTime;
-                logger.debug(SearchManager.NODE_PREFIX + " CloneValidator, QueryBlock " + candidatePair + " in " + estimatedTime/1000 + " micros");
+                logger.debug(SearchManager.NODE_PREFIX + " CloneValidator, QueryBlock " + candidatePair + " in " + estimatedTime / 1000 + " micros");
                 SearchManager.reportCloneQueue.send(cp);
             }
             /*
@@ -95,17 +80,16 @@ public class CloneValidator implements IListener, Runnable {
     }
 
     private int updateSimilarity(QueryBlock queryBlock, String tokens, int computedThreshold, int candidateSize,
-            CandidateSimInfo simInfo) {
+                                 CandidateSimInfo simInfo) {
         int tokensSeenInCandidate = 0;
         int similarity = simInfo.similarity;
-        Scanner scanner = new Scanner(tokens);
-        try {
+        try (Scanner scanner = new Scanner(tokens)) {
             scanner.useDelimiter("::");
-            String tokenfreqFrame = null;
+            String tokenfreqFrame;
             String[] tokenFreqInfo;
-            TokenInfo tokenInfo = null;
-            boolean matchFound = false;
-            int candidatesTokenFreq = -1;
+            TokenInfo tokenInfo;
+            boolean matchFound;
+            int candidatesTokenFreq;
             while (scanner.hasNext()) {
                 tokenfreqFrame = scanner.next();
                 tokenFreqInfo = tokenfreqFrame.split(":");
@@ -139,18 +123,14 @@ public class CloneValidator implements IListener, Runnable {
                 }
             }
 
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
             logger.error("possible error in the format. tokens: " + tokens);
-        } catch (NumberFormatException e) {
-            logger.error("possible error in the format. tokens: " + tokens);
-        } finally {
-            scanner.close();
         }
         return -1;
     }
 
     private int updateSimilarityHelper(CandidateSimInfo simInfo, TokenInfo tokenInfo, int similarity,
-            int candidatesTokenFreq) {
+                                       int candidatesTokenFreq) {
         simInfo.queryMatchPosition = tokenInfo.getPosition();
         similarity += Math.min(tokenInfo.getFrequency(), candidatesTokenFreq);
         // System.out.println("similarity: "+ similarity);

@@ -1,24 +1,12 @@
-/**
- * 
- */
 package com.mondego.postprocessing;
-
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import com.mondego.utility.Util;
 
+import java.io.*;
+import java.util.*;
+
 /**
  * @author vaibhavsaini
- * 
  */
 public class ClonesNamesAssembler {
 
@@ -26,14 +14,13 @@ public class ClonesNamesAssembler {
      * @param args
      */
     String projectName;
-    Map<Integer, String> idNameMap = new HashMap<Integer, String>();
-    Map<Integer, List<Integer>> cloneIdsMap = new HashMap<Integer, List<Integer>>();
-    Map<String, List<String>> cloneNameMap = new HashMap<String, List<String>>();
+    Map<Integer, String> idNameMap = new HashMap<>();
+    Map<Integer, List<Integer>> cloneIdsMap = new HashMap<>();
+    Map<String, List<String>> cloneNameMap = new HashMap<>();
     private Writer outputWriter;
     int linesWritten;
 
     public static void main(String[] args) {
-        // TODO Auto-generated method stub
         System.out.println("start!");
         ClonesNamesAssembler assembler = new ClonesNamesAssembler();
         if (args.length > 0) {
@@ -71,9 +58,9 @@ public class ClonesNamesAssembler {
             while ((sCurrentLine = br.readLine()) != null) {
                 if (sCurrentLine.trim().length() > 0) {
 
-                    if (sCurrentLine.indexOf("Bag") != -1) {
+                    if (sCurrentLine.contains("Bag")) {
                         key = Integer.parseInt(sCurrentLine.substring(offset));
-                        this.cloneIdsMap.put(key, new ArrayList<Integer>());
+                        this.cloneIdsMap.put(key, new ArrayList<>());
                     } else {
                         String[] clones = sCurrentLine.split(",");
                         for (String clone : clones) {
@@ -104,13 +91,13 @@ public class ClonesNamesAssembler {
         Set<Integer> ids = this.cloneIdsMap.keySet();
         try {
             for (Integer id : ids) {
-                sb.append(this.idNameMap.get(id) + Util.CSV_DELIMITER);
+                sb.append(this.idNameMap.get(id)).append(Util.CSV_DELIMITER);
                 List<Integer> clones = this.cloneIdsMap.get(id);
                 for (Integer clone : clones) {
-                    sb.append(this.idNameMap.get(clone) + "::");
+                    sb.append(this.idNameMap.get(clone)).append("::");
                 }
                 sb.setLength(sb.length() - 2);
-                sb.append(Util.CSV_DELIMITER + clones.size());
+                sb.append(Util.CSV_DELIMITER).append(clones.size());
                 Util.writeToFile(this.outputWriter, sb.toString(), true);
                 sb.setLength(0);
                 this.linesWritten++;

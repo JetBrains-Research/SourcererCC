@@ -1,10 +1,7 @@
 package com.mondego.models;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.mondego.indexbased.SearchManager;
+import com.mondego.utility.BlockInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
@@ -16,8 +13,10 @@ import org.apache.lucene.index.TieredMergePolicy;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
-import com.mondego.indexbased.SearchManager;
-import com.mondego.utility.BlockInfo;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Shard {
     int id;
@@ -29,13 +28,13 @@ public class Shard {
     private static final Logger logger = LogManager.getLogger(Shard.class);
 
     public Shard(int id, int minBagSizeToSearch, int maxBagSizeToSearch,
-            boolean forWriting) {
+                 boolean forWriting) {
         this.id = id;
         this.minSize = minBagSizeToSearch;
         this.maxSize = maxBagSizeToSearch;
         this.minBagSizeToIndex = BlockInfo.getMinimumSimilarityThreshold(
                 minBagSizeToSearch, SearchManager.th);
-        ; // minBagSizeToSearch;
+        // minBagSizeToSearch;
         this.maxBagSizeToIndex = BlockInfo.getMaximumSimilarityThreshold(
                 maxBagSizeToSearch, SearchManager.th);
         if (forWriting) {
@@ -101,7 +100,7 @@ public class Shard {
                         .get(id);
                 dirs.add(dir);
             } else {
-                List<FSDirectory> dirs = new ArrayList<FSDirectory>();
+                List<FSDirectory> dirs = new ArrayList<>();
                 dirs.add(dir);
                 SearchManager.invertedIndexDirectoriesOfShard.put(id, dirs);
             }
@@ -134,7 +133,7 @@ public class Shard {
                         .get(id);
                 dirs.add(dir);
             } else {
-                List<FSDirectory> dirs = new ArrayList<FSDirectory>();
+                List<FSDirectory> dirs = new ArrayList<>();
                 dirs.add(dir);
                 SearchManager.forwardIndexDirectoriesOfShard.put(id, dirs);
             }
@@ -162,7 +161,7 @@ public class Shard {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

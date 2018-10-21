@@ -1,19 +1,14 @@
 package com.mondego.models;
 
+import com.mondego.indexbased.SearchManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.Duration;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.mondego.indexbased.SearchManager;
 
 public class QueryLineProcessor implements Runnable {
     private String line;
@@ -27,16 +22,10 @@ public class QueryLineProcessor implements Runnable {
     }
 
     public void run() {
-        try {
-            processLine();
-        } catch (ParseException e) {
-            logger.error(SearchManager.NODE_PREFIX
-                    + " QLP, parse exception on line " + line.substring(0, 40));
-        }
+        processLine();
     }
 
-    public void processLine() throws ParseException {
-        // TODO Auto-generated method stub
+    public void processLine() {
         long startTime = System.nanoTime();
         try {
             QueryBlock queryBlock = this.getNextQueryBlock(line);
@@ -44,7 +33,7 @@ public class QueryLineProcessor implements Runnable {
                 return;
             if (searchManager.appendToExistingFile
                     && searchManager.completedQueries
-                            .contains(queryBlock.getId())) {
+                    .contains(queryBlock.getId())) {
                 logger.debug(
                         "ignoring query, REASON: completed in previous run, "
                                 + queryBlock);
@@ -61,21 +50,16 @@ public class QueryLineProcessor implements Runnable {
             SearchManager.queryBlockQueue.send(queryBlock);
             // System.out.println(SearchManager.NODE_PREFIX +
             // ", line number: "+ count);
-        } catch (InstantiationException e) {
+        } catch (InstantiationException
+                | IllegalAccessException
+                | NoSuchMethodException
+                | InvocationTargetException
+                | SecurityException e) {
             e.printStackTrace();
         } catch (IllegalArgumentException e) {
             logger.error(
                     e.getMessage() + " skiping this query block, illegal args: "
                             + line.substring(0, 40));
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (ParseException e) {
             logger.error("catching parseException, dont worry");
@@ -83,20 +67,16 @@ public class QueryLineProcessor implements Runnable {
                     + " skiping this query block, parse exception: "
                     + line.substring(0, 40));
             // e.printStackTrace();
-        } catch (SecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
     }
 
     public QueryBlock getNextQueryBlock(String line)
             throws ParseException, IllegalArgumentException {
-        List<Entry<String, TokenInfo>> listOfTokens = new ArrayList<Entry<String, TokenInfo>>();
+        List<Entry<String, TokenInfo>> listOfTokens = new ArrayList<>();
         QueryBlock queryBlock = searchManager.cloneHelper
                 .getSortedQueryBlock(line, listOfTokens);
         if (queryBlock == null) {
-            logger.debug(SearchManager.NODE_PREFIX + " QLP, Invalid QueryBlock "
-                    + queryBlock);
+            logger.debug(SearchManager.NODE_PREFIX + " QLP, Invalid QueryBlock");
             return null;
         }
 

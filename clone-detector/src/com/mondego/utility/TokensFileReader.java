@@ -1,17 +1,15 @@
 package com.mondego.utility;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.text.ParseException;
-
+import com.mondego.indexbased.SearchManager;
+import com.mondego.models.ITokensFileProcessor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.mondego.indexbased.SearchManager;
-import com.mondego.models.ITokensFileProcessor;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.text.ParseException;
 
 public class TokensFileReader {
     private String nodeId;
@@ -22,7 +20,7 @@ public class TokensFileReader {
             .getLogger(TokensFileReader.class);
 
     public TokensFileReader(String node_id, File f, int max_tokens,
-            ITokensFileProcessor p) throws IOException {
+                            ITokensFileProcessor p) {
         this.nodeId = node_id;
         this.file = f;
         this.processor = p;
@@ -30,7 +28,8 @@ public class TokensFileReader {
     }
 
     public void read()
-            throws FileNotFoundException, IOException, ParseException {
+            throws IOException, ParseException {
+        // fixme br never closed
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line;
         long lineNumber = 0;
@@ -40,8 +39,9 @@ public class TokensFileReader {
                     && lineNumber < SearchManager.QUERY_LINES_TO_IGNORE) {
                 logger.debug(
                         "RECOVERY: ignoring this line, as it was covered in previous run");
+                //noinspection StatementWithEmptyBody
                 while (((char) br.read()) != '\n') {
-                    ; // ignore the line
+                    // ignore the line
                 }
                 lineNumber++;
                 continue;
@@ -72,12 +72,12 @@ public class TokensFileReader {
             if (SearchManager.ACTION_SEARCH.equals(SearchManager.ACTION)
                     && SearchManager.LOG_PROCESSED_LINENUMBER_AFTER_X_LINES > 0
                     && lineNumber
-                            % SearchManager.LOG_PROCESSED_LINENUMBER_AFTER_X_LINES == 0) {
+                    % SearchManager.LOG_PROCESSED_LINENUMBER_AFTER_X_LINES == 0) {
                 Util.writeToFile(SearchManager.recoveryWriter, lineNumber + "",
                         true);
             }
         }
-        if(SearchManager.ACTION_SEARCH.equals(SearchManager.ACTION)){
+        if (SearchManager.ACTION_SEARCH.equals(SearchManager.ACTION)) {
             Util.writeToFile(SearchManager.recoveryWriter, lineNumber + "", true);
         }
         br.close();

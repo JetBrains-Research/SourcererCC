@@ -3,18 +3,13 @@ package com.mondego.models;
 import java.util.LinkedHashSet;
 
 /**
- * 
- */
-
-/**
  * @author vaibhavsaini
- * 
  */
-public class Bag extends LinkedHashSet<TokenFrequency>  { // TODO: why is this
-                                                         // not a
-                                                         // linkedhashmap?
+public class Bag extends LinkedHashSet<TokenFrequency> { // TODO: why is this
+    // not a
+    // linkedhashmap?
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 1721183896451527542L;
     private long id;
@@ -30,9 +25,6 @@ public class Bag extends LinkedHashSet<TokenFrequency>  { // TODO: why is this
         this.comparisions = comparisions;
     }
 
-    /**
-     * @param bagId
-     */
     public Bag(long bagId) {
         super();
         this.id = bagId;
@@ -70,9 +62,7 @@ public class Bag extends LinkedHashSet<TokenFrequency>  { // TODO: why is this
         if (getClass() != obj.getClass())
             return false;
         Bag other = (Bag) obj;
-        if (id != other.id)
-            return false;
-        return true;
+        return id == other.id;
     }
 
     /**
@@ -83,8 +73,7 @@ public class Bag extends LinkedHashSet<TokenFrequency>  { // TODO: why is this
     }
 
     /**
-     * @param id
-     *            the id to set
+     * @param id the id to set
      */
     public void setId(int id) {
         this.id = id;
@@ -92,12 +81,12 @@ public class Bag extends LinkedHashSet<TokenFrequency>  { // TODO: why is this
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-        return this.getFunctionId()+":"+this.getId()+":"+ this.getSize();
+        return this.getFunctionId() + ":" + this.getId() + ":" + this.getSize();
     }
 
     public TokenFrequency get(TokenFrequency tokenFrequency) {
@@ -119,8 +108,8 @@ public class Bag extends LinkedHashSet<TokenFrequency>  { // TODO: why is this
         }
         return this.size;
     }
-    
-    public void setSize(int size){
+
+    public void setSize(int size) {
         this.size = size;
     }
 }

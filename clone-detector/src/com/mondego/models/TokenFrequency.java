@@ -1,41 +1,41 @@
 package com.mondego.models;
-/**
- * 
- */
 
 /**
  * @author vaibhavsaini
- *
  */
 public class TokenFrequency {
     private int frequency;
     private Token token;
-    
-	
-	/**
+
+
+    /**
      * @return the frequency
      */
     public int getFrequency() {
         return frequency;
     }
+
     /**
      * @param frequency the frequency to set
      */
     public void setFrequency(int frequency) {
         this.frequency = frequency;
     }
+
     /**
      * @return the token
      */
     public Token getToken() {
         return token;
     }
+
     /**
      * @param token the token to set
      */
     public void setToken(Token token) {
         this.token = token;
     }
+
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
@@ -43,6 +43,7 @@ public class TokenFrequency {
     public int hashCode() {
         return token.hashCode();
     }
+
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
@@ -59,14 +60,10 @@ public class TokenFrequency {
         }
         TokenFrequency other = (TokenFrequency) obj;
         if (token == null) {
-            if (other.token != null) {
-                return false;
-            }
-        } else if (!token.getValue().equals(other.token.getValue())) {
-            return false;
-        }
-        return true;
+            return other.token == null;
+        } else return token.getValue().equals(other.token.getValue());
     }
+
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
@@ -75,7 +72,6 @@ public class TokenFrequency {
         return "TokenFrequency [frequency=" + frequency + ", token=" + token
                 + "]";
     }
-    
-    
-    
+
+
 }

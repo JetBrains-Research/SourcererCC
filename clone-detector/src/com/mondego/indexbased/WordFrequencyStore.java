@@ -1,15 +1,11 @@
 package com.mondego.indexbased;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.Writer;
-import java.text.ParseException;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
+import com.mondego.models.Bag;
+import com.mondego.models.ITokensFileProcessor;
+import com.mondego.models.TokenFrequency;
+import com.mondego.noindex.CloneHelper;
+import com.mondego.utility.TokensFileReader;
+import com.mondego.utility.Util;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,20 +16,22 @@ import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
-import com.mondego.models.Bag;
-import com.mondego.models.ITokensFileProcessor;
-import com.mondego.models.TokenFrequency;
-import com.mondego.noindex.CloneHelper;
-import com.mondego.utility.TokensFileReader;
-import com.mondego.utility.Util;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
+import java.text.ParseException;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 /**
  * for every project's input file (one file is one project) read all lines for
  * each line create a Bag. for each project create one output file, this file
  * will have all the tokens, in the bag.
- * 
+ *
  * @author vaibhavsaini
- * 
  */
 public class WordFrequencyStore implements ITokensFileProcessor {
     private CloneHelper cloneHelper;
@@ -44,8 +42,9 @@ public class WordFrequencyStore implements ITokensFileProcessor {
     private IndexWriter wfmIndexWriter = null;
     private DocumentMaker wfmIndexer = null;
     private static final Logger logger = LogManager.getLogger(WordFrequencyStore.class);
+
     public WordFrequencyStore() {
-        this.wordFreq = new TreeMap<String, Long>();
+        this.wordFreq = new TreeMap<>();
         this.cloneHelper = new CloneHelper();
     }
 
@@ -57,10 +56,6 @@ public class WordFrequencyStore implements ITokensFileProcessor {
     /**
      * Reads the input file and writes the partial word frequency maps to .wfm
      * files.
-     * 
-     * @param file
-     * @throws IOException
-     * @throws ParseException
      */
     private void readTokensFile(File file) throws IOException, ParseException {
         TokensFileReader tfr = new TokensFileReader(SearchManager.NODE_PREFIX, file, SearchManager.max_tokens, this);
@@ -78,7 +73,7 @@ public class WordFrequencyStore implements ITokensFileProcessor {
                 logger.debug("empty block, ignoring");
             } else {
                 logger.debug("not adding tokens of line to WFM, REASON: " + bag.getFunctionId() + ", " + bag.getId()
-                                + ", size: " + bag.getSize() + " (max tokens is " + SearchManager.max_tokens + ")");
+                        + ", size: " + bag.getSize() + " (max tokens is " + SearchManager.max_tokens + ")");
             }
         }
         this.lineNumber++;
@@ -106,7 +101,7 @@ public class WordFrequencyStore implements ITokensFileProcessor {
             // TermSorter.wordFreq);
 
             // reinit the map
-            this.wordFreq = new TreeMap<String, Long>();
+            this.wordFreq = new TreeMap<>();
         }
     }
 
@@ -139,7 +134,7 @@ public class WordFrequencyStore implements ITokensFileProcessor {
         }
     }
 
-    public void prepareIndex() throws IOException {
+    public void prepareIndex() {
         File globalWFMDIr = new File(Util.GTPM_INDEX_DIR);
         if (!globalWFMDIr.exists()) {
             Util.createDirs(Util.GTPM_INDEX_DIR);
@@ -179,7 +174,7 @@ public class WordFrequencyStore implements ITokensFileProcessor {
             this.wfmIndexWriter.forceMerge(1);
             this.wfmIndexWriter.commit();
         } catch (Exception e) {
-            logger.error(SearchManager.NODE_PREFIX + ", exception on commit",e);
+            logger.error(SearchManager.NODE_PREFIX + ", exception on commit", e);
             e.printStackTrace();
         }
         long elapsed = System.currentTimeMillis() - start;
@@ -196,14 +191,14 @@ public class WordFrequencyStore implements ITokensFileProcessor {
     }
 
     public void mergeWfms(String inputWfmDirectoryPath, String outputWfmDirectoryPath,
-            boolean deleteInputfilesAfterProcessing) throws IOException {
+                          boolean deleteInputfilesAfterProcessing) throws IOException {
         // Iterate on wfm fies in the input directory
-        List<File> wfmFiles = (List<File>) FileUtils.listFiles(new File(inputWfmDirectoryPath), new String[] { "wfm" },
+        List<File> wfmFiles = (List<File>) FileUtils.listFiles(new File(inputWfmDirectoryPath), new String[]{"wfm"},
                 true);
         // File inputFolder = new File(inputWfmDirectoryPath);
         /*
          * File[] wfmFiles = inputFolder.listFiles(new FilenameFilter() {
-         * 
+         *
          * @Override public boolean accept(File dir, String name) {
          * System.out.println("dir to consider: "+ dir.getAbsolutePath());
          * return !dir.getAbsolutePath().contains(".git") &&
@@ -213,7 +208,7 @@ public class WordFrequencyStore implements ITokensFileProcessor {
         for (File f : wfmFiles) {
             logger.debug("wfm files: " + f.getAbsolutePath());
         }
-        File resultFile = null;
+        File resultFile;
         File previousResultFile = new File(outputWfmDirectoryPath + "/sorted_0.wfm");
         boolean created = previousResultFile.createNewFile();
         logger.debug("temp wfm file created, status: " + created);
@@ -282,7 +277,6 @@ public class WordFrequencyStore implements ITokensFileProcessor {
                 bLine = bBr.readLine();
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } finally {
             // close files.

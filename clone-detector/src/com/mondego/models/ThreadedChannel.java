@@ -1,28 +1,20 @@
 package com.mondego.models;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.RejectedExecutionException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.mondego.indexbased.WordFrequencyStore;
+import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.*;
 
 public class ThreadedChannel<E> {
 
     private ExecutorService executor;
-    private Class<Runnable> workerType;
+    private Class<? extends Runnable> workerType;
     private Semaphore semaphore;
     private static final Logger logger = LogManager
             .getLogger(ThreadedChannel.class);
 
-    public ThreadedChannel(int nThreads, Class clazz) {
+    public ThreadedChannel(int nThreads, Class<? extends Runnable> clazz) {
         this.executor = Executors.newFixedThreadPool(nThreads);
         this.workerType = clazz;
         this.semaphore = new Semaphore(nThreads + 2);
@@ -31,8 +23,7 @@ public class ThreadedChannel<E> {
     public void send(E e) throws InstantiationException, IllegalAccessException,
             IllegalArgumentException, InvocationTargetException,
             NoSuchMethodException, SecurityException {
-        final Runnable o = this.workerType.getDeclaredConstructor(e.getClass())
-                .newInstance(e);
+        final Runnable runnable = this.workerType.getDeclaredConstructor(e.getClass()).newInstance(e);
         try {
             semaphore.acquire();
         } catch (InterruptedException ex) {
@@ -40,13 +31,11 @@ public class ThreadedChannel<E> {
         }
 
         try {
-            executor.execute(new Runnable() {
-                public void run() {
-                    try {
-                        o.run();
-                    } finally {
-                        semaphore.release();
-                    }
+            executor.execute(() -> {
+                try {
+                    runnable.run();
+                } finally {
+                    semaphore.release();
                 }
             });
         } catch (RejectedExecutionException ex) {
