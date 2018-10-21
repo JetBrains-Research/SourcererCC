@@ -18,6 +18,13 @@ do
   echo $replace_text
   echo $replace_log4_text
 
+  # replace NODE_PREFIX declaration
   sed -i -e "s/$src_text/$replace_text/g" $foldername/sourcerer-cc.properties
+
+  # Workaround:
+  # inline NODE_PREFIX usages
+  sed -i -e "s/\${NODE_PREFIX}/NODE_$i/g" $foldername/sourcerer-cc.properties
+
+  # replace logger configs
   sed -i -e "s/$src_log4_text/$replace_log4_text/g" $foldername/log4j2.xml
 done
