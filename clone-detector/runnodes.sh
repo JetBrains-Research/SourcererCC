@@ -33,7 +33,7 @@ count=1
 for pid in $PIDS
 do
     wait $pid
-    if [ $? -eq 0 ]; then
+    if [[ $? -eq 0 ]]; then
         echo " NODE_$count SUCCESS - Job $pid exited with a status of $?"
     else
         echo "NODE_$count FAILED - Job $pid exited with a status of $?"
