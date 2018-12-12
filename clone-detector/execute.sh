@@ -12,7 +12,7 @@ num_nodes="${1:-2}"
 th="${2:-8}"
 queryfile="$rootPATH/input/dataset/blocks.file"
 echo "spliting query file $queryfile into $num_nodes parts"
-python2 $rootPATH/unevensplit.py $queryfile $num_nodes
+python $rootPATH/unevensplit.py $queryfile $num_nodes
 echo "moving files"
 bash $rootPATH/preparequery.sh $num_nodes
 echo "done!"
