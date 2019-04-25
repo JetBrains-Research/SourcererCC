@@ -1,21 +1,13 @@
 #!/bin/bash
 
 # run this script on master
-<<<<<<< HEAD
 
-=======
->>>>>>> 2e73ed3bfbff4d5bbd45af8ad38e71a185fb8675
 realpath() {
     [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
 }
 scriptPATH=$(realpath "$0")
-<<<<<<< HEAD
-rootPATH=`dirname $scriptPATH`
-echo $rootPATH
-=======
 rootPATH=$(dirname $scriptPATH)
 printf "\e[32m[runnodes.sh] \e[0m$rootPATH\n"
->>>>>>> 2e73ed3bfbff4d5bbd45af8ad38e71a185fb8675
 ant -buildfile $rootPATH/build.xml clean cdi
 mode="${1:-search}"
 num_nodes="${2:-50}"
