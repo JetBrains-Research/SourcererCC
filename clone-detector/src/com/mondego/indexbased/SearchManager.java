@@ -20,8 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.jmatrix.eproperties.EProperties;
-import net.jmatrix.eproperties.Key;
+import java.util.Properties;
 
 import net.jmatrix.eproperties.Key;
 import org.apache.commons.io.FileUtils;
@@ -96,7 +95,7 @@ public class SearchManager {
     public static Map<Integer, List<FSDirectory>> invertedIndexDirectoriesOfShard;
     public static Map<Integer, List<FSDirectory>> forwardIndexDirectoriesOfShard;
     public static List<IndexWriter> indexerWriters;
-    private static EProperties properties = new EProperties();
+    private static Properties properties = new Properties();
 
     public static Object lock = new Object();
     public static int min_tokens;
@@ -237,15 +236,8 @@ public class SearchManager {
     private static String getProperty(String name, String defaultValue) {
         Key key = new Key(name);
         Object result = properties.get(key);
-<<<<<<< HEAD
-        if (result == null) {
-            return defaultValue;
-        }
-
-=======
         if (result == null)
             return defaultValue;
->>>>>>> 2e73ed3bfbff4d5bbd45af8ad38e71a185fb8675
         return String.valueOf(result);
     }
 
@@ -254,41 +246,36 @@ public class SearchManager {
         System.out.println("user.dir is: " + System.getProperty("user.dir"));
         System.out.println("root dir is:" + System.getProperty("properties.rootDir"));
         SearchManager.ROOT_DIR = System.getProperty("properties.rootDir");
-<<<<<<< HEAD
-        logger.info("reading Q values from properties file");
-        String propertiesPath = System.getProperty("properties.location");
-        logger.debug("propertiesPath: " + propertiesPath);
-=======
         System.out.println("reading Q values from properties file");
         String propertiesPath = System.getProperty("properties.location");
         System.out.println("[DEBUG] " + "propertiesPath: " + propertiesPath);
->>>>>>> 2e73ed3bfbff4d5bbd45af8ad38e71a185fb8675
 
         try {
-            properties.load(propertiesPath);
+            properties.load(fis);
+            String[] params = new String[2];
+            params[0] = args[0];
+            params[1] = args[1];
+            SearchManager.DATASET_DIR = SearchManager.ROOT_DIR
+                    + properties.getProperty("DATASET_DIR_PATH");
+            SearchManager.isGenCandidateStats = Boolean.parseBoolean(
+                    properties.getProperty("IS_GEN_CANDIDATE_STATISTICS"));
+            SearchManager.isStatusCounterOn = Boolean.parseBoolean(
+                    properties.getProperty("IS_STATUS_REPORTER_ON"));
+            SearchManager.NODE_PREFIX = properties.getProperty("NODE_PREFIX")
+                    .toUpperCase();
+            SearchManager.OUTPUT_DIR = SearchManager.ROOT_DIR + SearchManager.NODE_PREFIX + "/"
+                    + properties.getProperty("OUTPUT_DIR");
+            SearchManager.QUERY_DIR_PATH = SearchManager.ROOT_DIR + SearchManager.NODE_PREFIX + "/"
+                    + properties.getProperty("QUERY_DIR_PATH");
+            logger.debug("Query path:" + SearchManager.QUERY_DIR_PATH);
+            SearchManager.LOG_PROCESSED_LINENUMBER_AFTER_X_LINES = Integer
+                    .parseInt(properties.getProperty(
+                            "LOG_PROCESSED_LINENUMBER_AFTER_X_LINES", "1000"));
+            theInstance = new SearchManager(params);
         } catch (IOException e) {
             System.out.println("[ERROR] " + "ERROR READING PROPERTIES FILE, " + e.getMessage());
             System.exit(1);
         }
-<<<<<<< HEAD
-
-        String[] params = new String[2];
-        params[0] = args[0];
-        params[1] = args[1];
-        SearchManager.DATASET_DIR = SearchManager.ROOT_DIR + getProperty("DATASET_DIR_PATH");
-        SearchManager.isGenCandidateStats = Boolean.parseBoolean(getProperty("IS_GEN_CANDIDATE_STATISTICS"));
-        SearchManager.isStatusCounterOn = Boolean.parseBoolean(getProperty("IS_STATUS_REPORTER_ON"));
-        SearchManager.NODE_PREFIX = getProperty("NODE_PREFIX").toUpperCase();
-        SearchManager.OUTPUT_DIR = SearchManager.ROOT_DIR + getProperty("OUTPUT_DIR");
-        SearchManager.QUERY_DIR_PATH = SearchManager.ROOT_DIR + getProperty("QUERY_DIR_PATH");
-        logger.debug("Query path:" + SearchManager.QUERY_DIR_PATH);
-        SearchManager.LOG_PROCESSED_LINENUMBER_AFTER_X_LINES =
-                Integer.parseInt(getProperty("LOG_PROCESSED_LINENUMBER_AFTER_X_LINES", "1000"));
-        theInstance = new SearchManager(params);
-
-        logger.debug(SearchManager.NODE_PREFIX + " MAX_TOKENS=" + max_tokens + " MIN_TOKENS=" + min_tokens);
-=======
->>>>>>> 2e73ed3bfbff4d5bbd45af8ad38e71a185fb8675
 
         String[] params = new String[2];
         params[0] = args[0];
@@ -309,12 +296,7 @@ public class SearchManager {
         String reportFileName = SearchManager.OUTPUT_DIR + SearchManager.th / SearchManager.MUL_FACTOR + "/report.csv";
         File reportFile = new File(reportFileName);
         theInstance.appendToExistingFile = reportFile.exists();
-<<<<<<< HEAD
-        theInstance.reportWriter = Util.openFile(reportFileName,
-                theInstance.appendToExistingFile);
-=======
         theInstance.reportWriter = Util.openFile(reportFileName, theInstance.appendToExistingFile);
->>>>>>> 2e73ed3bfbff4d5bbd45af8ad38e71a185fb8675
         if (SearchManager.ACTION.equalsIgnoreCase(ACTION_INDEX)) {
             theInstance.initIndexEnv();
             long begin_time = System.currentTimeMillis();
