@@ -1,1 +1,8 @@
+<<<<<<< HEAD
 
+=======
+venv/
+.idea/*
+.vscode/*
+__pycache__/*
+>>>>>>> 2e73ed3bfbff4d5bbd45af8ad38e71a185fb8675

@@ -4,7 +4,11 @@ realpath() {
     [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
 }
 scriptPATH=$(realpath "$0")
+<<<<<<< HEAD
 rootPATH=`dirname $scriptPATH`
+=======
+rootPATH=$(dirname $scriptPATH)
+>>>>>>> 2e73ed3bfbff4d5bbd45af8ad38e71a185fb8675
 num_nodes="${1:-0}"
 src_text="NODE_PREFIX=NODE"
 src_log4_text="NODE_"
@@ -14,14 +18,17 @@ do
   replace_text="NODE_PREFIX=NODE_"$i
   replace_log4_text="NODE_"$i
 
-  echo $foldername
-  echo $replace_text
-  echo $replace_log4_text
+  printf "\e[32m[replacenodeprefix.sh] \e[0m$foldername\n"
+  printf "\e[32m[replacenodeprefix.sh] \e[0m$replace_text\n"
+  printf "\e[32m[replacenodeprefix.sh] \e[0m$replace_log4_text\n"
 
   # replace NODE_PREFIX declaration
   sed -i -e "s/$src_text/$replace_text/g" $foldername/sourcerer-cc.properties
 
+<<<<<<< HEAD
   # Workaround:
+=======
+>>>>>>> 2e73ed3bfbff4d5bbd45af8ad38e71a185fb8675
   # inline NODE_PREFIX usages
   sed -i -e "s/\${NODE_PREFIX}/NODE_$i/g" $foldername/sourcerer-cc.properties
 

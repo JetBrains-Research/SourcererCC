@@ -1,0 +1,14 @@
+language: python
+python:
+  - "3.6"
+before_install:
+  - sudo apt-get install ant
+install:
+  - pip install -r requirements.txt
+script:
+notifications:
+  email:
+    recipients:
+      - poletansky@gmail.com
+    on_success: never
+    on_failure: always

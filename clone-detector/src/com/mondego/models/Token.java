@@ -1,18 +1,28 @@
 package com.mondego.models;
-/**
- * 
- */
 
 /**
- * @author vaibhavsaini
- * 
+ * Class holding token as a String and it's id
  */
 public class Token {
-    private String value; // this is the face value of a token, e.g. 'for'
-    private int id; // unique id of a token
-    
     /**
-     * @return the id
+    * Value of token, e.g. 'for'
+    */
+    private String value;
+    /**
+    * Unique id of a token
+    */
+    private int id = 0;
+
+    /**
+    * Token constructor by token value
+    */
+    public Token(String value) {
+        super();
+        this.value = value;
+    }
+
+    /**
+     * @return the id of a token
      */
     public int getId() {
         return id;
@@ -25,12 +35,7 @@ public class Token {
         this.id = id;
     }
 
-    public Token(String value) {
-        super();
-        this.value = value;
-    }
-
-    /* (non-Javadoc)
+    /**
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -38,7 +43,7 @@ public class Token {
         return value.hashCode();
     }
 
-    /* (non-Javadoc)
+    /**
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -53,19 +58,10 @@ public class Token {
             return false;
         }
         Token other = (Token) obj;
-        if (value == null) {
-            if (other.value != null) {
-                return false;
-            }
-        } else if (!value.equals(other.value)) {
-            return false;
-        }
-        return true;
+        return (value != null && value.equals(other.value) || value == null && other.value == null);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see java.lang.Object#toString()
      */
     @Override
@@ -74,18 +70,16 @@ public class Token {
     }
 
     /**
-     * @return the value
+     * @return the value of a token
      */
     public String getValue() {
         return value;
     }
 
     /**
-     * @param value the value to set
+     * @param value the value to set to a token
      */
     public void setValue(String value) {
         this.value = value;
     }
-    
-
 }

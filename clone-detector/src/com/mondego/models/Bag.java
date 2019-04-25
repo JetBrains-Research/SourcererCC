@@ -3,54 +3,88 @@ package com.mondego.models;
 import java.util.LinkedHashSet;
 
 /**
- * 
+ * Set of tokenFrequencies able to find similar token in get(TokenFrequency) method.
  */
-
-/**
- * @author vaibhavsaini
- * 
- */
-public class Bag extends LinkedHashSet<TokenFrequency>  { // TODO: why is this
-                                                         // not a
-                                                         // linkedhashmap?
-    /**
-     * 
-     */
+public class Bag extends LinkedHashSet<TokenFrequency>  { 
     private static final long serialVersionUID = 1721183896451527542L;
     private long id;
-    private int size;
-    private int comparisions;
-    private long functionId;
-
-    public int getComparisions() {
-        return comparisions;
-    }
-
-    public void setComparisions(int comparisions) {
-        this.comparisions = comparisions;
-    }
+    private int size = 0;
+    private int comparisions = 0;
+    private long functionId = -1;
 
     /**
-     * @param bagId
-     */
+    * @param bagId id of bag to set
+    */
     public Bag(long bagId) {
         super();
         this.id = bagId;
-        this.size = 0;
-        this.comparisions = 0;
-        this.functionId = -1;
     }
 
     public Bag() {
         super();
     }
 
+    /**
+    * Returns token similar to tokenFrequency and counts comparisons made
+    *
+    * @param tokenFrequency token to find(don't know why with frequency)
+    * @return object of TokenFrequency class with same Token inside, null if not found
+    */
+    public TokenFrequency get(TokenFrequency tokenFrequency) {
+        this.comparisions = 0;
+        for (TokenFrequency tf : this) {
+            this.comparisions += 1;
+            if (tf.equals(tokenFrequency)) {
+                return tf;
+            }
+        }
+        return null;
+    }
+
+    /**
+    * @return comparisons made during get(TokenFrequency)
+    */
+    public int getComparisions() {
+        return comparisions;
+    }
+
+    /**
+    * @return functionId of bag
+    */
     public long getFunctionId() {
         return functionId;
     }
 
+    /**
+    * @param functionId to set to bag
+    */
     public void setFunctionId(long functionId) {
         this.functionId = functionId;
+    }
+
+    /**
+     * @return the id
+     */
+    public long getId() {
+        return this.id;
+    }
+
+    /**
+    * Counts and returns total number of tokens
+    *
+    * @return sum of all frequencies of all tokens
+    */
+    public int getSize() {
+        if (this.size == 0) {
+            for (TokenFrequency tf : this) {
+                this.size += tf.getFrequency();
+            }
+        }
+        return this.size;
+    }
+
+    public void setSize(int size){
+        this.size = size;
     }
 
     @Override
@@ -65,62 +99,17 @@ public class Bag extends LinkedHashSet<TokenFrequency>  { // TODO: why is this
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
+        if (!super.equals(obj) || getClass() != obj.getClass())
             return false;
         Bag other = (Bag) obj;
-        if (id != other.id)
-            return false;
-        return true;
+        return id == other.id;
     }
 
     /**
-     * @return the id
-     */
-    public long getId() {
-        return this.id;
-    }
-
-    /**
-     * @param id
-     *            the id to set
-     */
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-        return this.getFunctionId()+":"+this.getId()+":"+ this.getSize();
-    }
-
-    public TokenFrequency get(TokenFrequency tokenFrequency) {
-        this.comparisions = 0;
-        for (TokenFrequency tf : this) {
-            this.comparisions += 1;
-            if (tf.equals(tokenFrequency)) {
-                return tf;
-            }
-        }
-        return null;
-    }
-
-    public int getSize() {
-        if (this.size == 0) {
-            for (TokenFrequency tf : this) {
-                this.size += tf.getFrequency();
-            }
-        }
-        return this.size;
-    }
-    
-    public void setSize(int size){
-        this.size = size;
+        return this.getFunctionId() + ":" + this.getId() + ":" + this.getSize();
     }
 }
