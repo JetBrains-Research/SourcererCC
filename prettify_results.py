@@ -226,7 +226,7 @@ def print_results(results_file, stats_files, blocks_mode):
             formatted_titles[code_id] = {
                 "file": get_file_name(stats[code_id]["file_path"]),
                 "SLOC": stats[code_id]["SLOC"],
-                "content": get_lines(repo_zip_filename, 1, -1), source_file)
+                "content": get_lines(repo_zip_filename, 1, -1, source_file)
             }
     for code_id, code_id_list in results.items():
         full_results[formatted_titles[code_id]["file"]] = {
