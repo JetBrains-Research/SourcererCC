@@ -9,18 +9,30 @@ import json
 import zipfile
 
 
+# Gets file name from file path with archive name
+#
+# @param file_path path to file in archive
+# @return path to file in project
 def get_file_name(file_path):
     result = re.sub(r"\.zip/[a-zA-Z0-9-.]+-master/", "/tree/master/", file_path.strip("\"").replace("--", "/"))
     result = re.sub(r"/.*/([^/]+/[^/]+/tree/master/)", r"\1", result)
     return result
 
 
+# Reads lines from specified file
+#
+# @param filename file to read
+# @return generator yielding lines
 def get_file_lines(filename):
     with open(filename, "r", encoding="utf-8") as file_descr:
         for line in file_descr:
             yield line.strip("\n")
 
 
+# Unoptimized merging results to find all files (y) similar to (x)
+#
+# @param pairs pairs from results file
+# @return map (x): [all (y) similar to (x)]
 def merge_results(pairs):
     res = {}
     for x, y in pairs:
@@ -31,6 +43,26 @@ def merge_results(pairs):
     return res
 
 
+# Parse results from results file
+#
+# @param results_file file with SourcererCC results
+# @return map where keys are (block/file id) and value
+# is list of ids which are clones of that block
+def get_results(results_file):
+    results_pairs = []
+    for line in get_file_lines(results_file):
+        _, code_id_1, _, code_id_2 = line.split(",")
+        results_pairs.append((code_id_1, code_id_2))
+    results = merge_results(results_pairs)
+    return results
+
+
+# Gets list of files in specified path with given extension
+#
+# @param path where to find files
+# @param extension extension to filter files
+# @return set of files with that extension in that directory
+# (or that file if it is file with that extension)
 def filter_files(path, extension):
     res = set()
     if os.path.isdir(path):
@@ -44,6 +76,13 @@ def filter_files(path, extension):
     return res
 
 
+# Gets project info from bookkeeping files
+#
+# @param bookkeeping_files_path path to bookkeeping file or directory
+# @return list of maps {
+#     project_id: project_id
+#     project_path: path_to_project_archive
+# }
 def get_projects_info(bookkeeping_files_path):
     files = filter_files(bookkeeping_files_path, ".projs")
     projects_info = []
@@ -57,6 +96,12 @@ def get_projects_info(bookkeeping_files_path):
     return projects_info
 
 
+# Parse stats
+#
+# @param stats_files_path file or directory with stats
+# @param blocks_mode True if stats were made by tokenizer in block mode
+# @return map where keys are block/file ids and values are maps such as
+# in parse_file_line or parse_block_line functions
 def get_stats_info(stats_files_path, blocks_mode):
     def parse_file_line(line_parts):
         return {
@@ -104,16 +149,13 @@ def get_stats_info(stats_files_path, blocks_mode):
     return stats_info
 
 
-def get_results(results_file):
-    results_pairs = []
-    for line in get_file_lines(results_file):
-        code_id_1 = line.split(",")[1]
-        code_id_2 = line.split(",")[3]
-        results_pairs.append((code_id_1, code_id_2))
-    results = merge_results(results_pairs)
-    return results
-
-
+# Reads specified lines of file from archive
+#
+# @param zip_file_path project zip archive
+# @param start_line first line number of code to read
+# @param end_line last line number of code to read, -1 for all lines
+# @param source_file path to file to read
+# @return lines of file joined with "\n"
 def get_lines(zip_file_path, start_line, end_line, source_file):
     result = ""
     with zipfile.ZipFile(zip_file_path, "r") as repo:
@@ -122,9 +164,39 @@ def get_lines(zip_file_path, start_line, end_line, source_file):
                 continue
             with repo.open(code_file) as f:
                 result = f.read().decode("utf-8").split("\n")
+    if end_line == -1:
+        return "\n".join(result[start_line - 1:])
     return "\n".join(result[start_line - 1 : end_line])
 
 
+# Prints nice formatted results
+#
+# @param results_file file with SourcererCC results
+# @param stats_files file or directory with stats files
+# @param blocks_mode True if tokenizer ran in block mode
+# @return map with results parameters in following format:
+#     in file mode:
+#         "full_file_path": {
+#             clones: [
+#                 file: "full_file_path"
+#                 SLOC: source_lines_of_code
+#                 content: "file_content"
+#             ]
+#             SLOC: source_lines_of_code
+#             content: "file_content"
+#         }
+#     in block mode:
+#         "full_file_path": {
+#             clones: [
+#                 file: "full_file_path"
+#                 start_line: first_line_of_block
+#                 end_line: last_line_of_block
+#                 content: "block_content"
+#             ]
+#             start_line: first_line_of_block
+#             end_line: last_line_of_block
+#             content: "block_content"
+#         }
 def print_results(results_file, stats_files, blocks_mode):
     stats = get_stats_info(stats_files, blocks_mode)
     results = get_results(results_file)
@@ -154,7 +226,7 @@ def print_results(results_file, stats_files, blocks_mode):
             formatted_titles[code_id] = {
                 "file": get_file_name(stats[code_id]["file_path"]),
                 "SLOC": stats[code_id]["SLOC"],
-                "content": get_lines(repo_zip_filename, 1, int(stats[code_id]["SLOC"]), source_file)
+                "content": get_lines(repo_zip_filename, 1, -1), source_file)
             }
     for code_id, code_id_list in results.items():
         full_results[formatted_titles[code_id]["file"]] = {
@@ -170,11 +242,21 @@ def print_results(results_file, stats_files, blocks_mode):
     return full_results
 
 
+# Prints project list from bookkeeping files
+#
+# @param bookkeeping_files file or directory with bookkeeping files
 def print_projects_list(bookkeeping_files):
     projects_info = get_projects_info(bookkeeping_files)
     print(json.dumps(projects_info, indent=4))
 
 
+# Print SourcererCC results in more comprehensive way than pairs of pairs of numbers
+#
+# @param block-mode must be True if tokenizer ran in block mode
+# @param bookkeepingFiles file or directory with bookkeeping files(.projs)
+# @param statsFiles file or directory with blocks and files stats(.stats)
+# @param resultsFile file with results paris (first project id, first block/file, second project id, second block/file id)
+# by default it is results.pairs
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--block-mode", dest="blocks_mode", nargs="?", const=True, default=False, help="Specify if files produced in blocks-mode")
