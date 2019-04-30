@@ -3,7 +3,7 @@
 import re
 import sys
 import unittest
-import tokenizer
+from tokenizer import tokenize_files
 import hashlib
 from configparser import ConfigParser
 
