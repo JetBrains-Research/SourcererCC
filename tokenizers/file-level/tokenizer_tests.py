@@ -1,26 +1,10 @@
-# -*- encoding: utf-8 -*-
-
 import re
 import sys
 import unittest
-from tokenizer import tokenize_files
 import hashlib
-from configparser import ConfigParser
 
-config = ConfigParser()
-# parse existing file
-try:
-    config.read("config.ini")
-except IOError:
-    print("[ERROR] - config.ini is not found")
-    sys.exit(1)
+from tokenizing import tokenize_files
 
-separators = config.get('Language', 'separators').strip('"').split(' ')
-comment_inline = config.get('Language', 'comment_inline')
-comment_inline_pattern = comment_inline + '.*?$'
-comment_open_tag = re.escape(config.get('Language', 'comment_open_tag'))
-comment_close_tag = re.escape(config.get('Language', 'comment_close_tag'))
-comment_open_close_pattern = comment_open_tag + '.*?' + comment_close_tag
 
 REGEX = re.compile('.+?@@::@@+\d')
 
@@ -39,8 +23,7 @@ class TestParser(unittest.TestCase):
         input_str = """ line 1
                         line 2
                         line 3 """
-        (final_stats, _, _) = tokenizer.tokenize_files(input_str, comment_inline_pattern, comment_open_close_pattern,
-                                                       separators)
+        (final_stats, _, _) = tokenizer.tokenize_files(input_str)
         (_, lines, LOC, SLOC) = final_stats
 
         self.assertEqual(lines, 3)
@@ -52,8 +35,7 @@ class TestParser(unittest.TestCase):
                         line 2
                         line 3
                     """
-        (final_stats, _, _) = tokenizer.tokenize_files(input_str, comment_inline_pattern, comment_open_close_pattern,
-                                                       separators)
+        (final_stats, _, _) = tokenizer.tokenize_files(input_str)
         (_, lines, LOC, SLOC) = final_stats
 
         self.assertEqual(lines, 3)
@@ -66,8 +48,7 @@ class TestParser(unittest.TestCase):
                     // line 2
                     line 3 
                 """
-        (final_stats, _, _) = tokenizer.tokenize_files(input_str, comment_inline_pattern, comment_open_close_pattern,
-                                                       separators)
+        (final_stats, _, _) = tokenizer.tokenize_files(input_str)
         (_, lines, LOC, SLOC) = final_stats
 
         self.assertEqual(lines, 5)
@@ -76,8 +57,7 @@ class TestParser(unittest.TestCase):
 
     def test_comments(self):
         input_str = "// Hello\n // World"
-        (final_stats, final_tokens, _) = tokenizer.tokenize_files(input_str, comment_inline_pattern,
-                                                                  comment_open_close_pattern, separators)
+        (final_stats, final_tokens, _) = tokenizer.tokenize_files(input_str)
         (_, lines, LOC, SLOC) = final_stats
         (tokens_count_total, tokens_count_unique, _, tokens) = final_tokens
 
@@ -91,8 +71,7 @@ class TestParser(unittest.TestCase):
 
     def test_multiline_comment(self):
         input_str = '/* this is a \n comment */ /* Last one */ '
-        (final_stats, final_tokens, _) = tokenizer.tokenize_files(input_str, comment_inline_pattern,
-                                                                  comment_open_close_pattern, separators)
+        (final_stats, final_tokens, _) = tokenizer.tokenize_files(input_str)
         (_, lines, LOC, SLOC) = final_stats
         (tokens_count_total, tokens_count_unique, _, tokens) = final_tokens
 
@@ -117,8 +96,7 @@ class TestParser(unittest.TestCase):
                        }
                        printf("%s", "asciiじゃない文字");
                      }""".encode("utf-8")
-        (final_stats, final_tokens, _) = tokenizer.tokenize_files(string, comment_inline_pattern,
-                                                                  comment_open_close_pattern, separators)
+        (final_stats, final_tokens, _) = tokenizer.tokenize_files(string)
         (_, lines, LOC, SLOC) = final_stats
         (tokens_count_total, tokens_count_unique, token_hash, tokens) = final_tokens
 
