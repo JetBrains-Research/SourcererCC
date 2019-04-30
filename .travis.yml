@@ -10,7 +10,7 @@ script:
   - pylint *.py
   - pylint tokenizers/*/*.py
   - pylint clone-detector/*.py
-  - python -m unittest tokenizers.file-level.tokenizer_test.py
+  - python -m unittest tokenizers/file-level/tokenizer_test.py
 notifications:
   email:
     recipients:
