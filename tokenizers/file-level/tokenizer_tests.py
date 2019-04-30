@@ -10,10 +10,10 @@ from configparser import ConfigParser
 config = ConfigParser()
 # parse existing file
 try:
-    config.read('config.ini')
+    config.read("config.ini")
 except IOError:
-    print('ERROR - Config settings not found. Usage: $python this-script.py config.ini')
-    sys.exit()
+    print("[ERROR] - config.ini is not found")
+    sys.exit(1)
 
 separators = config.get('Language', 'separators').strip('"').split(' ')
 comment_inline = config.get('Language', 'comment_inline')

@@ -12,10 +12,6 @@ Copies projects names and downloaded projects from `cloneGithub/` into block-lev
 
 Some database with unknown purpose
 
-## tokenizer-unit-test.py
-
-Unit tests for tokenizers/file-level/tokenizer.py
-
 ## splitquery.sh
 
 Shows some lines statistics
