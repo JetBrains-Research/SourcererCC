@@ -10,7 +10,7 @@ import zipfile
 from configparser import ConfigParser
 from multiprocessing import Process, Queue
 
-from tokenizing import *
+from file_level.tokenizing import *
 
 
 def process_projects(process_num, list_projects, base_file_id, global_queue):
