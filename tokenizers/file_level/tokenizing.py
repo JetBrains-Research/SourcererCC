@@ -116,14 +116,14 @@ def tokenize_files(file_string):
 
     # SourcererCC formatting
     start_time = dt.datetime.now()
-    tokens = ','.join(['{}@@::@@{}'.format(k, v) for k, v in file_string_for_tokenization.items()])
+    tokens = '@#@'
+    tokens += ','.join(['{}@@::@@{}'.format(k, v) for k, v in file_string_for_tokenization.items()])
     times["tokens_time"] = (dt.datetime.now() - start_time).microseconds
 
     start_time = dt.datetime.now()
     tokens_hash = md5_hash(tokens)
     times["hash_time"] += (dt.datetime.now() - start_time).microseconds
 
-    tokens = f'@#@{tokens}\n'
     final_tokens = (tokens_count_total, tokens_count_unique, tokens_hash, tokens)
     return final_stats, final_tokens, times
 
