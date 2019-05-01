@@ -3,6 +3,7 @@ import zipfile
 import re
 import collections
 import hashlib
+import os
 from configparser import ConfigParser
 
 MULTIPLIER = 50000000
