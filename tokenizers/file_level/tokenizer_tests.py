@@ -3,7 +3,7 @@ import sys
 import unittest
 import hashlib
 
-from tokenizing import tokenize_files
+from . import tokenizing.tokenize_files
 
 
 REGEX = re.compile('.+?@@::@@+\d')
