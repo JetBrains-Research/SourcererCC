@@ -34,7 +34,7 @@ def get_file_lines(filename):
 
 def merge_results(pairs):
     """Merge results to find all files (y) similar to (x).
-    
+
     Return map {(x): [all (y) similar to (x)]}
 
     Arguments:
@@ -51,7 +51,7 @@ def merge_results(pairs):
 
 def get_results(results_file):
     """Parse results from results file.
-    
+
     Return map where keys are (block/file id) and value
     is list of ids which are clones of that block
 
