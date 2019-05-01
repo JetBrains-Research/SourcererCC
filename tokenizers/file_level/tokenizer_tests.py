@@ -117,7 +117,7 @@ class TestParser(unittest.TestCase):
         self.assertTrue(len(hard_tokens - this_tokens), 0)
 
         m = hashlib.md5()
-        m.update(tokens[3:])
+        m.update(tokens[3:].encode("utf-8"))
         self.assertEqual(m.hexdigest(), token_hash)
 
 
