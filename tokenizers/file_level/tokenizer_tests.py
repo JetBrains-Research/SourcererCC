@@ -3,7 +3,7 @@ import sys
 import unittest
 import hashlib
 
-from . import tokenizing.tokenize_files
+from . import tokenizing
 
 
 REGEX = re.compile('.+?@@::@@+\d')
@@ -23,7 +23,7 @@ class TestParser(unittest.TestCase):
         input_str = """ line 1
                         line 2
                         line 3 """
-        (final_stats, _, _) = tokenizer.tokenize_files(input_str)
+        (final_stats, _, _) = tokenizing.tokenize_files(input_str)
         (_, lines, LOC, SLOC) = final_stats
 
         self.assertEqual(lines, 3)
@@ -35,7 +35,7 @@ class TestParser(unittest.TestCase):
                         line 2
                         line 3
                     """
-        (final_stats, _, _) = tokenizer.tokenize_files(input_str)
+        (final_stats, _, _) = tokenizing.tokenize_files(input_str)
         (_, lines, LOC, SLOC) = final_stats
 
         self.assertEqual(lines, 3)
@@ -48,7 +48,7 @@ class TestParser(unittest.TestCase):
                     // line 2
                     line 3 
                 """
-        (final_stats, _, _) = tokenizer.tokenize_files(input_str)
+        (final_stats, _, _) = tokenizing.tokenize_files(input_str)
         (_, lines, LOC, SLOC) = final_stats
 
         self.assertEqual(lines, 5)
@@ -57,7 +57,7 @@ class TestParser(unittest.TestCase):
 
     def test_comments(self):
         input_str = "// Hello\n // World"
-        (final_stats, final_tokens, _) = tokenizer.tokenize_files(input_str)
+        (final_stats, final_tokens, _) = tokenizing.tokenize_files(input_str)
         (_, lines, LOC, SLOC) = final_stats
         (tokens_count_total, tokens_count_unique, _, tokens) = final_tokens
 
@@ -71,7 +71,7 @@ class TestParser(unittest.TestCase):
 
     def test_multiline_comment(self):
         input_str = '/* this is a \n comment */ /* Last one */ '
-        (final_stats, final_tokens, _) = tokenizer.tokenize_files(input_str)
+        (final_stats, final_tokens, _) = tokenizing.tokenize_files(input_str)
         (_, lines, LOC, SLOC) = final_stats
         (tokens_count_total, tokens_count_unique, _, tokens) = final_tokens
 
@@ -96,7 +96,7 @@ class TestParser(unittest.TestCase):
                        }
                        printf("%s", "asciiじゃない文字");
                      }""".encode("utf-8")
-        (final_stats, final_tokens, _) = tokenizer.tokenize_files(string)
+        (final_stats, final_tokens, _) = tokenizing.tokenize_files(string)
         (_, lines, LOC, SLOC) = final_stats
         (tokens_count_total, tokens_count_unique, token_hash, tokens) = final_tokens
 
