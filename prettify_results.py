@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""This module print results of SourcererCC in nicer way when ran.
+Other functions are used to transform SourcererCC output to json format for
+further processing."""
 
 import datetime as dt
 from argparse import ArgumentParser
@@ -40,13 +43,13 @@ def merge_results(pairs):
     Arguments:
     pairs -- pairs from results file
     """
-    res = {}
+    result = {}
     for x, y in pairs:
-        if not x in res:
-            res[x] = [y]
+        if not x in result:
+            result[x] = [y]
         else:
-            res[x].append(y)
-    return res
+            result[x].append(y)
+    return result
 
 
 def get_results(results_file):
@@ -223,8 +226,7 @@ def print_results(results_file, stats_files, blocks_mode):
     full_results = {}
     formatted_titles = {}
     if blocks_mode:
-        for code_id in stats.keys():
-            code_stat = stats[code_id]
+        for code_id, code_stat in stats.items():
             if "start_line" in code_stat:
                 file_path = stats[code_stat["file_id"]]["file_path"]
                 filename = get_file_name(file_path)
@@ -242,8 +244,7 @@ def print_results(results_file, stats_files, blocks_mode):
                     "content": code_content
                 }
     else:
-        for code_id in stats.keys():
-            code_stat = stats[code_id]
+        for code_id, code_stat in stats.items():
             filename = get_file_name(code_stat["file_path"])
             repo_zip_filename = code_stat["file_path"][1:-1]
             ext_index = repo_zip_filename.index(".zip")
@@ -304,8 +305,8 @@ if __name__ == "__main__":
         if not options.stats_files:
             print("No stats files specified. Exiting")
             sys.exit(0)
-        res = print_results(options.results_file, options.stats_files, options.blocks_mode)
-        print(json.dumps(res, indent=4))
+        json_string = print_results(options.results_file, options.stats_files, options.blocks_mode)
+        print(json.dumps(json_string, indent=4))
     elif options.bookkeeping_files:
         print_projects_list(options.bookkeeping_files)
 
