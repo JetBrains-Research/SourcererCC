@@ -116,9 +116,7 @@ class TestParser(unittest.TestCase):
         this_tokens = set(tokens[3:].split(','))
         self.assertTrue(len(hard_tokens - this_tokens), 0)
 
-        m = hashlib.md5()
-        m.update(tokens[3:].encode("utf-8"))
-        self.assertEqual(m.hexdigest(), token_hash)
+        self.assertEqual(tokenizing.md5_hash(tokens[3:]), token_hash)
 
 
 if __name__ == '__main__':

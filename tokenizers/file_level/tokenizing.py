@@ -121,7 +121,7 @@ def tokenize_files(file_string):
     times["tokens_time"] = (dt.datetime.now() - start_time).microseconds
 
     start_time = dt.datetime.now()
-    tokens_hash = md5_hash(tokens)
+    tokens_hash = md5_hash(tokens[3:])
     times["hash_time"] += (dt.datetime.now() - start_time).microseconds
 
     final_tokens = (tokens_count_total, tokens_count_unique, tokens_hash, tokens)
