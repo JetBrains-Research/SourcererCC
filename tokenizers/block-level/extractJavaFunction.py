@@ -25,25 +25,29 @@ def getFunctions(filestring, file_path, separators, comment_inline_pattern):
         else:
             package = package.name
     except:
-        print(f"[WARNING] File {file_path} possibly contains syntax error and therefore won't be parsed")
+        print(f"[WARNING] File {file_path} contains syntax error")
         return None, None, []
 
     file_string_split = filestring.split('\n')
-    nodes = itertools.chain(tree.filter(javalang.tree.ConstructorDeclaration), tree.filter(javalang.tree.MethodDeclaration))
+    nodes = itertools.chain(tree.filter(javalang.tree.ConstructorDeclaration), \
+        tree.filter(javalang.tree.MethodDeclaration))
 
     try:
         for path, node in nodes:
-            name = '.' + node.name
+            node_name = '.' + node.name
             for i, var in enumerate(reversed(path)):
                 if isinstance(var, javalang.tree.ClassDeclaration):
                     if len(path) - 3 == i:  # Top most
-                        name = '.' + var.name + check_repetition(var, var.name) + name
+                        name = '.'
                     else:
-                        name = '$' + var.name + check_repetition(var, var.name) + name
-                if isinstance(var, javalang.tree.ClassCreator):
-                    name = '$' + var.type.name + check_repetition(var, var.type.name) + name
-                if isinstance(var, javalang.tree.InterfaceDeclaration):
-                    name = '$' + var.name + check_repetition(var, var.name) + name
+                        name = '$'
+                    name += var.name + check_repetition(var, var.name)
+                elif isinstance(var, javalang.tree.InterfaceDeclaration):
+                    name = '$' + var.name + check_repetition(var, var.name)
+                elif isinstance(var, javalang.tree.ClassCreator):
+                    var_type = var.type.name
+                    name = '$' + var_type + check_repetition(var, var_type)
+                name += node_name
             args = []
             for t in node.parameters:
                 dims = []
@@ -83,11 +87,11 @@ def getFunctions(filestring, file_path, separators, comment_inline_pattern):
 
             method_name.append(fqn)
     except RecursionError:
-        print("[WARNING] Stack recursion limit exceeded, file will not be processed")
+        print(f"[WARNING] Stack recursion limit exceeded on {method_name}")
         return None, None, method_name
 
     if len(method_pos) != len(method_string):
-        print(f"[WARNING] File {file_path} cannot be parsed due to Java Syntax error")
+        print(f"[WARNING] File {file_path} contains syntax error")
         return None, None, method_name
     else:
         return method_pos, method_string, method_name
