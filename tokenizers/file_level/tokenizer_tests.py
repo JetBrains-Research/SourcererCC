@@ -95,7 +95,7 @@ class TestParser(unittest.TestCase):
                          input_event_queue->push(inputaction);   
                        }
                        printf("%s", "asciiじゃない文字");
-                     }""".encode("utf-8")
+                     }"""
         (final_stats, final_tokens, _) = tokenizing.tokenize_files(string)
         (_, lines, LOC, SLOC) = final_stats
         (tokens_count_total, tokens_count_unique, token_hash, tokens) = final_tokens
