@@ -11,20 +11,10 @@ N_PROCESSES = 2
 PROJECTS_BATCH = 20
 
 dirs_config = {}
-dirs_config["stats_folder"] = 'files_stats'
 dirs_config["bookkeeping_folder"] = 'bookkeeping_projs'
 dirs_config["tokens_file"] = 'files_tokens'
 FILE_projects_list = "project-list.txt"
 language_config = {}
-
-# Reading Language settings
-separators = ''
-comment_inline = ''
-comment_inline_pattern = comment_inline + '.*?$'
-comment_open_tag = ''
-comment_close_tag = ''
-comment_open_close_pattern = comment_open_tag + '.*?' + comment_close_tag
-file_extensions = '.none'
 
 file_count = 0
 
@@ -61,6 +51,7 @@ def read_config():
     language_config["comment_close_tag"] = re.escape(config.get('Language', 'comment_close_tag'))
     language_config["comment_open_close_pattern"] = language_config["comment_open_tag"] + '.*?' + language_config["comment_close_tag"]
     language_config["file_extensions"] = config.get('Language', 'File_extensions').split(' ')
+    language_config["comment_open_close_pattern"] = language_config["comment_open_tag"] + '.*?' + language_config["comment_close_tag"]
     FILE_projects_list = config.get("Main", "FILE_projects_list")
     # Reading config settings
     init_file_id = config.getint('Config', 'init_file_id')
