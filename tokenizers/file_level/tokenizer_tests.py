@@ -1,7 +1,5 @@
 import re
-import sys
 import unittest
-import hashlib
 
 from . import tokenizing
 
