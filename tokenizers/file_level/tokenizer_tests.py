@@ -112,7 +112,7 @@ class TestParser(unittest.TestCase):
         hard_tokens = {'int@@::@@4', 'void@@::@@1', 'cstdio@@::@@1', 'action@@::@@1', 'static@@::@@1', 'key@@::@@1',
                        'glfw_key_callback@@::@@1', 'mod@@::@@1', 'if@@::@@1', 'glfw3@@::@@1', 'scancode@@::@@1',
                        'h@@::@@1', 'GLFW_INCLUDE_GLU@@::@@1', 'input_event_queue@@::@@2', 'GLFW@@::@@1', 'push@@::@@1',
-                       'inputaction@@::@@1', 'include@@::@@3'}
+                       'inputaction@@::@@1', 'include@@::@@3', 'asciiじゃない文字@@::@@1'}
         this_tokens = set(tokens[3:].split(','))
         self.assertTrue(len(hard_tokens - this_tokens), 0)
 
