@@ -7,6 +7,7 @@ from . import tokenizing
 
 
 REGEX = re.compile('.+?@@::@@+\d')
+tokenizing.read_config()
 
 
 class TestParser(unittest.TestCase):

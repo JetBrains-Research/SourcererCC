@@ -51,7 +51,6 @@ def read_config():
     language_config["comment_close_tag"] = re.escape(config.get('Language', 'comment_close_tag'))
     language_config["comment_open_close_pattern"] = language_config["comment_open_tag"] + '.*?' + language_config["comment_close_tag"]
     language_config["file_extensions"] = config.get('Language', 'File_extensions').split(' ')
-    language_config["comment_open_close_pattern"] = language_config["comment_open_tag"] + '.*?' + language_config["comment_close_tag"]
     FILE_projects_list = config.get("Main", "FILE_projects_list")
     # Reading config settings
     init_file_id = config.getint('Config', 'init_file_id')
