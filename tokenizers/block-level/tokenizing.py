@@ -6,8 +6,8 @@ import hashlib
 import os
 from configparser import ConfigParser
 
-from . import extractJavaFunction
-from . import extractPythonFunction
+from . import extract_java_functions
+from . import extract_python_functions
 
 MULTIPLIER = 50000000
 
@@ -171,10 +171,10 @@ def tokenize_blocks(file_string, comment_inline_pattern, comment_open_close_patt
     blocks = None
     experimental_values = ''
     if '.py' in file_extensions:
-        (block_linenos, blocks) = extractPythonFunction.getFunctions(file_string, file_path)
+        (block_linenos, blocks) = extract_python_functions.get_functions(file_string, file_path)
     # Notice workaround with replacing. It is needed because javalang counts things like String[]::new as syntax errors
     if '.java' in file_extensions:
-        (block_linenos, blocks, experimental_values) = extractJavaFunction.getFunctions(file_string.replace("[]::", "::"), file_path, separators, comment_inline_pattern)
+        (block_linenos, blocks, experimental_values) = extract_java_functions.get_functions(file_string.replace("[]::", "::"), file_path, separators, comment_inline_pattern)
 
     if block_linenos is None:
         print("[INFO] Returning None on tokenize_blocks for file {}".format(file_path))
