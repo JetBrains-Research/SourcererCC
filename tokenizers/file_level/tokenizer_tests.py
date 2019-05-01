@@ -6,7 +6,7 @@ import hashlib
 from . import tokenizing
 
 
-REGEX = re.compile('.+?@@::@@+\d')
+REGEX = re.compile('.+@@::@@\d+')
 tokenizing.read_config()
 
 
@@ -39,7 +39,7 @@ class TestParser(unittest.TestCase):
         (final_stats, _, _) = tokenizing.tokenize_files(input_str)
         (_, lines, LOC, SLOC) = final_stats
 
-        self.assertEqual(lines, 3)
+        self.assertEqual(lines, 4)
         self.assertEqual(LOC, 3)
         self.assertEqual(SLOC, 3)
 
