@@ -1,3 +1,10 @@
+import datetime as dt
+import zipfile
+import re
+import collections
+import hashlib
+from configparser import ConfigParser
+
 MULTIPLIER = 50000000
 
 N_PROCESSES = 2

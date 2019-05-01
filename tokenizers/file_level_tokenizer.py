@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
 
-import collections
 import datetime as dt
-import hashlib
 import os
-import re
 import sys
-import zipfile
-from configparser import ConfigParser
 from multiprocessing import Process, Queue
 
 from file_level.tokenizing import *
