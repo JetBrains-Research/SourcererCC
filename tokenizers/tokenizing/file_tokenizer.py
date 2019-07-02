@@ -70,14 +70,14 @@ def tokenize_files(file_string):
 
     lines = count_lines(file_string)
     file_string = "".join([s for s in file_string.splitlines(True) if s.strip()])
-
     loc = count_lines(file_string)
 
     file_string, regex_time = remove_comments(file_string, language_config)
     times["regex_time"] = regex_time
 
     file_string = "".join([s for s in file_string.splitlines(True) if s.strip()]).strip()
-    sloc = count_lines(file_string)
+    sloc = count_lines(file_string, False)
+
     final_stats = (file_hash, lines, loc, sloc)
     # Rather a copy of the file string here for tokenization
     file_string_for_tokenization = file_string
@@ -90,7 +90,7 @@ def tokenize_files(file_string):
     tokens, tokens_time = format_tokens(tokens_bag)
     times["tokens_time"] = tokens_time
 
-    tokens_hash, hash_time = hash_measuring_time(tokens[3:])
+    tokens_hash, hash_time = hash_measuring_time(tokens)
     times["hash_time"] += hash_time
 
     final_tokens = (total_tokens, unique_tokens, tokens_hash, "@#@" + tokens)
