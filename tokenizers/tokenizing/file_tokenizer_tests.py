@@ -1,7 +1,7 @@
 import re
 import unittest
 
-from . import tokenizing
+from .file_tokenizer import *
 
 
 REGEX = re.compile('.+@@::@@\d+')
@@ -22,7 +22,7 @@ class TestParser(unittest.TestCase):
         input_str = """ line 1
                         line 2
                         line 3 """
-        (final_stats, _, _) = tokenizing.tokenize_files(input_str)
+        (final_stats, _, _) = tokenize_files(input_str)
         (_, lines, LOC, SLOC) = final_stats
 
         self.assertEqual(lines, 3)
@@ -34,7 +34,7 @@ class TestParser(unittest.TestCase):
                         line 2
                         line 3
                     """
-        (final_stats, _, _) = tokenizing.tokenize_files(input_str)
+        (final_stats, _, _) = tokenize_files(input_str)
         (_, lines, LOC, SLOC) = final_stats
 
         self.assertEqual(lines, 4)
@@ -47,7 +47,7 @@ class TestParser(unittest.TestCase):
                     // line 2
                     line 3 
                 """
-        (final_stats, _, _) = tokenizing.tokenize_files(input_str)
+        (final_stats, _, _) = tokenize_files(input_str)
         (_, lines, LOC, SLOC) = final_stats
 
         self.assertEqual(lines, 5)
@@ -56,7 +56,7 @@ class TestParser(unittest.TestCase):
 
     def test_comments(self):
         input_str = "// Hello\n // World"
-        (final_stats, final_tokens, _) = tokenizing.tokenize_files(input_str)
+        (final_stats, final_tokens, _) = tokenize_files(input_str)
         (_, lines, LOC, SLOC) = final_stats
         (tokens_count_total, tokens_count_unique, _, tokens) = final_tokens
 
@@ -70,7 +70,7 @@ class TestParser(unittest.TestCase):
 
     def test_multiline_comment(self):
         input_str = '/* this is a \n comment */ /* Last one */ '
-        (final_stats, final_tokens, _) = tokenizing.tokenize_files(input_str)
+        (final_stats, final_tokens, _) = tokenize_files(input_str)
         (_, lines, LOC, SLOC) = final_stats
         (tokens_count_total, tokens_count_unique, _, tokens) = final_tokens
 
@@ -95,7 +95,7 @@ class TestParser(unittest.TestCase):
                        }
                        printf("%s", "asciiじゃない文字");
                      }"""
-        (final_stats, final_tokens, _) = tokenizing.tokenize_files(string)
+        (final_stats, final_tokens, _) = tokenize_files(string)
         (_, lines, LOC, SLOC) = final_stats
         (tokens_count_total, tokens_count_unique, token_hash, tokens) = final_tokens
 
@@ -114,7 +114,7 @@ class TestParser(unittest.TestCase):
         this_tokens = set(tokens[3:].split(','))
         self.assertTrue(len(hard_tokens - this_tokens), 0)
 
-        self.assertEqual(tokenizing.md5_hash(tokens[3:]), token_hash)
+        self.assertEqual(md5_hash(tokens[3:]), token_hash)
 
 
 if __name__ == '__main__':

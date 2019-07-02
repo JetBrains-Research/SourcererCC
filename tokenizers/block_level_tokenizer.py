@@ -5,31 +5,38 @@ import os
 import sys
 from multiprocessing import Process, Queue
 
-from block_level.tokenizing import *
+from tokenizing.block_tokenizer import *
 
 
-def process_projects(process_num, list_projects, base_file_id, global_queue):
-    file_files_tokens_file = os.path.join(PATH_tokens_file_folder, 'files-tokens-{}.tokens'.format(process_num))
-    file_bookkeeping_proj_name = os.path.join(PATH_bookkeeping_proj_folder, 'bookkeeping-proj-{}.projs'.format(process_num))
-    file_files_stats_file = os.path.join(PATH_stats_file_folder, 'files-stats-{}.stats'.format(process_num))
+def process_projects(process_num, list_projects, base_file_id, global_queue, dirs_config):
+    PATH_stats_file_folder = dirs_config["stats_file_folder"]
+    PATH_bookkeeping_proj_folder = dirs_config["bookkeeping_proj_folder"]
+    PATH_tokens_file_folder = dirs_config["tokens_file_folder"]
+
+    tokens_file = os.path.join(PATH_tokens_file_folder, 'files-tokens-{}.tokens'.format(process_num))
+    bookkeeping_file = os.path.join(PATH_bookkeeping_proj_folder, 'bookkeeping-proj-{}.projs'.format(process_num))
+    stats_file = os.path.join(PATH_stats_file_folder, 'files-stats-{}.stats'.format(process_num))
 
     global file_count
     file_count = 0
     print("[INFO] Process {} starting".format(process_num))
-    with open(file_files_tokens_file, 'a+', encoding="utf-8") as tokens_file, open(file_bookkeeping_proj_name, 'a+', encoding="utf-8") as bookkeeping_file, open(file_files_stats_file, 'a+', encoding="utf-8") as stats_file:
+    with open(tokens_file, 'a+', encoding="utf-8") as tokens_f, \
+        open(bookkeeping_file, 'a+', encoding="utf-8") as bookkeeping_f, \
+            open(stats_file, 'a+', encoding="utf-8") as stats_f:
+        out_files = (tokens_f, bookkeeping_f, stats_f)
         p_start = dt.datetime.now()
         for proj_id, proj_path in list_projects:
-            process_one_project(process_num, str(proj_id), proj_path, base_file_id, tokens_file, bookkeeping_file, stats_file)
+            process_one_project(process_num, str(proj_id), proj_path, base_file_id, out_files)
 
     p_elapsed = (dt.datetime.now() - p_start).seconds
-    print("[INFO] " + 'Process {} finished. {} files in {} s'.format(process_num, file_count, p_elapsed))
+    print(f"[INFO] Process {process_num} finished. {file_count} files in {p_elapsed} s")
 
     # Let parent know
     global_queue.put((process_num, file_count))
     sys.exit(0)
 
 
-def start_child(processes, global_queue, proj_paths, batch):
+def start_child(processes, global_queue, proj_paths, batch, dirs_config):
     # This is a blocking get. If the queue is empty, it waits
     pid, n_files_processed = global_queue.get()
     # OK, one of the processes finished. Let's get its data and kill it
@@ -40,7 +47,7 @@ def start_child(processes, global_queue, proj_paths, batch):
     del proj_paths[:batch]
 
     print("[INFO] Starting new process {}".format(pid))
-    p = Process(name='Process ' + str(pid), target=process_projects, args=(pid, paths_batch, processes[pid][1], global_queue))
+    p = Process(name='Process ' + str(pid), target=process_projects, args=(pid, paths_batch, processes[pid][1], global_queue, dirs_config))
     processes[pid][0] = p
     p.start()
 
@@ -62,17 +69,24 @@ if __name__ == '__main__':
     # Need to bypass javalang syntax tree traverse limits
     sys.setrecursionlimit(3000)
 
-    read_config()
+    inner_config, dirs_config = read_config("block_config.ini")
+    PATH_stats_file_folder = dirs_config["stats_file_folder"]
+    PATH_bookkeeping_proj_folder = dirs_config["bookkeeping_proj_folder"]
+    PATH_tokens_file_folder = dirs_config["tokens_file_folder"]
+    N_PROCESSES = inner_config["N_PROCESSES"]
+    PROJECTS_BATCH = inner_config["PROJECTS_BATCH"]
+    init_file_id = inner_config["init_file_id"]
+
     p_start = dt.datetime.now()
 
     proj_paths = []
-    with open(FILE_projects_list, "r", encoding="utf-8") as f:
+    with open(inner_config["FILE_projects_list"], "r", encoding="utf-8") as f:
         proj_paths = f.read().split("\n")
     proj_paths = list(enumerate(proj_paths, start=1))
     # it will diverge the process flow on process_file()
 
     if os.path.exists(PATH_stats_file_folder) or os.path.exists(PATH_bookkeeping_proj_folder) or os.path.exists(PATH_tokens_file_folder):
-        print('[ERROR] ERROR - Folder [{}] or [{}] or [{}] already exists!'.format(PATH_stats_file_folder, PATH_bookkeeping_proj_folder, PATH_tokens_file_folder))
+        print(f'[ERROR] - Folder [{PATH_stats_file_folder}] or [{PATH_bookkeeping_proj_folder}] or [{PATH_tokens_file_folder}] already exists!')
         sys.exit(1)
     else:
         os.makedirs(PATH_stats_file_folder)
@@ -90,7 +104,7 @@ if __name__ == '__main__':
 
     print("[INFO] *** Starting regular projects...")
     while len(proj_paths) > 0:
-        start_child(processes, global_queue, proj_paths, PROJECTS_BATCH)
+        start_child(processes, global_queue, proj_paths, PROJECTS_BATCH, dirs_config)
 
     print("[INFO] *** No more projects to process. Waiting for children to finish...")
     while active_process_count(processes) > 0:

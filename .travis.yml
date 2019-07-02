@@ -9,8 +9,9 @@ install:
 script:
   - pylint *.py --exit-zero
   - pylint tokenizers/*/*.py --exit-zero
+  - pylint tokenizers/*.py --exit-zero
   - pylint clone-detector/*.py --exit-zero
-  - python -m unittest tokenizers/file_level/tokenizer_tests.py
+  - python -m unittest tokenizers/tokenizing/file_tokenizer_tests.py
 notifications:
   email:
     recipients:

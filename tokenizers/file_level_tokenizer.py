@@ -5,7 +5,7 @@ import os
 import sys
 from multiprocessing import Process, Queue
 
-from file_level.tokenizing import *
+from tokenizing.file_tokenizer import *
 
 
 def process_projects(process_num, list_projects, base_file_id, global_queue):
@@ -60,7 +60,7 @@ def active_process_count(processes):
 
 if __name__ == '__main__':
     try:
-        read_config()
+        read_config("file_config.ini")
     except Exception as e:
         print(e)
         sys.exit()

@@ -7,7 +7,7 @@ global found_parent
 re_string = re.escape("\"") + '.*?' + re.escape("\"")
 
 
-def getFunctions(filestring, file_path, separators, comment_inline_pattern):
+def get_functions(filestring, file_path, comment_inline_pattern):
     method_string = []
     method_pos = []
     method_name = []
@@ -35,6 +35,7 @@ def getFunctions(filestring, file_path, separators, comment_inline_pattern):
     try:
         for path, node in nodes:
             node_name = '.' + node.name
+            name = ""
             for i, var in enumerate(reversed(path)):
                 if isinstance(var, javalang.tree.ClassDeclaration):
                     if len(path) - 3 == i:  # Top most
