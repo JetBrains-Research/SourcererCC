@@ -1,18 +1,5 @@
 # SourcererCC
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/86471e8cabf74c6486622d9027c1c0d3)](https://app.codacy.com/app/rprtr258/SourcererCC?utm_source=github.com&utm_medium=referral&utm_content=rprtr258/SourcererCC&utm_campaign=Badge_Grade_Settings)
-[![Build Status](https://travis-ci.com/rprtr258/SourcererCC.svg?branch=master)](https://travis-ci.com/rprtr258/SourcererCC)
-
-## How to run
-
-Write urls of repositories you want to analyze in **urls.txt**. Then execute:
-
-```bash
-./run.py
-```
-
-## Old README
-
 ## Tutorial
 
 SourcererCC is [Sourcerer](http://sourcerer.ics.uci.edu/ "Sourcerer Project @ UCI")'s token-based code clone detector for very large code bases and Internet-scale project repositories. SourcererCC works at many levels of granularity such as detecting clones between files, methods, statements or blocks, in any language. This tutorial is for file-level clone detection on Java.
