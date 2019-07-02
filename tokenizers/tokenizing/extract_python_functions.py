@@ -1,7 +1,7 @@
 import ast
 
 
-def getFunctions(filestring, file_path):
+def get_functions(filestring, file_path):
     tree = None
     try:
         tree = ast.parse(filestring)
