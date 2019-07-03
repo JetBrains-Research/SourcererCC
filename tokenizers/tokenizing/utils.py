@@ -49,7 +49,7 @@ def process_zip_ball(process_num, proj_id, zip_file, base_file_id, language_conf
                     print(f"[WARNING] File {file_path} can't be read")
                 times["file_time"] += (dt.datetime.now() - f_time).microseconds
 
-                file_times = callback(file_string, proj_id, file_id, zip_file, file_path, file_bytes, out_files)
+                file_times = callback(file_string, proj_id, file_id, zip_file, file_path, file_bytes, out_files[0], out_files[2])
                 for time_name, time in file_times.items():
                     times[time_name] += time
     except zipfile.BadZipFile as e:
