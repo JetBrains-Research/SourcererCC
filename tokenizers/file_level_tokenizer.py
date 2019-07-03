@@ -84,6 +84,7 @@ if __name__ == '__main__':
 
     # Multiprocessing with N_PROCESSES
     # [process, file_count]
+    global init_file_id
     processes = [[None, init_file_id] for i in range(N_PROCESSES)]
     # The queue for processes to communicate back to the parent (this process)
     # Initialize it with N_PROCESSES number of (process_id, n_files_processed)

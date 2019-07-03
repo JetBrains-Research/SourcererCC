@@ -17,6 +17,7 @@ PROJECTS_BATCH = 20
 dirs_config = {}
 FILE_projects_list = "project-list.txt"
 language_config = {}
+init_file_id = 1
 
 file_count = 0
 
