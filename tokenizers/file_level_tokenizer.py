@@ -9,17 +9,25 @@ from tokenizing.file_tokenizer import *
 
 
 def process_projects(process_num, list_projects, base_file_id, global_queue):
-    file_files_stats_file = os.path.join(dirs_config["stats_folder"], f'files-stats-{process_num}.stats')
-    file_bookkeeping_proj_name = os.path.join(dirs_config["bookkeeping_folder"], f'bookkeeping-proj-{process_num}.projs')
-    file_files_tokens_file = os.path.join(dirs_config["tokens_folder"], f'files-tokens-{process_num}.tokens')
+    stats_folder = dirs_config["stats_folder"]
+    bookkeeping_folder = dirs_config["bookkeeping_folder"]
+    tokens_folder = dirs_config["tokens_folder"]
+
+    tokens_filename = os.path.join(tokens_folder, f'files-tokens-{process_num}.tokens')
+    bookkeeping_filename = os.path.join(bookkeeping_folder, f'bookkeeping-proj-{process_num}.projs')
+    stats_filename = os.path.join(stats_folder, f'files-stats-{process_num}.stats')
 
     global file_count
     file_count = 0
-    with open(file_files_tokens_file, 'a+', encoding="utf-8") as FILE_tokens, open(file_bookkeeping_proj_name, 'a+', encoding="utf-8") as FILE_bookkeeping, open(file_files_stats_file, 'a+', encoding="utf-8") as FILE_stats:
-        print(f"[INFO] Process {process_num} starting")
+
+    print(f"[INFO] Process {process_num} starting")
+    with open(tokens_filename, 'a+', encoding="utf-8") as tokens_file, \
+        open(bookkeeping_filename, 'a+', encoding="utf-8") as bookkeeping_file, \
+        open(stats_filename, 'a+', encoding="utf-8") as stats_file:
+        out_files = (tokens_file, bookkeeping_file, stats_file)
         p_start = dt.datetime.now()
         for proj_id, proj_path in list_projects:
-            process_one_project(process_num, str(proj_id), proj_path, base_file_id, FILE_tokens, FILE_bookkeeping, FILE_stats)
+            process_one_project(process_num, str(proj_id), proj_path, base_file_id, out_files)
 
     p_elapsed = (dt.datetime.now() - p_start).seconds
     print(f"[INFO] Process {process_num} finished. {file_count} files in {p_elapsed} sec")

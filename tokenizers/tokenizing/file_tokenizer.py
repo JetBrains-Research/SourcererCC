@@ -113,33 +113,25 @@ def process_file_contents(file_string, proj_id, file_id, container_path, file_pa
     return file_times
 
 
-def process_one_project(process_num, proj_id, proj_path, base_file_id, FILE_tokens_file, FILE_bookkeeping_proj, FILE_stats_file):
+def process_one_project(process_num, proj_id, proj_path, base_file_id, out_files):
     print(f"[INFO] Starting  project <{proj_id},{proj_path}> (process {process_num})")
     p_start = dt.datetime.now()
 
     if not os.path.isfile(proj_path):
         print(f"[WARNING] Unable to open project <{proj_id},{proj_path}> (process {process_num})")
         return
-    times = process_zip_ball(process_num, proj_id, proj_path, base_file_id, FILE_tokens_file, FILE_bookkeeping_proj, FILE_stats_file, language_config, process_file_contents)
-    zip_time, file_time, string_time, tokens_time, write_time, hash_time, regex_time = (-1, -1, -1, -1, -1, -1, -1)
-    if times is not None:
-        zip_time = times["zip_time"]
-        file_time = times["file_time"]
-        string_time = times["string_time"]
-        tokens_time = times["tokens_time"]
-        write_time = times["write_time"]
-        hash_time = times["hash_time"]
-        regex_time = times["regex_time"]
-
-    FILE_bookkeeping_proj.write(f'{proj_id},"{proj_path}"\n')
+    global MULTIPLIER
+    times = process_zip_ball(process_num, proj_id, proj_path, base_file_id, language_config, process_file_contents, out_files, {"MULTIPLIER": MULTIPLIER})
+    _, bookkeeping_file, _ = out_files
+    bookkeeping_file.write(f'{proj_id},"{proj_path}"\n')
 
     p_elapsed = dt.datetime.now() - p_start
     print(f"[INFO] Project finished <{proj_id},{proj_path}> (process {process_num}))")
     print(f"[INFO]  ({process_num}): Total: {p_elapsed} ms")
-    print(f"[INFO]      Zip: {zip_time} ms")
-    print(f"[INFO]      Read: {file_time} ms")
-    print(f"[INFO]      Separators: {string_time} ms")
-    print(f"[INFO]      Tokens: {tokens_time} ms")
-    print(f"[INFO]      Write: {write_time} ms")
-    print(f"[INFO]      Hash: {hash_time} ms")
-    print(f"[INFO]      regex: {regex_time} ms")
+    print(f"[INFO]      Zip: {times["zip_time"]} ms")
+    print(f"[INFO]      Read: {times["file_time"]} ms")
+    print(f"[INFO]      Separators: {times["string_time"]} ms")
+    print(f"[INFO]      Tokens: {times["tokens_time"]} ms")
+    print(f"[INFO]      Write: {times["write_time"]} ms")
+    print(f"[INFO]      Hash: {times["hash_time"]} ms")
+    print(f"[INFO]      regex: {times["regex_time"]} ms")
