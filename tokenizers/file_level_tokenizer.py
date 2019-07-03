@@ -11,7 +11,7 @@ from tokenizing.file_tokenizer import *
 def process_projects(process_num, list_projects, base_file_id, global_queue):
     file_files_stats_file = os.path.join(dirs_config["stats_folder"], f'files-stats-{process_num}.stats')
     file_bookkeeping_proj_name = os.path.join(dirs_config["bookkeeping_folder"], f'bookkeeping-proj-{process_num}.projs')
-    file_files_tokens_file = os.path.join(dirs_config["tokens_file"], f'files-tokens-{process_num}.tokens')
+    file_files_tokens_file = os.path.join(dirs_config["tokens_folder"], f'files-tokens-{process_num}.tokens')
 
     global file_count
     file_count = 0
@@ -62,6 +62,7 @@ if __name__ == '__main__':
     try:
         read_config("file_config.ini")
     except Exception as e:
+        print("ERROR while reading file_config.ini:")
         print(e)
         sys.exit()
     p_start = dt.datetime.now()
@@ -71,14 +72,15 @@ if __name__ == '__main__':
         proj_paths = f.read().split("\n")
     proj_paths = list(enumerate(proj_paths, start=1))
 
-    if os.path.exists(dirs_config["stats_folder"]) or os.path.exists(dirs_config["bookkeeping_folder"]) or os.path.exists(dirs_config["tokens_file"]):
-        missing_files = filter(os.path.exists, [dirs_config["stats_folder"], dirs_config["bookkeeping_folder"], dirs_config["tokens_file"]])
-        print('ERROR - Folder [' + '] or ['.join(missing_files) + '] already exists!')
+    if any(map(lambda x: os.path.exists(dirs_config[x]), ["stats_folder", "bookkeeping_folder", "tokens_folder"])):
+        missing_folders = filter(lambda x: os.path.exists(dirs_config[x]), ["stats_folder", "bookkeeping_folder", "tokens_folder"])
+        for missing_folder in missing_folders:
+            print(f"ERROR - Folder [{missing_folder}] already exists!")
         sys.exit(1)
-    else:
-        os.makedirs(dirs_config["stats_folder"])
-        os.makedirs(dirs_config["bookkeeping_folder"])
-        os.makedirs(dirs_config["tokens_file"])
+
+    os.makedirs(dirs_config["stats_folder"])
+    os.makedirs(dirs_config["bookkeeping_folder"])
+    os.makedirs(dirs_config["tokens_folder"])
 
     # Multiprocessing with N_PROCESSES
     # [process, file_count]

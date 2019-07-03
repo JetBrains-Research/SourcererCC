@@ -15,8 +15,6 @@ N_PROCESSES = 2
 PROJECTS_BATCH = 20
 
 dirs_config = {}
-dirs_config["bookkeeping_folder"] = 'bookkeeping_projs'
-dirs_config["tokens_file"] = 'files_tokens'
 FILE_projects_list = "project-list.txt"
 language_config = {}
 
@@ -43,9 +41,9 @@ def read_config(config_filename):
     # Get info from config.ini into global variables
     N_PROCESSES = config.getint('Main', 'N_PROCESSES')
     PROJECTS_BATCH = config.getint('Main', 'PROJECTS_BATCH')
-    dirs_config["stats_folder"] = config.get('Folders/Files', 'PATH_stats_file_folder')
-    dirs_config["bookkeeping_folder"] = config.get('Folders/Files', 'PATH_bookkeeping_proj_folder')
-    dirs_config["tokens_file"] = config.get('Folders/Files', 'PATH_tokens_file_folder')
+    dirs_config["stats_folder"] = config.get('Folders/Files', 'PATH_stats_folder')
+    dirs_config["bookkeeping_folder"] = config.get('Folders/Files', 'PATH_bookkeeping_folder')
+    dirs_config["tokens_folder"] = config.get('Folders/Files', 'PATH_tokens_folder')
 
     # Reading Language settings
     language_config["separators"] = config.get('Language', 'separators').strip('"').split(' ')
