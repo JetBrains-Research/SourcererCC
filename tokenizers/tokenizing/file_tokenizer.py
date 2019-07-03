@@ -98,8 +98,6 @@ def tokenize_files(file_string):
 
 def process_file_contents(file_string, proj_id, file_id, container_path, file_path, file_bytes, FILE_tokens_file, FILE_stats_file):
     print(f"[INFO] Started process_file_contents on {file_path}")
-    global file_count
-    file_count += 1
 
     (final_stats, final_tokens, file_times) = tokenize_files(file_string)
     (file_hash, lines, LOC, SLOC) = final_stats
@@ -122,7 +120,9 @@ def process_one_project(process_num, proj_id, proj_path, base_file_id, out_files
         return
     global MULTIPLIER
     global file_count
-    times = process_zip_ball(process_num, proj_id, proj_path, base_file_id, language_config, process_file_contents, out_files, {"MULTIPLIER": MULTIPLIER}, file_count)
+    tmp = {"MULTIPLIER": MULTIPLIER, "file_count": file_count}
+    times = process_zip_ball(process_num, proj_id, proj_path, base_file_id, language_config, process_file_contents, out_files, tmp)
+    file_count = tmp["file_count"]
     _, bookkeeping_file, _ = out_files
     bookkeeping_file.write(f'{proj_id},"{proj_path}"\n')
 

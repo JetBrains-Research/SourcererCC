@@ -6,7 +6,7 @@ import re
 import collections
 
 
-def process_zip_ball(process_num, proj_id, zip_file, base_file_id, language_config, callback, out_files, inner_config, file_count):
+def process_zip_ball(process_num, proj_id, zip_file, base_file_id, language_config, callback, out_files, tmp):
     print(f"[INFO] Started zip ball {zip_file}")
     times = {
         "zip_time": 0,
@@ -23,7 +23,8 @@ def process_zip_ball(process_num, proj_id, zip_file, base_file_id, language_conf
                 if not os.path.splitext(code_file.filename)[1] in language_config["file_extensions"]:
                     continue
 
-                file_id = process_num * inner_config["MULTIPLIER"] + base_file_id + file_count
+                file_id = process_num * tmp["MULTIPLIER"] + base_file_id + tmp["file_count"]
+                tmp["file_count"] += 1
                 file_bytes = str(code_file.file_size)
                 file_path = code_file.filename
                 full_code_file_path = os.path.join(zip_file, file_path)
