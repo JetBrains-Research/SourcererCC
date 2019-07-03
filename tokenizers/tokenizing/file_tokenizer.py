@@ -121,7 +121,8 @@ def process_one_project(process_num, proj_id, proj_path, base_file_id, out_files
         print(f"[WARNING] Unable to open project <{proj_id},{proj_path}> (process {process_num})")
         return
     global MULTIPLIER
-    times = process_zip_ball(process_num, proj_id, proj_path, base_file_id, language_config, process_file_contents, out_files, {"MULTIPLIER": MULTIPLIER})
+    global file_count
+    times = process_zip_ball(process_num, proj_id, proj_path, base_file_id, language_config, process_file_contents, out_files, {"MULTIPLIER": MULTIPLIER}, file_count)
     _, bookkeeping_file, _ = out_files
     bookkeeping_file.write(f'{proj_id},"{proj_path}"\n')
 

@@ -6,7 +6,7 @@ import re
 import collections
 
 
-def process_zip_ball(process_num, proj_id, zip_file, base_file_id, language_config, callback, out_files, inner_config):
+def process_zip_ball(process_num, proj_id, zip_file, base_file_id, language_config, callback, out_files, inner_config, file_count):
     print(f"[INFO] Started zip ball {zip_file}")
     times = {
         "zip_time": 0,
