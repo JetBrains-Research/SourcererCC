@@ -47,9 +47,9 @@ def read_inner_config(config):
 
 def read_dirs_config(config):
     dirs_config = {}
-    dirs_config["stats_file_folder"] = config.get('Folders/Files', 'PATH_stats_file_folder')
-    dirs_config["bookkeeping_proj_folder"] = config.get('Folders/Files', 'PATH_bookkeeping_proj_folder')
-    dirs_config["tokens_file_folder"] = config.get('Folders/Files', 'PATH_tokens_file_folder')
+    dirs_config["stats_folder"] = config.get('Folders/Files', 'PATH_stats_folder')
+    dirs_config["bookkeeping_folder"] = config.get('Folders/Files', 'PATH_bookkeeping_folder')
+    dirs_config["tokens_folder"] = config.get('Folders/Files', 'PATH_tokens_folder')
     return dirs_config
 
 

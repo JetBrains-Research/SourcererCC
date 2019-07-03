@@ -9,9 +9,9 @@ from tokenizing.block_tokenizer import *
 
 
 def process_projects(process_num, list_projects, base_file_id, global_queue, dirs_config):
-    PATH_stats_file_folder = dirs_config["stats_file_folder"]
-    PATH_bookkeeping_proj_folder = dirs_config["bookkeeping_proj_folder"]
-    PATH_tokens_file_folder = dirs_config["tokens_file_folder"]
+    PATH_stats_file_folder = dirs_config["stats_folder"]
+    PATH_bookkeeping_proj_folder = dirs_config["bookkeeping_folder"]
+    PATH_tokens_file_folder = dirs_config["tokens_folder"]
 
     tokens_file = os.path.join(PATH_tokens_file_folder, 'files-tokens-{}.tokens'.format(process_num))
     bookkeeping_file = os.path.join(PATH_bookkeeping_proj_folder, 'bookkeeping-proj-{}.projs'.format(process_num))
@@ -70,9 +70,9 @@ if __name__ == '__main__':
     sys.setrecursionlimit(3000)
 
     inner_config, dirs_config = read_config("block_config.ini")
-    PATH_stats_file_folder = dirs_config["stats_file_folder"]
-    PATH_bookkeeping_proj_folder = dirs_config["bookkeeping_proj_folder"]
-    PATH_tokens_file_folder = dirs_config["tokens_file_folder"]
+    PATH_stats_file_folder = dirs_config["stats_folder"]
+    PATH_bookkeeping_proj_folder = dirs_config["bookkeeping_folder"]
+    PATH_tokens_file_folder = dirs_config["tokens_folder"]
     N_PROCESSES = inner_config["N_PROCESSES"]
     PROJECTS_BATCH = inner_config["PROJECTS_BATCH"]
     init_file_id = inner_config["init_file_id"]
@@ -85,13 +85,15 @@ if __name__ == '__main__':
     proj_paths = list(enumerate(proj_paths, start=1))
     # it will diverge the process flow on process_file()
 
-    if os.path.exists(PATH_stats_file_folder) or os.path.exists(PATH_bookkeeping_proj_folder) or os.path.exists(PATH_tokens_file_folder):
-        print(f'[ERROR] - Folder [{PATH_stats_file_folder}] or [{PATH_bookkeeping_proj_folder}] or [{PATH_tokens_file_folder}] already exists!')
+    if any(map(lambda x: os.path.exists(dirs_config[x]), ["stats_folder", "bookkeeping_folder", "tokens_folder"])):
+        missing_folders = filter(lambda x: os.path.exists(dirs_config[x]), ["stats_folder", "bookkeeping_folder", "tokens_folder"])
+        for missing_folder in missing_folders:
+            print(f"ERROR - Folder [{missing_folder}] already exists!")
         sys.exit(1)
-    else:
-        os.makedirs(PATH_stats_file_folder)
-        os.makedirs(PATH_bookkeeping_proj_folder)
-        os.makedirs(PATH_tokens_file_folder)
+
+    os.makedirs(PATH_stats_file_folder)
+    os.makedirs(PATH_bookkeeping_proj_folder)
+    os.makedirs(PATH_tokens_file_folder)
 
     # Multiprocessing with N_PROCESSES
     # [process, file_count]
