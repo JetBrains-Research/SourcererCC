@@ -256,10 +256,19 @@ def print_results(results_file, stats_files, blocks_mode):
                 "SLOC": code_stat["SLOC"],
                 "content": code_content
             }
+    print("results:")
+    for code_id, code_id_list in result.items():
+        print(f"{code_id}: {code_id_list}")
     for code_id, code_id_list in results.items():
         print(f"code_id: {code_id}")
         print(f"code_id_list: {code_id_list}")
-        print(f"formatted_titles: {formatted_titles}")
+        print("formatted_titles:")
+        for a, b in formatted_titles.items():
+            print(f"{a}: {{")
+            for x, y in b.items():
+                if len(y) < 100:
+                    print(f"{x}: {y},")
+            print("}")
         full_results[formatted_titles[code_id]["file"]] = {
             "clones": list(map(lambda x: formatted_titles[x], code_id_list))
         }
