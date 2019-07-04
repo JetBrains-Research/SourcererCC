@@ -257,7 +257,7 @@ def print_results(results_file, stats_files, blocks_mode):
                 "content": code_content
             }
     print("results:")
-    for code_id, code_id_list in result.items():
+    for code_id, code_id_list in results.items():
         print(f"{code_id}: {code_id_list}")
     for code_id, code_id_list in results.items():
         print(f"code_id: {code_id}")
