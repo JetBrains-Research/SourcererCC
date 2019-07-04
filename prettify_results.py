@@ -266,8 +266,7 @@ def print_results(results_file, stats_files, blocks_mode):
         for a, b in formatted_titles.items():
             print(f"{a}: {{")
             for x, y in b.items():
-                if len(y) < 100:
-                    print(f"{x}: {y},")
+                print(f"{x}: {y},")
             print("}")
         full_results[formatted_titles[code_id]["file"]] = {
             "clones": list(map(lambda x: formatted_titles[x], code_id_list))
