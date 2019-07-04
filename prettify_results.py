@@ -257,6 +257,9 @@ def print_results(results_file, stats_files, blocks_mode):
                 "content": code_content
             }
     for code_id, code_id_list in results.items():
+        print(f"code_id: {code_id}")
+        print(f"code_id_list: {code_id_list}")
+        print(f"formatted_titles: {formatted_titles}")
         full_results[formatted_titles[code_id]["file"]] = {
             "clones": list(map(lambda x: formatted_titles[x], code_id_list))
         }
