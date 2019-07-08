@@ -1,6 +1,7 @@
 import re
 import javalang
 import itertools
+from sys import setrecursionlimit
 
 global found_parent
 
@@ -8,6 +9,7 @@ re_string = re.escape("\"") + '.*?' + re.escape("\"")
 
 
 def get_functions(filestring, file_path, comment_inline_pattern):
+    setrecursionlimit(3000)
     method_string = []
     method_pos = []
     method_name = []

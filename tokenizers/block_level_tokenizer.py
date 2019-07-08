@@ -8,7 +8,7 @@ from multiprocessing import Process, Queue
 from block_tokenizer import *
 
 
-def process_projects(process_num, list_projects, base_file_id, global_queue, dirs_config):
+def process_projects(process_num, list_projects, base_file_id, threads_queue, dirs_config):
     stats_folder = dirs_config["stats_folder"]
     bookkeeping_folder = dirs_config["bookkeeping_folder"]
     tokens_folder = dirs_config["tokens_folder"]
@@ -33,7 +33,7 @@ def process_projects(process_num, list_projects, base_file_id, global_queue, dir
     print(f"[INFO] Process {process_num} finished. {file_count} files in {p_elapsed} s")
 
     # Let parent know
-    global_queue.put((process_num, file_count))
+    threads_queue.put((process_num, file_count))
     sys.exit(0)
 
 
@@ -67,9 +67,6 @@ def active_process_count(processes):
 
 
 if __name__ == '__main__':
-    # Need to bypass javalang syntax tree traverse limits
-    sys.setrecursionlimit(3000)
-
     inner_config, dirs_config = read_config("block_config.ini")
     PATH_stats_file_folder = dirs_config["stats_folder"]
     PATH_bookkeeping_proj_folder = dirs_config["bookkeeping_folder"]
