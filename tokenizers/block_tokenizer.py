@@ -217,7 +217,7 @@ class Tokenizer():
         try:
             with zipfile.ZipFile(zip_file, 'r') as my_file:
                 for code_file in my_file.infolist():
-                    if not os.path.splitext(code_file.filename)[1] in language_config["extensions"]:
+                    if not os.path.splitext(code_file.filename)[1] in self.language_config["extensions"]:
                         continue
 
                     file_id = process_num * self.inner_config["MULTIPLIER"] + base_file_id + file_count
