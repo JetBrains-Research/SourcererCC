@@ -1,9 +1,8 @@
 import hashlib
 import os
-import zipfile
 import datetime as dt
 import re
-import collections
+from collections import Counter
 
 
 def remove_comments(string, language_config):
@@ -34,7 +33,7 @@ def tokenize_string(string, language_config):
 
     tokens_list = tokenized_string.split()  # Create a list of tokens
     total_tokens = len(tokens_list)  # Total number of tokens
-    tokens_counter = collections.Counter(tokens_list)  # Count occurrences
+    tokens_counter = Counter(tokens_list)  # Count occurrences
     tokens_bag = dict(tokens_counter)  # Converting Counter to dict, {token: occurences}
     unique_tokens = len(tokens_bag)  # Unique number of tokens
     return tokens_bag, total_tokens, unique_tokens
