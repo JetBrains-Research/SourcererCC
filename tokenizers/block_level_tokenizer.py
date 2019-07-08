@@ -5,7 +5,7 @@ import os
 import sys
 from multiprocessing import Process, Queue
 
-from tokenizing.block_tokenizer import *
+from block_tokenizer import *
 
 
 def process_projects(process_num, list_projects, base_file_id, global_queue, dirs_config):
