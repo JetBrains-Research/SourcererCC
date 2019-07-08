@@ -267,9 +267,12 @@ def print_projects_list(bookkeeping_files):
 # second project id, second block/file id) usually it is results.pairs
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("-b", "--bookkeepingFiles", dest="bookkeeping_files", default=False, help="File or folder with bookkeeping files (*.projs).")
-    parser.add_argument("-r", "--resultsFile", dest="results_file", default=False, help="File with results of SourcererCC (results.pairs).")
-    parser.add_argument("-s", "--statsFiles", dest="stats_files", default=False, help="File or folder with stats files (*.stats).")
+    parser.add_argument("-b", "--bookkeepingFiles", dest="bookkeeping_files",\
+         default=False, help="File or folder with bookkeeping files (*.projs).")
+    parser.add_argument("-r", "--resultsFile", dest="results_file",\
+        default=False, help="File with results of SourcererCC (results.pairs).")
+    parser.add_argument("-s", "--statsFiles", dest="stats_files",\
+        default=False, help="File or folder with stats files (*.stats).")
 
     options = parser.parse_args(sys.argv[1:])
 
