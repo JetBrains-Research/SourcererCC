@@ -39,7 +39,7 @@ def tokenize_string(string, language_config):
     return tokens_bag, total_tokens, unique_tokens
 
 
-def count_lines(string, count_empty = True):
+def count_lines(string, count_empty=True):
     result = string.count('\n')
     if not string.endswith('\n') and (count_empty or string != ""):
         result += 1
