@@ -12,11 +12,11 @@ script:
   - pylint tokenizers/*.py --exit-zero
   - pylint clone-detector/*.py --exit-zero
   - wget "https://github.com/a1arick/spbsu-programming-homework/archive/master.zip"
-  - mv master.zip > tokenizers/master.zip
+  - mv master.zip tokenizers/master.zip
   - echo "master.zip" > tokenizers/project-list.txt
   - cd tokenizers
   - ./block_level_tokenizer.py
-  - mv blocks_tokens/* > ../clone-detector/input/dataset/blocks.file
+  - mv blocks_tokens/* ../clone-detector/input/dataset/blocks.file
   - cd ../clone-detector
   - ./controller.py
 #  - python3 -m unittest tokenizers/tokenizing/file_tokenizer_tests.py
