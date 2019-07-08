@@ -12,7 +12,7 @@ script:
   - pylint tokenizers/*/*.py --exit-zero
   - pylint tokenizers/*.py --exit-zero
   - pylint clone-detector/*.py --exit-zero
-  - wget "https://github.com/0x5e/RubiksCubeSolver/archive/master.zip"
+  - wget "https://github.com/a1arick/spbsu-programming-homework/archive/master.zip"
   - mv master.zip tokenizers/master.zip
   - echo "master.zip" > tokenizers/project-list.txt
   - cd tokenizers
