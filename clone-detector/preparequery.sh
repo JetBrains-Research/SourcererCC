@@ -13,7 +13,7 @@ do
   rm -rf $foldername
   mkdir -p $foldername
   queryfile="$rootPATH/query_$i.file"
-  mv $queryfile $foldername
+  mv $queryfile $foldername/
   cp $rootPATH/sourcerer-cc.properties "$rootPATH/NODE_"$i/
   cp $rootPATH/res/log4j2.xml "$rootPATH/NODE"_$i/
 done

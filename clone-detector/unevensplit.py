@@ -4,7 +4,7 @@ import sys
 import math
 
 
-class Spliter():
+class Spliter(object):
     def __init__(self, params):
         self.split_count = params['split_count']
         self.input_filename = params['input_filename']

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from __future__ import absolute_import, division, print_function, unicode_literals
 import subprocess
 import sys
 import os
@@ -54,7 +55,7 @@ class ScriptController(object):
         self.previous_run_state = self.load_previous_state()
 
     def execute(self):
-        print(f"previous run state {self.previous_run_state}")
+        print("previous run state {}".format(self.previous_run_state))
         if self.previous_run_state <= STATE_EXECUTE_1:
             run_command_wrapper("execute.sh", "1")
         self.current_state += 1
@@ -76,8 +77,8 @@ class ScriptController(object):
         # execute move indexes
         self.perform_step(STATE_MOVE_INDEX, "move-index.sh", "")
         # execute command to create the dir structure
-        self.perform_step(STATE_EXECUTE_2, "execute.sh", f"{self.num_nodes_search}")
-        self.perform_step(STATE_SEARCH, "runnodes.sh", f"search {self.num_nodes_search}")
+        self.perform_step(STATE_EXECUTE_2, "execute.sh", "{}".format(self.num_nodes_search))
+        self.perform_step(STATE_SEARCH, "runnodes.sh", "search {}".format(self.num_nodes_search))
 
         self.flush_state()
         self.current_state = STATE_EXECUTE_1  # go back to EXE 1 state
@@ -105,8 +106,10 @@ class ScriptController(object):
 
 
 if __name__ == '__main__':
-    numnodes = int(sys.argv[1]) if len(sys.argv) >= 2 else 2
-    print(f"search will be carried out with {numnodes} nodes")
+    numnodes = 2
+    if len(sys.argv) >= 2:
+        numnodes = int(sys.argv[1])
+    print("search will be carried out with {} nodes".format(numnodes))
 
     controller = ScriptController(numnodes)
     controller.execute()

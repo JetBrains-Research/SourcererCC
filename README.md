@@ -1,8 +1,5 @@
 # SourcererCC
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/86471e8cabf74c6486622d9027c1c0d3)](https://app.codacy.com/app/rprtr258/SourcererCC?utm_source=github.com&utm_medium=referral&utm_content=rprtr258/SourcererCC&utm_campaign=Badge_Grade_Settings)
-[![Build Status](https://travis-ci.com/rprtr258/SourcererCC.svg?branch=master)](https://travis-ci.com/rprtr258/SourcererCC)
-
 ## Tutorial
 
 SourcererCC is [Sourcerer](http://sourcerer.ics.uci.edu/ "Sourcerer Project @ UCI")'s token-based code clone detector for very large code bases and Internet-scale project repositories. SourcererCC works at many levels of granularity such as detecting clones between files, methods, statements or blocks, in any language. This tutorial is for file-level clone detection on Java.
@@ -68,7 +65,7 @@ python tokenizer.py zip
 where `zip` is the extension of the individual projects in `FILE_projects_list = this/is/a/path/paths.txt`. 
 
 The resulting output is composed of three folders, in the same location:
-*   `blocks_bookkeeping/*.projs`, `files_bookkeeping/*.projs` - contain a list of processed projects. Has the following format:
+*   `bookkeeping_projs/*.projs` - contains a list of processed projects. Has the following format:
 
 `project_id, project_path, project_url`
 
@@ -93,8 +90,8 @@ in blocks-mode  in `blocks_tokens/` contains:
 
 `block_id` is `"relative_id"` + `"file_id"`
 
-The elements `file id` and `project id` always point to the same source code file or project, respectively (they work as a primary key). So a line in `files_stats/*` that start with `1,1` represents the same file as the line in `files_tokens/*` that starts with `1,1`, and these came from the project in `blocks_bookkeeping/*`, `files_bookkeeping/*` whose line starts with `1`.
-The number of lines in `blocks_bookkeeping/*`, `files_bookkeeping/*` corresponds to the total number of projects analyzed, the number of lines in `files_stats/*` is the same as `files_tokens/*` and is the same as the total number of files obtained from the projects.
+The elements `file id` and `project id` always point to the same source code file or project, respectively (they work as a primary key). So a line in `files_stats/*` that start with `1,1` represents the same file as the line in `files_tokens/*` that starts with `1,1`, and these came from the project in `bookkeeping_projs/*` whose line starts with `1`.
+The number of lines in `bookkeeping_projs/*` corresponds to the total number of projects analyzed, the number of lines in `files_stats/*` is the same as `files_tokens/*` and is the same as the total number of files obtained from the projects.
 
 ### Run SourcererCC
 
