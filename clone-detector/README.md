@@ -14,7 +14,7 @@ SHARD_MAX_NUM_TOKENS=<comma seperated list of numbers. 75,90,100  would mean we 
 execute
 `ant cdi`
 ### Step 1: Init
-Modify runnodes.sh, only one for loop should exist there. It should look like as shwn below. Here num_nodes is the number of processes you want to create to do this step. 
+Modify runnodes.sh, only one for loop should exist there. It should look like as shown below. Here num_nodes is the number of processes you want to create to do this step. 
 ```bash
 for i in $(seq 1 1 $num_nodes)
 do
@@ -25,7 +25,7 @@ Now run, `./runnodes.sh `
 if you want to run 100 processes, run `./runnodes.sh 100`
 
 ### Step 2: Index
-Modify runnodes.sh, only one for loop should exist there. It should look like as shwn below.
+Modify runnodes.sh, only one for loop should exist there. It should look like as shown below.
 ```bash
 for i in $(seq 1 1 $num_nodes)
 do
