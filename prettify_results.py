@@ -146,11 +146,10 @@ def get_stats_info(stats_files_path):
         for line in get_file_lines(stats_file):
             line_parts = line.split(",")
             stats = {}
-            code_type = line_parts[0]
             code_id = line_parts[2]
-            if code_type == "f":
+            if line.startswith("f"):
                 stats = parse_file_line(line_parts[1:])
-            elif code_type == "b":
+            elif line.startswith("b"):
                 stats = parse_block_line(line_parts[1:])
                 stats["relative_id"] = code_id[:5]
                 stats["file_id"] = code_id[5:]
@@ -176,58 +175,45 @@ def get_lines(zip_file_path, start_line, end_line, source_file):
         for code_file in repo.infolist():
             if source_file != code_file.filename:
                 continue
-            with repo.open(code_file) as f:
-                result = f.read().decode("utf-8").split("\n")
-    if end_line == -1:
-        return "\n".join(result[start_line - 1:])
+            with repo.open(code_file) as code_file:
+                result = code_file.read().decode("utf-8").split("\n")
     return "\n".join(result[start_line - 1 : end_line])
+
+def split_zip_file_path(file_path):
+    ext_index = file_path.index(".zip") + len(".zip")
+    return file_path[:ext_index], file_path[ext_index + 1:]
 
 
 def print_results(results_file, stats_files):
     """Print nice formatted results.
 
-    Return map with results parameters in following format:
-        in file mode:
-            "full_file_path": {
-                clones: [
-                    file: "full_file_path"
-                    SLOC: source_lines_of_code
-                    content: "file_content"
-                ]
-                SLOC: source_lines_of_code
-                content: "file_content"
-            }
-        in block mode:
-            "full_file_path": {
-                clones: [
-                    file: "full_file_path"
-                    start_line: first_line_of_block
-                    end_line: last_line_of_block
-                    content: "block_content"
-                ]
-                start_line: first_line_of_block
-                end_line: last_line_of_block
-                content: "block_content"
-            }
+    Return map with results parameters in following json format:
+        "full_file_path": {
+            clones: [
+                file: "{{full_file_path}}"
+                start_line: {{first_line_of_block}}
+                end_line: {{last_line_of_block}}
+                content: "{{block_content}}"
+            ]
+            start_line: {{first_line_of_block}}
+            end_line: {{last_line_of_block}}
+            content: "{{block_content}}"
+        }
 
     Arguments:
     results_file -- file with SourcererCC results
     stats_files -- file or directory with stats files
     """
     stats = get_stats_info(stats_files)
-    results = get_results(results_file)
     full_results = {}
     formatted_titles = {}
     for code_id, code_stat in stats.items():
         if "start_line" in code_stat:
             file_path = stats[code_stat["file_id"]]["file_path"]
             filename = get_file_name(file_path)
+            repo_zip_filename, source_file = split_zip_file_path(file_path.strip("\""))
             start_line = code_stat["start_line"]
             end_line = code_stat["end_line"]
-            repo_zip_filename = file_path[1:-1]
-            ext_index = repo_zip_filename.index(".zip")
-            source_file = repo_zip_filename[ext_index + 5:]
-            repo_zip_filename = repo_zip_filename[:ext_index + 4]
             code_content = get_lines(repo_zip_filename, start_line, end_line, source_file)
             formatted_titles[code_id] = {
                 "file": filename,
@@ -235,6 +221,7 @@ def print_results(results_file, stats_files):
                 "end_line": end_line,
                 "content": code_content
             }
+    results = get_results(results_file)
     print("results:")
     for code_id, code_id_list in results.items():
         print(f"{code_id}: {code_id_list}")
