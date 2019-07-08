@@ -7,7 +7,7 @@ import os
 from configparser import ConfigParser
 
 
-from .utils import *
+from utils import *
 from . import extract_java_functions
 from . import extract_python_functions
 
