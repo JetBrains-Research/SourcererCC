@@ -243,7 +243,7 @@ if __name__ == "__main__":
         print("No stats files specified. Exiting")
         sys.exit(0)
 
-    if not OPTIONS.results_files:
+    if not OPTIONS.results_file:
         print("No results files specified. Exiting")
         sys.exit(0)
 
