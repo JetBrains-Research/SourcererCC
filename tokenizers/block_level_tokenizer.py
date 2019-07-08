@@ -47,8 +47,8 @@ def start_child(processes, global_queue, proj_paths, batch, dirs_config):
     paths_batch = proj_paths[:batch]
     del proj_paths[:batch]
 
-    print("[INFO] Starting new process {}".format(pid))
-    p = Process(name='Process ' + str(pid), target=process_projects, args=(pid, paths_batch, processes[pid][1], global_queue, dirs_config))
+    print(f"[INFO] Starting new process {pid}")
+    p = Process(name=f"Process {pid}", target=process_projects, args=(pid, paths_batch, processes[pid][1], global_queue, dirs_config))
     processes[pid][0] = p
     p.start()
 
@@ -59,7 +59,7 @@ def kill_child(processes, pid, n_files_processed):
     if processes[pid][0] is not None:
         processes[pid][0] = None
         processes[pid][1] += n_files_processed
-        print("[INFO] Process {} finished, {} files processed {}. Current total: {}".format(pid, n_files_processed, processes[pid][1], file_count))
+        print(f"[INFO] Process {pid} finished, {n_files_processed} files processed {processes[pid][1]}. Current total: {file_count}")
 
 
 def active_process_count(processes):
