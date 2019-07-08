@@ -20,5 +20,9 @@ script:
   - mv blocks_tokens/* ../clone-detector/input/dataset/blocks.file
   - cd ../clone-detector
   - ./controller.py
-  - cat NODE_*/output8.0/query*.txt
+  - cat NODE_*/output8.0/query*.txt > ../results.pairs
+  - cd ..
+  - cat results.pairs
+  - cp tokenizers/master.zip .
+  - ./prettify_results.py --resultsFile=results.pairs --statsFiles=tokenizers/blocks_stats/files-stats-0.stats
 #  - python3 -m unittest tokenizers/tokenizing/file_tokenizer_tests.py
