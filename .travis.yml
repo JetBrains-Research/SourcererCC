@@ -11,4 +11,4 @@ script:
   - pylint tokenizers/*/*.py --exit-zero
   - pylint tokenizers/*.py --exit-zero
   - pylint clone-detector/*.py --exit-zero
-  - python3 -m unittest tokenizers/tokenizing/file_tokenizer_tests.py
+#  - python3 -m unittest tokenizers/tokenizing/file_tokenizer_tests.py
