@@ -72,7 +72,7 @@ if __name__ == '__main__':
     except Exception as e:
         print("ERROR while reading file_config.ini:")
         print(e)
-        sys.exit()
+        sys.exit(1)
     p_start = dt.datetime.now()
 
     proj_paths = []
