@@ -9,7 +9,7 @@ from block_tokenizer import *
 
 
 def process_one_project(process_num, proj_id, proj_path, base_file_id, out_files):
-    global inner_config
+    global inner_config, language_config
 
     proj_id_flag = inner_config["proj_id_flag"]
 
