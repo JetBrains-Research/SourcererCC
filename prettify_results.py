@@ -134,7 +134,7 @@ def get_stats_info(stats_files_path):
             if code_id in stats_info:
                 print(f"[NOTIFY] intersection on id {code_id}")
                 print(f"old: {stats_info[code_id]}")
-                print(f"new: {stats)}")
+                print(f"new: {stats}")
             stats_info[code_id] = stats
     return stats_info
 
