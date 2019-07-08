@@ -6,7 +6,7 @@ import re
 import collections
 
 
-def process_zip_ball(process_num, proj_id, zip_file, base_file_id, language_config, callback, out_files, inner_config):
+def process_zip_ball(process_num, proj_id, zip_file, base_file_id, language_config, callback, out_files, tmp):
     print(f"[INFO] Started zip ball {zip_file}")
     times = {
         "zip_time": 0,
@@ -23,7 +23,8 @@ def process_zip_ball(process_num, proj_id, zip_file, base_file_id, language_conf
                 if not os.path.splitext(code_file.filename)[1] in language_config["file_extensions"]:
                     continue
 
-                file_id = process_num * inner_config["MULTIPLIER"] + base_file_id + file_count
+                file_id = process_num * tmp["MULTIPLIER"] + base_file_id + tmp["file_count"]
+                tmp["file_count"] += 1
                 file_bytes = str(code_file.file_size)
                 file_path = code_file.filename
                 full_code_file_path = os.path.join(zip_file, file_path)
@@ -49,7 +50,7 @@ def process_zip_ball(process_num, proj_id, zip_file, base_file_id, language_conf
                     print(f"[WARNING] File {file_path} can't be read")
                 times["file_time"] += (dt.datetime.now() - f_time).microseconds
 
-                file_times = callback(file_string, proj_id, file_id, zip_file, file_path, file_bytes, out_files)
+                file_times = callback(file_string, proj_id, file_id, zip_file, file_path, file_bytes, out_files[0], out_files[2])
                 for time_name, time in file_times.items():
                     times[time_name] += time
     except zipfile.BadZipFile as e:

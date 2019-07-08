@@ -8,7 +8,7 @@ flag = None
 
 
 def import_tokenizer_output_files_tokens(db, output_path, logging):
-    bookkeeping_file_path = os.path.join(output_path, 'bookkeeping_projs')
+    bookkeeping_file_path = os.path.join(output_path, 'files_bookkeeping')
     files_stats_path = os.path.join(output_path, 'files_stats')
     files_tokens_path = os.path.join(output_path, 'files_tokens')
 
@@ -121,7 +121,7 @@ def import_tokenizer_output_files_tokens(db, output_path, logging):
 
 
 def import_tokenizer_output_blocks_tokens(db, output_path, logging):
-    bookkeeping_file_path = os.path.join(output_path, 'bookkeeping_projs')
+    bookkeeping_file_path = os.path.join(output_path, 'blocks_bookkeeping')
     files_stats_path = os.path.join(output_path, 'files_stats')
     blocks_tokens_path = os.path.join(output_path, 'blocks_tokens')
     blocks_stats_path = os.path.join(output_path, 'blocks_stats')

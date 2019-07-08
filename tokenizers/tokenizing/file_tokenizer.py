@@ -15,10 +15,9 @@ N_PROCESSES = 2
 PROJECTS_BATCH = 20
 
 dirs_config = {}
-dirs_config["bookkeeping_folder"] = 'bookkeeping_projs'
-dirs_config["tokens_file"] = 'files_tokens'
 FILE_projects_list = "project-list.txt"
 language_config = {}
+init_file_id = 1
 
 file_count = 0
 
@@ -43,9 +42,9 @@ def read_config(config_filename):
     # Get info from config.ini into global variables
     N_PROCESSES = config.getint('Main', 'N_PROCESSES')
     PROJECTS_BATCH = config.getint('Main', 'PROJECTS_BATCH')
-    dirs_config["stats_folder"] = config.get('Folders/Files', 'PATH_stats_file_folder')
-    dirs_config["bookkeeping_folder"] = config.get('Folders/Files', 'PATH_bookkeeping_proj_folder')
-    dirs_config["tokens_file"] = config.get('Folders/Files', 'PATH_tokens_file_folder')
+    dirs_config["stats_folder"] = config.get('Folders/Files', 'PATH_stats_folder')
+    dirs_config["bookkeeping_folder"] = config.get('Folders/Files', 'PATH_bookkeeping_folder')
+    dirs_config["tokens_folder"] = config.get('Folders/Files', 'PATH_tokens_folder')
 
     # Reading Language settings
     language_config["separators"] = config.get('Language', 'separators').strip('"').split(' ')
@@ -99,8 +98,6 @@ def tokenize_files(file_string):
 
 def process_file_contents(file_string, proj_id, file_id, container_path, file_path, file_bytes, FILE_tokens_file, FILE_stats_file):
     print(f"[INFO] Started process_file_contents on {file_path}")
-    global file_count
-    file_count += 1
 
     (final_stats, final_tokens, file_times) = tokenize_files(file_string)
     (file_hash, lines, LOC, SLOC) = final_stats
@@ -114,33 +111,28 @@ def process_file_contents(file_string, proj_id, file_id, container_path, file_pa
     return file_times
 
 
-def process_one_project(process_num, proj_id, proj_path, base_file_id, FILE_tokens_file, FILE_bookkeeping_proj, FILE_stats_file):
+def process_one_project(process_num, proj_id, proj_path, base_file_id, out_files):
     print(f"[INFO] Starting  project <{proj_id},{proj_path}> (process {process_num})")
     p_start = dt.datetime.now()
 
     if not os.path.isfile(proj_path):
         print(f"[WARNING] Unable to open project <{proj_id},{proj_path}> (process {process_num})")
         return
-    times = process_zip_ball(process_num, proj_id, proj_path, base_file_id, FILE_tokens_file, FILE_bookkeeping_proj, FILE_stats_file, language_config, process_file_contents)
-    zip_time, file_time, string_time, tokens_time, write_time, hash_time, regex_time = (-1, -1, -1, -1, -1, -1, -1)
-    if times is not None:
-        zip_time = times["zip_time"]
-        file_time = times["file_time"]
-        string_time = times["string_time"]
-        tokens_time = times["tokens_time"]
-        write_time = times["write_time"]
-        hash_time = times["hash_time"]
-        regex_time = times["regex_time"]
-
-    FILE_bookkeeping_proj.write(f'{proj_id},"{proj_path}"\n')
+    global MULTIPLIER
+    global file_count
+    tmp = {"MULTIPLIER": MULTIPLIER, "file_count": file_count}
+    times = process_zip_ball(process_num, proj_id, proj_path, base_file_id, language_config, process_file_contents, out_files, tmp)
+    file_count = tmp["file_count"]
+    _, bookkeeping_file, _ = out_files
+    bookkeeping_file.write(f'{proj_id},"{proj_path}"\n')
 
     p_elapsed = dt.datetime.now() - p_start
     print(f"[INFO] Project finished <{proj_id},{proj_path}> (process {process_num}))")
     print(f"[INFO]  ({process_num}): Total: {p_elapsed} ms")
-    print(f"[INFO]      Zip: {zip_time} ms")
-    print(f"[INFO]      Read: {file_time} ms")
-    print(f"[INFO]      Separators: {string_time} ms")
-    print(f"[INFO]      Tokens: {tokens_time} ms")
-    print(f"[INFO]      Write: {write_time} ms")
-    print(f"[INFO]      Hash: {hash_time} ms")
-    print(f"[INFO]      regex: {regex_time} ms")
+    print(f"[INFO]      Zip: {times['zip_time']} ms")
+    print(f"[INFO]      Read: {times['file_time']} ms")
+    print(f"[INFO]      Separators: {times['string_time']} ms")
+    print(f"[INFO]      Tokens: {times['tokens_time']} ms")
+    print(f"[INFO]      Write: {times['write_time']} ms")
+    print(f"[INFO]      Hash: {times['hash_time']} ms")
+    print(f"[INFO]      regex: {times['regex_time']} ms")

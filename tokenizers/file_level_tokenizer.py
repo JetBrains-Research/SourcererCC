@@ -9,17 +9,25 @@ from tokenizing.file_tokenizer import *
 
 
 def process_projects(process_num, list_projects, base_file_id, global_queue):
-    file_files_stats_file = os.path.join(dirs_config["stats_folder"], f'files-stats-{process_num}.stats')
-    file_bookkeeping_proj_name = os.path.join(dirs_config["bookkeeping_folder"], f'bookkeeping-proj-{process_num}.projs')
-    file_files_tokens_file = os.path.join(dirs_config["tokens_file"], f'files-tokens-{process_num}.tokens')
+    stats_folder = dirs_config["stats_folder"]
+    bookkeeping_folder = dirs_config["bookkeeping_folder"]
+    tokens_folder = dirs_config["tokens_folder"]
+
+    tokens_filename = os.path.join(tokens_folder, f'files-tokens-{process_num}.tokens')
+    bookkeeping_filename = os.path.join(bookkeeping_folder, f'bookkeeping-proj-{process_num}.projs')
+    stats_filename = os.path.join(stats_folder, f'files-stats-{process_num}.stats')
 
     global file_count
     file_count = 0
-    with open(file_files_tokens_file, 'a+', encoding="utf-8") as FILE_tokens, open(file_bookkeeping_proj_name, 'a+', encoding="utf-8") as FILE_bookkeeping, open(file_files_stats_file, 'a+', encoding="utf-8") as FILE_stats:
-        print(f"[INFO] Process {process_num} starting")
+
+    print(f"[INFO] Process {process_num} starting")
+    with open(tokens_filename, 'a+', encoding="utf-8") as tokens_file, \
+        open(bookkeeping_filename, 'a+', encoding="utf-8") as bookkeeping_file, \
+        open(stats_filename, 'a+', encoding="utf-8") as stats_file:
+        out_files = (tokens_file, bookkeeping_file, stats_file)
         p_start = dt.datetime.now()
         for proj_id, proj_path in list_projects:
-            process_one_project(process_num, str(proj_id), proj_path, base_file_id, FILE_tokens, FILE_bookkeeping, FILE_stats)
+            process_one_project(process_num, str(proj_id), proj_path, base_file_id, out_files)
 
     p_elapsed = (dt.datetime.now() - p_start).seconds
     print(f"[INFO] Process {process_num} finished. {file_count} files in {p_elapsed} sec")
@@ -62,8 +70,9 @@ if __name__ == '__main__':
     try:
         read_config("file_config.ini")
     except Exception as e:
+        print("ERROR while reading file_config.ini:")
         print(e)
-        sys.exit()
+        sys.exit(1)
     p_start = dt.datetime.now()
 
     proj_paths = []
@@ -71,17 +80,19 @@ if __name__ == '__main__':
         proj_paths = f.read().split("\n")
     proj_paths = list(enumerate(proj_paths, start=1))
 
-    if os.path.exists(dirs_config["stats_folder"]) or os.path.exists(dirs_config["bookkeeping_folder"]) or os.path.exists(dirs_config["tokens_file"]):
-        missing_files = filter(os.path.exists, [dirs_config["stats_folder"], dirs_config["bookkeeping_folder"], dirs_config["tokens_file"]])
-        print('ERROR - Folder [' + '] or ['.join(missing_files) + '] already exists!')
+    if any(map(lambda x: os.path.exists(dirs_config[x]), ["stats_folder", "bookkeeping_folder", "tokens_folder"])):
+        missing_folders = filter(lambda x: os.path.exists(dirs_config[x]), ["stats_folder", "bookkeeping_folder", "tokens_folder"])
+        for missing_folder in missing_folders:
+            print(f"ERROR - Folder [{missing_folder}] already exists!")
         sys.exit(1)
-    else:
-        os.makedirs(dirs_config["stats_folder"])
-        os.makedirs(dirs_config["bookkeeping_folder"])
-        os.makedirs(dirs_config["tokens_file"])
+
+    os.makedirs(dirs_config["stats_folder"])
+    os.makedirs(dirs_config["bookkeeping_folder"])
+    os.makedirs(dirs_config["tokens_folder"])
 
     # Multiprocessing with N_PROCESSES
     # [process, file_count]
+    global init_file_id
     processes = [[None, init_file_id] for i in range(N_PROCESSES)]
     # The queue for processes to communicate back to the parent (this process)
     # Initialize it with N_PROCESSES number of (process_id, n_files_processed)
