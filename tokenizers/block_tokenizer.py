@@ -28,7 +28,7 @@ class Tokenizer():
         self.file_count = 0
 
 
-    def read_language_config(config):
+    def read_language_config(self, config):
         result = {}
         result["separators"] = config.get('Language', 'separators').strip('"').split(' ')
         result["comment_inline"] = re.escape(config.get('Language', 'comment_inline'))
