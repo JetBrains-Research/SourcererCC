@@ -20,7 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import java.util.Properties;
+import net.jmatrix.eproperties.EProperties;
+import net.jmatrix.eproperties.Key;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.lucene.index.IndexWriter;
@@ -94,7 +95,7 @@ public class SearchManager {
     public static Map<Integer, List<FSDirectory>> invertedIndexDirectoriesOfShard;
     public static Map<Integer, List<FSDirectory>> forwardIndexDirectoriesOfShard;
     public static List<IndexWriter> indexerWriters;
-    private static Properties properties = new Properties();
+    private static EProperties properties = new EProperties();
 
     public static Object lock = new Object();
     public static int min_tokens;
@@ -233,7 +234,8 @@ public class SearchManager {
     }
 
     private static String getProperty(String name, String defaultValue) {
-        Object result = properties.get(name);
+        Key key = new Key(name);
+        Object result = properties.get(key);
         if (result == null)
             return defaultValue;
         return String.valueOf(result);
@@ -248,30 +250,8 @@ public class SearchManager {
         String propertiesPath = System.getProperty("properties.location");
         System.out.println("[DEBUG] " + "propertiesPath: " + propertiesPath);
 
-        FileInputStream fis = null;
-        fis = new FileInputStream(propertiesPath);
         try {
-            properties.load(fis);
-            String[] params = new String[2];
-            params[0] = args[0];
-            params[1] = args[1];
-            SearchManager.DATASET_DIR = SearchManager.ROOT_DIR
-                    + properties.getProperty("DATASET_DIR_PATH");
-            SearchManager.isGenCandidateStats = Boolean.parseBoolean(
-                    properties.getProperty("IS_GEN_CANDIDATE_STATISTICS"));
-            SearchManager.isStatusCounterOn = Boolean.parseBoolean(
-                    properties.getProperty("IS_STATUS_REPORTER_ON"));
-            SearchManager.NODE_PREFIX = properties.getProperty("NODE_PREFIX")
-                    .toUpperCase();
-            SearchManager.OUTPUT_DIR = SearchManager.ROOT_DIR + SearchManager.NODE_PREFIX + "/"
-                    + properties.getProperty("OUTPUT_DIR");
-            SearchManager.QUERY_DIR_PATH = SearchManager.ROOT_DIR + SearchManager.NODE_PREFIX + "/"
-                    + properties.getProperty("QUERY_DIR_PATH");
-            System.out.println("Query path:" + SearchManager.QUERY_DIR_PATH);
-            SearchManager.LOG_PROCESSED_LINENUMBER_AFTER_X_LINES = Integer
-                    .parseInt(properties.getProperty(
-                            "LOG_PROCESSED_LINENUMBER_AFTER_X_LINES", "1000"));
-            theInstance = new SearchManager(params);
+            properties.load(propertiesPath);
         } catch (IOException e) {
             System.out.println("[ERROR] " + "ERROR READING PROPERTIES FILE, " + e.getMessage());
             System.exit(1);
