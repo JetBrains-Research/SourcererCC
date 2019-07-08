@@ -12,9 +12,3 @@ script:
   - pylint tokenizers/*.py --exit-zero
   - pylint clone-detector/*.py --exit-zero
   - python3 -m unittest tokenizers/tokenizing/file_tokenizer_tests.py
-notifications:
-  email:
-    recipients:
-      - poletansky@gmail.com
-    on_success: never
-    on_failure: always
