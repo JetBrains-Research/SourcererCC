@@ -158,6 +158,15 @@ def get_lines(zip_file_path, start_line, end_line, source_file):
     return "\n".join(result[start_line - 1 : end_line])
 
 def split_zip_file_path(file_path):
+    """Split filename of source file in zip archive into zip filename and
+    source filename. For example
+        "master.zip/src/com/google/Hack.java"
+    is split to
+        "master.zip", "src/com/google/Hack.java"
+    
+    Arguments:
+    file_path -- path to file inside zip archive
+    """
     ext_index = file_path.index(".zip") + len(".zip")
     return file_path[:ext_index], file_path[ext_index + 1:]
 
