@@ -12,9 +12,6 @@ import extract_java_functions
 import extract_python_functions
 
 
-language_config = {}
-dirs_config = {}
-
 file_count = 0
 
 
