@@ -22,8 +22,8 @@ class Tokenizer():
             sys.exit(1)
 
         self.language_config = self.read_language_config(config)
-        self.inner_config["MULTIPLIER"] = 50000000
         self.inner_config = self.read_inner_config(config)
+        self.inner_config["MULTIPLIER"] = 50000000
         self.dirs_config = self.read_dirs_config(config)
         self.file_count = 0
 
