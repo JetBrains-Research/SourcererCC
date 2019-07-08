@@ -8,8 +8,8 @@ from configparser import ConfigParser
 
 
 from utils import *
-from . import extract_java_functions
-from . import extract_python_functions
+from extract_java_functions import extract_java_functions
+from extract_python_functions import extract_python_functions
 
 
 language_config = {}
