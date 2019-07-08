@@ -22,7 +22,6 @@ import java.util.Set;
 
 import java.util.Properties;
 
-import net.jmatrix.eproperties.Key;
 import org.apache.commons.io.FileUtils;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.FSDirectory;
@@ -234,8 +233,7 @@ public class SearchManager {
     }
 
     private static String getProperty(String name, String defaultValue) {
-        Key key = new Key(name);
-        Object result = properties.get(key);
+        Object result = properties.get(name);
         if (result == null)
             return defaultValue;
         return String.valueOf(result);
