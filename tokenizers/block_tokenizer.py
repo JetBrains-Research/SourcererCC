@@ -8,8 +8,8 @@ from configparser import ConfigParser
 
 
 from utils import *
-from extract_java_functions import *
-from extract_python_functions import *
+import extract_java_functions
+import extract_python_functions
 
 
 language_config = {}
@@ -113,13 +113,13 @@ def parse_blocks(file_string, file_path, language_config):
     blocks = None
     function_name = ''
     if '.py' in language_config["extensions"]:
-        (block_linenos, blocks) = get_functions(file_string, file_path)
+        (block_linenos, blocks) = extract_python_functions.get_functions(file_string, file_path)
         return (block_linenos, blocks, "PYTHON_FUNCTION_SIGNATURE_NOT_IMPLEMENTED")
     elif '.java' in language_config["extensions"]:
         # Workaround with replacing is needed because javalang counts things like String[]::new as syntax errors
         tmp_file_string = file_string.replace("[]::", "::")
         comment_inline_pattern = language_config["comment_inline_pattern"]
-        return get_functions(tmp_file_string, file_path, comment_inline_pattern)
+        return extract_java_functions.get_functions(tmp_file_string, file_path, comment_inline_pattern)
     return (None, None, None)
 
 
