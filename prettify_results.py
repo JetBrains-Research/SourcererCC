@@ -171,6 +171,28 @@ def split_zip_file_path(file_path):
     return file_path[:ext_index], file_path[ext_index + 1:]
 
 
+def get_block_info(block_id, block_info):
+    """Retrieve block info with file name and content of code block with id
+    block_id from block_info
+
+    Arguments:
+    block_id -- id of code block
+    block_info -- map with block info from stats
+    """
+    file_path = stats[block_info["file_id"]]["file_path"]
+    filename = get_file_name(file_path)
+    repo_zip_filename, source_file = split_zip_file_path(file_path.strip("\""))
+    start_line = block_info["start_line"]
+    end_line = block_info["end_line"]
+    code_content = get_lines(repo_zip_filename, start_line, end_line, source_file)
+    return {
+        "file": filename,
+        "start_line": start_line,
+        "end_line": end_line,
+        "content": code_content
+    }
+
+
 def results_to_map(results_file, stats_files):
     """Print nice formatted results.
 
@@ -194,29 +216,18 @@ def results_to_map(results_file, stats_files):
     stats = get_stats_info(stats_files)
     full_results = {}
     formatted_titles = {}
-    for code_id, code_stat in stats.items():
-        if "start_line" in code_stat:
-            file_path = stats[code_stat["file_id"]]["file_path"]
-            filename = get_file_name(file_path)
-            repo_zip_filename, source_file = split_zip_file_path(file_path.strip("\""))
-            start_line = code_stat["start_line"]
-            end_line = code_stat["end_line"]
-            code_content = get_lines(repo_zip_filename, start_line, end_line, source_file)
-            formatted_titles[code_id] = {
-                "file": filename,
-                "start_line": start_line,
-                "end_line": end_line,
-                "content": code_content
-            }
+    for block_id, block_info in stats.items():
+        if "start_line" in block_info:
+            formatted_titles[block_id] = get_block_info(block_id, block_info)
     results = get_results(results_file)
-    for code_id, code_id_list in results.items():
-        print(f"{code_id}: {code_id_list}")
-    for code_id, code_id_list in results.items():
-        full_results[formatted_titles[code_id]["file"]] = {
-            "clones": list(map(lambda x: formatted_titles[x], code_id_list))
+    for block_id, block_id_list in results.items():
+        print(f"{block_id}: {block_id_list}")
+    for block_id, block_id_list in results.items():
+        full_results[formatted_titles[block_id]["file"]] = {
+            "clones": list(map(lambda x: formatted_titles[x], block_id_list))
         }
         for key in ["start_line", "end_line", "content"]:
-            full_results[formatted_titles[code_id]["file"]][key] = formatted_titles[code_id][key]
+            full_results[formatted_titles[block_id]["file"]][key] = formatted_titles[block_id][key]
     return full_results
 
 
