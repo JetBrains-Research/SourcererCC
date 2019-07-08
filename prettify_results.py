@@ -89,28 +89,6 @@ def filter_files(path, extension):
     return res
 
 
-def get_projects_info(bookkeeping_files_path):
-    """Get project info from bookkeeping files.
-    Return list of maps {
-        project_id: project_id
-        project_path: path_to_project_archive
-    }
-
-    Arguments:
-    bookkeeping_files_path -- path to bookkeeping file or directory
-    """
-    files = filter_files(bookkeeping_files_path, ".projs")
-    projects_info = []
-    for bookkeeping_file in files:
-        for line in get_file_lines(bookkeeping_file):
-            project_info = {
-                "project_id": line.split(",")[0],
-                "project_path": line.split(",")[1]
-            }
-            projects_info.append(project_info)
-    return projects_info
-
-
 def get_stats_info(stats_files_path):
     """Parse stats.
 
@@ -234,47 +212,35 @@ def print_results(results_file, stats_files):
     return full_results
 
 
-def print_projects_list(bookkeeping_files):
-    """Print project list from bookkeeping files.
-
-    Arguments:
-    bookkeeping_files -- file or directory with bookkeeping files
-    """
-    projects_info = get_projects_info(bookkeeping_files)
-    print(json.dumps(projects_info, indent=4))
-
-
 # Print SourcererCC results conveniently
 #
-# block-mode -- must be True if tokenizer ran in block mode
-# bookkeepingFiles -- file or directory with bookkeeping files(.projs)
-# statsFiles -- file or directory with blocks and files stats(.stats)
+# statsFiles -- file or directory with blocks and files stats(*.stats)
 # resultsFile -- file with results paris (first project id, first block/file,
 # second project id, second block/file id) usually it is results.pairs
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument("-b", "--bookkeepingFiles", dest="bookkeeping_files",\
-         default=False, help="File or folder with bookkeeping files (*.projs).")
-    parser.add_argument("-r", "--resultsFile", dest="results_file",\
+    PARSER = ArgumentParser()
+    PARSER.add_argument("-r", "--resultsFile", dest="results_file",\
         default=False, help="File with results of SourcererCC (results.pairs).")
-    parser.add_argument("-s", "--statsFiles", dest="stats_files",\
+    PARSER.add_argument("-s", "--statsFiles", dest="stats_files",\
         default=False, help="File or folder with stats files (*.stats).")
-
-    options = parser.parse_args(sys.argv[1:])
 
     if len(sys.argv) == 1:
         print("No arguments were passed. Try running with '--help'.")
         sys.exit(0)
 
-    p_start = dt.datetime.now()
+    OPTIONS = PARSER.parse_args(sys.argv[1:])
 
-    if options.results_file:
-        if not options.stats_files:
-            print("No stats files specified. Exiting")
-            sys.exit(0)
-        json_string = print_results(options.results_file, options.stats_files)
-        print(json.dumps(json_string, indent=4))
-    elif options.bookkeeping_files:
-        print_projects_list(options.bookkeeping_files)
+    if not OPTIONS.stats_files:
+        print("No stats files specified. Exiting")
+        sys.exit(0)
 
-    print("Processed printing in {}".format(dt.datetime.now() - p_start))
+    if not OPTIONS.results_files:
+        print("No results files specified. Exiting")
+        sys.exit(0)
+
+    TIME_START = dt.datetime.now()
+
+    RESULTS_MAP = print_results(OPTIONS.results_file, OPTIONS.stats_files)
+    print(json.dumps(RESULTS_MAP, indent=4))
+
+    print("Processed printing in {}".format(dt.datetime.now() - TIME_START))
