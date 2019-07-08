@@ -54,7 +54,7 @@ class ScriptController(object):
         self.previous_run_state = self.load_previous_state()
 
     def execute(self):
-        print("previous run state {}".format(self.previous_run_state))
+        print(f"previous run state {self.previous_run_state}")
         if self.previous_run_state <= STATE_EXECUTE_1:
             run_command_wrapper("execute.sh", "1")
         self.current_state += 1
@@ -105,10 +105,8 @@ class ScriptController(object):
 
 
 if __name__ == '__main__':
-    numnodes = 2
-    if len(sys.argv) >= 2:
-        numnodes = int(sys.argv[1])
-    print("search will be carried out with {} nodes".format(numnodes))
+    numnodes = int(sys.argv[1]) if len(sys.argv) >= 2 else 2
+    print(f"search will be carried out with {numnodes} nodes")
 
     controller = ScriptController(numnodes)
     controller.execute()
