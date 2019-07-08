@@ -163,7 +163,7 @@ def split_zip_file_path(file_path):
         "master.zip/src/com/google/Hack.java"
     is split to
         "master.zip", "src/com/google/Hack.java"
-    
+
     Arguments:
     file_path -- path to file inside zip archive
     """
