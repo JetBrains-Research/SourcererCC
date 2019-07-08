@@ -64,7 +64,7 @@ def active_process_count(processes):
 
 if __name__ == '__main__':
     tokenizer = Tokenizer("block_config.ini")
-    inner_config, dirs_config, language_config = tokenizer.get_configs()
+    language_config, inner_config, dirs_config = tokenizer.get_configs()
     PATH_stats_file_folder = dirs_config["stats_folder"]
     PATH_bookkeeping_proj_folder = dirs_config["bookkeeping_folder"]
     PATH_tokens_file_folder = dirs_config["tokens_folder"]
