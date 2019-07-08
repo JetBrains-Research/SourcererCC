@@ -19,38 +19,38 @@ file_count = 0
 
 
 def read_language_config(config):
-    language_config = {}
-    language_config["separators"] = config.get('Language', 'separators').strip('"').split(' ')
-    language_config["comment_inline"] = re.escape(config.get('Language', 'comment_inline'))
-    language_config["comment_open_tag"] = re.escape(config.get('Language', 'comment_open_tag'))
-    language_config["comment_close_tag"] = re.escape(config.get('Language', 'comment_close_tag'))
-    language_config["extensions"] = config.get('Language', 'File_extensions').split(' ')
+    tmp_language_config = {}
+    tmp_language_config["separators"] = config.get('Language', 'separators').strip('"').split(' ')
+    tmp_language_config["comment_inline"] = re.escape(config.get('Language', 'comment_inline'))
+    tmp_language_config["comment_open_tag"] = re.escape(config.get('Language', 'comment_open_tag'))
+    tmp_language_config["comment_close_tag"] = re.escape(config.get('Language', 'comment_close_tag'))
+    tmp_language_config["extensions"] = config.get('Language', 'File_extensions').split(' ')
 
-    language_config["comment_inline_pattern"] = language_config["comment_inline"] + '.*?$'
-    language_config["comment_open_close_pattern"] = language_config["comment_open_tag"] + '.*?' + language_config["comment_close_tag"]
-    return language_config
+    tmp_language_config["comment_inline_pattern"] = tmp_language_config["comment_inline"] + '.*?$'
+    tmp_language_config["comment_open_close_pattern"] = tmp_language_config["comment_open_tag"] + '.*?' + tmp_language_config["comment_close_tag"]
+    return tmp_language_config
 
 
 def read_inner_config(config):
-    inner_config = {}
+    tmp_inner_config = {}
     # Get info from config.ini into global variables
-    inner_config["N_PROCESSES"] = config.getint('Main', 'N_PROCESSES')
-    inner_config["PROJECTS_BATCH"] = config.getint('Main', 'PROJECTS_BATCH')
-    inner_config["FILE_projects_list"] = config.get('Main', 'FILE_projects_list')
+    tmp_inner_config["N_PROCESSES"] = config.getint('Main', 'N_PROCESSES')
+    tmp_inner_config["PROJECTS_BATCH"] = config.getint('Main', 'PROJECTS_BATCH')
+    tmp_inner_config["FILE_projects_list"] = config.get('Main', 'FILE_projects_list')
     # Reading config settings
-    inner_config["init_file_id"] = config.getint('Config', 'init_file_id')
-    inner_config["init_proj_id"] = config.getint('Config', 'init_proj_id')
+    tmp_inner_config["init_file_id"] = config.getint('Config', 'init_file_id')
+    tmp_inner_config["init_proj_id"] = config.getint('Config', 'init_proj_id')
     # flag before proj_id
-    inner_config["proj_id_flag"] = config.getint('Config', 'init_proj_id')
-    return inner_config
+    tmp_inner_config["proj_id_flag"] = config.getint('Config', 'init_proj_id')
+    return tmp_inner_config
 
 
 def read_dirs_config(config):
-    dirs_config = {}
-    dirs_config["stats_folder"] = config.get('Folders/Files', 'PATH_stats_folder')
-    dirs_config["bookkeeping_folder"] = config.get('Folders/Files', 'PATH_bookkeeping_folder')
-    dirs_config["tokens_folder"] = config.get('Folders/Files', 'PATH_tokens_folder')
-    return dirs_config
+    tmp_dirs_config = {}
+    tmp_dirs_config["stats_folder"] = config.get('Folders/Files', 'PATH_stats_folder')
+    tmp_dirs_config["bookkeeping_folder"] = config.get('Folders/Files', 'PATH_bookkeeping_folder')
+    tmp_dirs_config["tokens_folder"] = config.get('Folders/Files', 'PATH_tokens_folder')
+    return tmp_dirs_config
 
 
 def read_config(config_filename):
