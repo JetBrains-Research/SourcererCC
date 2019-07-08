@@ -209,7 +209,6 @@ def print_results(results_file, stats_files):
                 "content": code_content
             }
     results = get_results(results_file)
-    print("results:")
     for code_id, code_id_list in results.items():
         print(f"{code_id}: {code_id_list}")
     for code_id, code_id_list in results.items():
