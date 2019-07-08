@@ -171,7 +171,7 @@ def split_zip_file_path(file_path):
     return file_path[:ext_index], file_path[ext_index + 1:]
 
 
-def print_results(results_file, stats_files):
+def results_to_map(results_file, stats_files):
     """Print nice formatted results.
 
     Return map with results parameters in following json format:
@@ -248,7 +248,7 @@ if __name__ == "__main__":
 
     TIME_START = dt.datetime.now()
 
-    RESULTS_MAP = print_results(OPTIONS.results_file, OPTIONS.stats_files)
+    RESULTS_MAP = results_to_map(OPTIONS.results_file, OPTIONS.stats_files)
     print(json.dumps(RESULTS_MAP, indent=4))
 
     print(f"Processed printing in {dt.datetime.now() - TIME_START}")
