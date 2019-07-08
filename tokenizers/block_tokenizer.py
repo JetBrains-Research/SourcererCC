@@ -251,7 +251,7 @@ def process_zip_ball(process_num, proj_id, zip_file, base_file_id, language_conf
     return times
 
 
-def process_one_project(process_num, proj_id, proj_path, base_file_id, out_files, inner_config):
+def process_one_project(process_num, proj_id, proj_path, base_file_id, out_files, language_config, inner_config):
     proj_id_flag = inner_config["proj_id_flag"]
 
     project_info = f"project <id: {proj_id}, path: {proj_path}> (process {process_num})"

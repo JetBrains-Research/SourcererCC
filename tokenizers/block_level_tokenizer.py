@@ -8,7 +8,7 @@ from multiprocessing import Process, Queue
 from block_tokenizer import *
 
 
-def process_projects(process_num, list_projects, base_file_id, threads_queue, dirs_config, inner_config):
+def process_projects(process_num, list_projects, base_file_id, threads_queue, dirs_config, inner_config, language_config):
     stats_folder = dirs_config["stats_folder"]
     bookkeeping_folder = dirs_config["bookkeeping_folder"]
     tokens_folder = dirs_config["tokens_folder"]
@@ -27,7 +27,7 @@ def process_projects(process_num, list_projects, base_file_id, threads_queue, di
         out_files = (tokens_file, bookkeeping_file, stats_file)
         p_start = dt.datetime.now()
         for proj_id, proj_path in list_projects:
-            process_one_project(process_num, str(proj_id), proj_path, base_file_id, out_files, inner_config)
+            process_one_project(process_num, str(proj_id), proj_path, base_file_id, out_files, language_config, inner_config)
 
     p_elapsed = (dt.datetime.now() - p_start).seconds
     print(f"[INFO] Process {process_num} finished. {file_count} files in {p_elapsed} s")
@@ -37,7 +37,7 @@ def process_projects(process_num, list_projects, base_file_id, threads_queue, di
     sys.exit(0)
 
 
-def start_child(processes, threads_queue, proj_paths, batch, dirs_config, inner_config):
+def start_child(processes, threads_queue, proj_paths, batch, dirs_config, inner_config, language_config):
     # This is a blocking get. If the queue is empty, it waits
     pid, n_files_processed = threads_queue.get()
     # OK, one of the processes finished. Let's get its data and kill it
@@ -48,7 +48,7 @@ def start_child(processes, threads_queue, proj_paths, batch, dirs_config, inner_
     del proj_paths[:batch]
 
     print(f"[INFO] Starting new process {pid}")
-    p = Process(name=f"Process {pid}", target=process_projects, args=(pid, paths_batch, processes[pid][1], threads_queue, dirs_config, inner_config))
+    p = Process(name=f"Process {pid}", target=process_projects, args=(pid, paths_batch, processes[pid][1], threads_queue, dirs_config, inner_config, language_config))
     processes[pid][0] = p
     p.start()
 
@@ -104,7 +104,7 @@ if __name__ == '__main__':
 
     print("[INFO] *** Starting regular projects...")
     while len(proj_paths) > 0:
-        start_child(processes, global_queue, proj_paths, PROJECTS_BATCH, dirs_config, inner_config)
+        start_child(processes, global_queue, proj_paths, PROJECTS_BATCH, dirs_config, inner_config, language_config)
 
     print("[INFO] *** No more projects to process. Waiting for children to finish...")
     while active_process_count(processes) > 0:
