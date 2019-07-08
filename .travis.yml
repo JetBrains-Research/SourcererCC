@@ -2,6 +2,7 @@ language: python
 python:
   - "3.6"
 before_install:
+  - sudo apt install openjdk-8-jdk
   - sudo apt-get install ant
   - pip3 install pylint
 install:
