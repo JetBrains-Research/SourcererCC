@@ -11,6 +11,7 @@ import re
 import json
 import zipfile
 
+
 def get_file_name(file_path):
     """Get file name from path of archive.
 
@@ -88,7 +89,29 @@ def filter_files(path, extension):
     return res
 
 
-def get_blocks_info(stats_files_path):
+def get_projects_info(bookkeeping_files_path):
+    """Get project info from bookkeeping files.
+    Return list of maps {
+        project_id: project_id
+        project_path: path_to_project_archive
+    }
+
+    Arguments:
+    bookkeeping_files_path -- path to bookkeeping file or directory
+    """
+    files = filter_files(bookkeeping_files_path, ".projs")
+    projects_info = []
+    for bookkeeping_file in files:
+        for line in get_file_lines(bookkeeping_file):
+            project_info = {
+                "project_id": line.split(",")[0],
+                "project_path": line.split(",")[1]
+            }
+            projects_info.append(project_info)
+    return projects_info
+
+
+def get_stats_info(stats_files_path):
     """Parse stats.
 
     Return map where keys are block/file ids and values are maps such as
@@ -97,24 +120,44 @@ def get_blocks_info(stats_files_path):
     Arguments:
     stats_files_path -- file or directory with stats
     """
+    def parse_file_line(line_parts):
+        return {
+            "project_id": line_parts[0],
+            "file_path": line_parts[2],
+            "file_hash": line_parts[3],
+            "file_size": line_parts[4],
+            "lines": line_parts[5],
+            "LOC": line_parts[6],
+            "SLOC": line_parts[7]
+        }
+    def parse_block_line(line_parts):
+        return {
+            "project_id": line_parts[0],
+            "block_hash": line_parts[2],
+            "block_lines": line_parts[3],
+            "block_LOC": line_parts[4],
+            "block_SLOC": line_parts[5],
+            "start_line": int(line_parts[6]),
+            "end_line": int(line_parts[7])
+        }
     files = filter_files(stats_files_path, ".stats")
     stats_info = {}
     for stats_file in files:
         for line in get_file_lines(stats_file):
             line_parts = line.split(",")
-            if line.startswith("b"):
-                block_id = line_parts[2]
-                stats_info[block_id] = {
-                    "project_id": line_parts[1],
-                    "block_hash": line_parts[3],
-                    "block_lines": line_parts[4],
-                    "block_LOC": line_parts[5],
-                    "block_SLOC": line_parts[6],
-                    "start_line": int(line_parts[7]),
-                    "end_line": int(line_parts[8]),
-                    "relative_id": block_id[:5],
-                    "file_id": block_id[5:]
-                }
+            stats = {}
+            code_id = line_parts[2]
+            if line.startswith("f"):
+                stats = parse_file_line(line_parts[1:])
+            elif line.startswith("b"):
+                stats = parse_block_line(line_parts[1:])
+                stats["relative_id"] = code_id[:5]
+                stats["file_id"] = code_id[5:]
+            if code_id in stats_info:
+                print("[NOTIFY] intersection on id {}".format(code_id))
+                print("old: {}".format(stats_info[code_id]))
+                print("new: {}".format(stats))
+            stats_info[code_id] = stats
     return stats_info
 
 
@@ -141,116 +184,97 @@ def split_zip_file_path(file_path):
     return file_path[:ext_index], file_path[ext_index + 1:]
 
 
-def transform_results(results_file, blocks_map):
-    """Transform results pairs using stats.
+def print_results(results_file, stats_files):
+    """Print nice formatted results.
 
-    Return map with results parameters in following format:
-        "{{full_file_path}}": {
+    Return map with results parameters in following json format:
+        "full_file_path": {
             clones: [
-                file: "{{full_file_path}}",
-                start_line: {{first_line_of_block}},
-                end_line: {{last_line_of_block}},
+                file: "{{full_file_path}}"
+                start_line: {{first_line_of_block}}
+                end_line: {{last_line_of_block}}
                 content: "{{block_content}}"
-            ],
-            start_line: {{first_line_of_block}},
-            end_line: {{last_line_of_block}},
+            ]
+            start_line: {{first_line_of_block}}
+            end_line: {{last_line_of_block}}
             content: "{{block_content}}"
         }
 
     Arguments:
     results_file -- file with SourcererCC results
-    blocks_map -- map in format:
-        {{block_id}}: {
-            "file": "{{filename}}",
-            "start_line": {{start_line}},
-            "end_line": {{end_line}},
-            "content": "{{code_content}}"
-        }
+    stats_files -- file or directory with stats files
     """
+    stats = get_stats_info(stats_files)
     full_results = {}
+    formatted_titles = {}
+    for code_id, code_stat in stats.items():
+        if "start_line" in code_stat:
+            file_path = stats[code_stat["file_id"]]["file_path"]
+            filename = get_file_name(file_path)
+            repo_zip_filename, source_file = split_zip_file_path(file_path.strip("\""))
+            start_line = code_stat["start_line"]
+            end_line = code_stat["end_line"]
+            code_content = get_lines(repo_zip_filename, start_line, end_line, source_file)
+            formatted_titles[code_id] = {
+                "file": filename,
+                "start_line": start_line,
+                "end_line": end_line,
+                "content": code_content
+            }
     results = get_results(results_file)
-    print(f"results:\n{json.dumps(results, indent=4)}")
+    print("results:")
     for code_id, code_id_list in results.items():
-        full_results[blocks_map[code_id]["file"]] = {
-            "clones": list(map(lambda x: blocks_map[x], code_id_list))
+        print(f"{code_id}: {code_id_list}")
+    for code_id, code_id_list in results.items():
+        full_results[formatted_titles[code_id]["file"]] = {
+            "clones": list(map(lambda x: formatted_titles[x], code_id_list))
         }
         for key in ["start_line", "end_line", "content"]:
-            full_results[blocks_map[code_id]["file"]][key] = blocks_map[code_id][key]
+            full_results[formatted_titles[code_id]["file"]][key] = formatted_titles[code_id][key]
     return full_results
 
 
-def results_to_map(results_file, stats_files):
-    """Transform results pairs using stats.
-
-    Return map with results parameters in following format:
-        "{{full_file_path}}": {
-            clones: [
-                file: "{{full_file_path}}",
-                start_line: {{first_line_of_block}},
-                end_line: {{last_line_of_block}},
-                content: "{{block_content}}"
-            ],
-            start_line: {{first_line_of_block}},
-            end_line: {{last_line_of_block}},
-            content: "{{block_content}}"
-        }
+def print_projects_list(bookkeeping_files):
+    """Print project list from bookkeeping files.
 
     Arguments:
-    results_file -- file with SourcererCC results
-    stats_files -- file or folder with stats (*.stats) files
+    bookkeeping_files -- file or directory with bookkeeping files
     """
-    stats = get_blocks_info(stats_files)
-    formatted_titles = {}
-    for block_id, code_stat in stats.items():
-        file_path = stats[code_stat["file_id"]]["file_path"]
-        filename = get_file_name(file_path)
-        repo_zip_filename, source_file = split_zip_file_path(file_path.strip("\""))
-        start_line = code_stat["start_line"]
-        end_line = code_stat["end_line"]
-        code_content = get_lines(repo_zip_filename, start_line, end_line, source_file)
-        formatted_titles[block_id] = {
-            "file": filename,
-            "start_line": start_line,
-            "end_line": end_line,
-            "content": code_content
-        }
-    return transform_results(results_file, formatted_titles)
+    projects_info = get_projects_info(bookkeeping_files)
+    print(json.dumps(projects_info, indent=4))
 
 
 # Print SourcererCC results conveniently
 #
+# block-mode -- must be True if tokenizer ran in block mode
+# bookkeepingFiles -- file or directory with bookkeeping files(.projs)
 # statsFiles -- file or directory with blocks and files stats(.stats)
 # resultsFile -- file with results paris (first project id, first block/file,
-#     second project id, second block/file id) usually it is results.pairs
+# second project id, second block/file id) usually it is results.pairs
 if __name__ == "__main__":
     parser = ArgumentParser()
+    parser.add_argument("-b", "--bookkeepingFiles", dest="bookkeeping_files",\
+         default=False, help="File or folder with bookkeeping files (*.projs).")
     parser.add_argument("-r", "--resultsFile", dest="results_file",\
         default=False, help="File with results of SourcererCC (results.pairs).")
     parser.add_argument("-s", "--statsFiles", dest="stats_files",\
         default=False, help="File or folder with stats files (*.stats).")
 
+    options = parser.parse_args(sys.argv[1:])
+
     if len(sys.argv) == 1:
         print("No arguments were passed. Try running with '--help'.")
         sys.exit(0)
 
-    options = parser.parse_args(sys.argv[1:])
-    results_file = options.results_file
-    stats_files = options.stats_files
-
-    if not results_file:
-        print("No results files specified. Exiting")
-        sys.exit(0)
-
-    if not stats_files:
-        print("No stats files specified. Exiting")
-        sys.exit(0)
-
     p_start = dt.datetime.now()
-    print("Starting prettify_results with parameters:")
-    print(f"    stats_files: {stats_files}")
-    print(f"    results_file: {results_file}")
 
-    results_map = results_to_map(options.results_file, options.stats_files)
-    print(json.dumps(results_map, indent=4))
+    if options.results_file:
+        if not options.stats_files:
+            print("No stats files specified. Exiting")
+            sys.exit(0)
+        json_string = print_results(options.results_file, options.stats_files)
+        print(json.dumps(json_string, indent=4))
+    elif options.bookkeeping_files:
+        print_projects_list(options.bookkeeping_files)
 
-    print(f"Processed printing in {dt.datetime.now() - p_start}")
+    print("Processed printing in {}".format(dt.datetime.now() - p_start))
