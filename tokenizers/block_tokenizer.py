@@ -258,3 +258,24 @@ def process_zip_ball(process_num, proj_id, zip_file, base_file_id, language_conf
 
     print(f"[INFO] Successfully ran process_zip_ball {zip_file}")
     return times
+
+
+def process_one_project(process_num, proj_id, proj_path, base_file_id, out_files):
+    global inner_config
+
+    proj_id_flag = inner_config["proj_id_flag"]
+
+    project_info = f"project <id: {proj_id}, path: {proj_path}> (process {process_num})"
+    print(f"[INFO] Starting  {project_info}")
+
+    start_time = dt.datetime.now()
+    proj_id = f"{proj_id_flag}{proj_id}"
+    if not os.path.isfile(proj_path):
+        print(f"[WARNING] Unable to open {project_info}")
+        return
+    times = process_zip_ball(process_num, proj_id, proj_path, base_file_id, language_config, out_files, inner_config)
+    _, bookkeeping_file, _ = out_files
+    bookkeeping_file.write(f'{proj_id},"{proj_path}"\n')
+
+    elapsed_time = dt.datetime.now() - start_time
+    print_times(project_info, elapsed_time, times)
