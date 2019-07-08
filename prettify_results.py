@@ -84,7 +84,7 @@ def filter_files(path, extension):
     elif os.path.isfile(path):
         res.add(path)
     else:
-        print("ERROR: '{}' not found!".format(path))
+        print(f"ERROR: '{path}' not found!")
         sys.exit()
     return res
 
@@ -132,9 +132,9 @@ def get_stats_info(stats_files_path):
                 stats["relative_id"] = code_id[:5]
                 stats["file_id"] = code_id[5:]
             if code_id in stats_info:
-                print("[NOTIFY] intersection on id {}".format(code_id))
-                print("old: {}".format(stats_info[code_id]))
-                print("new: {}".format(stats))
+                print(f"[NOTIFY] intersection on id {code_id}")
+                print(f"old: {stats_info[code_id]}")
+                print(f"new: {stats)}")
             stats_info[code_id] = stats
     return stats_info
 
@@ -243,4 +243,4 @@ if __name__ == "__main__":
     RESULTS_MAP = print_results(OPTIONS.results_file, OPTIONS.stats_files)
     print(json.dumps(RESULTS_MAP, indent=4))
 
-    print("Processed printing in {}".format(dt.datetime.now() - TIME_START))
+    print(f"Processed printing in {dt.datetime.now() - TIME_START}")
