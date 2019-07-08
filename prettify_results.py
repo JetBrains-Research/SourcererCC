@@ -171,12 +171,11 @@ def split_zip_file_path(file_path):
     return file_path[:ext_index], file_path[ext_index + 1:]
 
 
-def get_block_info(block_id, block_info):
-    """Retrieve block info with file name and content of code block with id
-    block_id from block_info
+def get_block_info(stats, block_info):
+    """Retrieve block info with file name and content of code block
 
     Arguments:
-    block_id -- id of code block
+    stats -- stats map
     block_info -- map with block info from stats
     """
     file_path = stats[block_info["file_id"]]["file_path"]
@@ -218,7 +217,7 @@ def results_to_map(results_file, stats_files):
     formatted_titles = {}
     for block_id, block_info in stats.items():
         if "start_line" in block_info:
-            formatted_titles[block_id] = get_block_info(block_id, block_info)
+            formatted_titles[block_id] = get_block_info(stats, block_info)
     results = get_results(results_file)
     for block_id, block_id_list in results.items():
         print(f"{block_id}: {block_id_list}")
