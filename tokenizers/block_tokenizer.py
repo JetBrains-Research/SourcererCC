@@ -51,10 +51,6 @@ def read_dirs_config(config):
 
 
 def read_config(config_filename):
-    global language_config
-    global dirs_config
-    global inner_config
-
     config = ConfigParser()
     try:
         config.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), config_filename))
@@ -66,7 +62,7 @@ def read_config(config_filename):
     inner_config["MULTIPLIER"] = 50000000
     language_config = read_language_config(config)
     dirs_config = read_dirs_config(config)
-    return inner_config, dirs_config
+    return inner_config, dirs_config, language_config
 
 
 def get_lines_stats(string, language_config):
@@ -120,9 +116,7 @@ def parse_blocks(file_string, file_path, language_config):
     return (None, None, None)
 
 
-def tokenize_blocks(file_string, file_path):
-    global language_config
-
+def tokenize_blocks(language_config, file_string, file_path):
     times = {
         "zip_time": 0,
         "file_time": 0,
@@ -154,7 +148,7 @@ def tokenize_blocks(file_string, file_path):
     return (file_hash, lines, LOC, SLOC), blocks_data, times
 
 
-def process_file_contents(file_string, proj_id, file_id, container_path, file_path, file_bytes, out_files):
+def process_file_contents(language_config, file_string, proj_id, file_id, container_path, file_path, file_bytes, out_files):
     (tokens_file, _, stats_file) = out_files
 
     print(f"[INFO] Started process_file_contents on {file_path}")
@@ -162,7 +156,7 @@ def process_file_contents(file_string, proj_id, file_id, container_path, file_pa
     file_count += 1
 
     file_path = os.path.join(container_path, file_path)
-    (final_stats, blocks_data, times) = tokenize_blocks(file_string, file_path)
+    (final_stats, blocks_data, times) = tokenize_blocks(language_config, file_string, file_path)
 
     if (final_stats is None) or (blocks_data is None) or (times is None):
         print(f"[WARNING] Problems tokenizing file {file_path}")
@@ -247,7 +241,7 @@ def process_zip_ball(process_num, proj_id, zip_file, base_file_id, language_conf
                     print(f"[WARNING] File {file_path} can't be read")
                 times["file_time"] += (dt.datetime.now() - f_time).microseconds
 
-                file_times = process_file_contents(file_string, proj_id, file_id, zip_file, file_path, file_bytes, out_files)
+                file_times = process_file_contents(language_config, file_string, proj_id, file_id, zip_file, file_path, file_bytes, out_files)
                 for time_name, time in file_times.items():
                     times[time_name] += time
     except zipfile.BadZipFile as e:
@@ -257,9 +251,7 @@ def process_zip_ball(process_num, proj_id, zip_file, base_file_id, language_conf
     return times
 
 
-def process_one_project(process_num, proj_id, proj_path, base_file_id, out_files):
-    global inner_config
-
+def process_one_project(process_num, proj_id, proj_path, base_file_id, out_files, inner_config):
     proj_id_flag = inner_config["proj_id_flag"]
 
     project_info = f"project <id: {proj_id}, path: {proj_path}> (process {process_num})"
