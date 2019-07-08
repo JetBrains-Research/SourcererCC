@@ -37,9 +37,9 @@ def process_projects(process_num, list_projects, base_file_id, threads_queue, di
     sys.exit(0)
 
 
-def start_child(processes, global_queue, proj_paths, batch, dirs_config):
+def start_child(processes, threads_queue, proj_paths, batch, dirs_config):
     # This is a blocking get. If the queue is empty, it waits
-    pid, n_files_processed = global_queue.get()
+    pid, n_files_processed = threads_queue.get()
     # OK, one of the processes finished. Let's get its data and kill it
     kill_child(processes, pid, n_files_processed)
 
@@ -48,7 +48,7 @@ def start_child(processes, global_queue, proj_paths, batch, dirs_config):
     del proj_paths[:batch]
 
     print(f"[INFO] Starting new process {pid}")
-    p = Process(name=f"Process {pid}", target=process_projects, args=(pid, paths_batch, processes[pid][1], global_queue, dirs_config))
+    p = Process(name=f"Process {pid}", target=process_projects, args=(pid, paths_batch, processes[pid][1], threads_queue, dirs_config))
     processes[pid][0] = p
     p.start()
 
