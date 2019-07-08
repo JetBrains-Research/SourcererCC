@@ -35,20 +35,19 @@ def get_file_lines(filename):
             yield line.strip("\n")
 
 
-def merge_results(pairs):
-    """Merge results to find all files (y) similar to (x).
+def squash_edges(edges):
+    """Transforms list of edges into sparse graph.
+    For example [(1, 2), (1, 3), (2, 3)] is transformed to
+    {1: [2, 3], 2: [3]}
 
     Return map {(x): [all (y) similar to (x)]}
 
     Arguments:
-    pairs -- pairs from results file
+    edges -- edges list
     """
-    result = {}
-    for x, y in pairs:
-        if not x in result:
-            result[x] = [y]
-        else:
-            result[x].append(y)
+    result = {vertex: [] for vertex, _ in edges}
+    for parent, child in edges:
+        result[parent].append(child)
     return result
 
 
@@ -65,7 +64,7 @@ def get_results(results_file):
     for line in get_file_lines(results_file):
         _, code_id_1, _, code_id_2 = line.split(",")
         results_pairs.append((code_id_1, code_id_2))
-    results = merge_results(results_pairs)
+    results = squash_edges(results_pairs)
     return results
 
 
