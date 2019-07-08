@@ -250,6 +250,8 @@ public class SearchManager {
         String propertiesPath = System.getProperty("properties.location");
         System.out.println("[DEBUG] " + "propertiesPath: " + propertiesPath);
 
+        FileInputStream fis = null;
+        fis = new FileInputStream(propertiesPath);
         try {
             properties.load(fis);
             String[] params = new String[2];
@@ -267,7 +269,7 @@ public class SearchManager {
                     + properties.getProperty("OUTPUT_DIR");
             SearchManager.QUERY_DIR_PATH = SearchManager.ROOT_DIR + SearchManager.NODE_PREFIX + "/"
                     + properties.getProperty("QUERY_DIR_PATH");
-            logger.debug("Query path:" + SearchManager.QUERY_DIR_PATH);
+            System.out.println("Query path:" + SearchManager.QUERY_DIR_PATH);
             SearchManager.LOG_PROCESSED_LINENUMBER_AFTER_X_LINES = Integer
                     .parseInt(properties.getProperty(
                             "LOG_PROCESSED_LINENUMBER_AFTER_X_LINES", "1000"));
