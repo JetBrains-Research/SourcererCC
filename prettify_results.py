@@ -124,7 +124,7 @@ def get_stats_info(stats_files_path):
         for line in get_file_lines(stats_file):
             line_parts = line.split(",")
             stats = {}
-            code_id = line_parts[2]
+            code_id = line_parts[1] + "_" + line_parts[2]
             if line.startswith("f"):
                 stats = parse_file_line(line_parts[1:])
             elif line.startswith("b"):
