@@ -100,9 +100,8 @@ class TestParser(unittest.TestCase):
                        'glfw_key_callback@@::@@2', 'mod@@::@@1', 'if@@::@@1', 'glfw3@@::@@1', 'scancode@@::@@1',
                        'h@@::@@1', 'GLFW_INCLUDE_GLU@@::@@1', 'input_event_queue@@::@@1', 'GLFW@@::@@1', 'push@@::@@1',
                        'inputaction@@::@@1', 'include@@::@@3', 'asciiじゃない文字@@::@@1', 'printf@@::@@1', 's@@::@@1'}
-        tokens_str = tokens[3:]
-        self.assertSetEqual(set(tokens_str.split(',')), set(hard_tokens))
-        self.assertEqual(md5_hash(tokens_str), token_hash)
+        self.assertSetEqual(set(tokens.split(',')), set(hard_tokens))
+        self.assertEqual(md5_hash(tokens), token_hash)
 
     def test_recursion_limit_light(self):
         """ Test tokenizer on file which can break tokenizer because of lots of
