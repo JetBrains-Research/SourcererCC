@@ -2,12 +2,12 @@ import os
 import re
 import unittest
 
-from .file_tokenizer import read_config, tokenize_files
-from .utils import md5_hash
+from block_tokenizer import Tokenizer
+from utils import md5_hash
 
 
 REGEX = re.compile(r".+@@::@@\d+")
-read_config("file_config.ini")
+tokenizer = Tokenizer("block_config.ini")
 
 
 class TestParser(unittest.TestCase):

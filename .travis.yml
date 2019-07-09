@@ -8,6 +8,7 @@ before_install:
 install:
   - pip3 install -r requirements.txt
 script:
+  # Linting
   - pylint prettify_results.py --exit-zero
   - pylint tokenizers/block_level_tokenizer.py --exit-zero
   - pylint tokenizers/extract_java_functions.py --exit-zero
@@ -17,6 +18,9 @@ script:
   - pylint tokenizers/extract_python_functions.py --exit-zero
   - pylint tokenizers/separate-file-block-stats.py --exit-zero
   - pylint clone-detector/*.py --exit-zero
+  # Unit tests
+  - python3 -m unittest tokenizers/tokenizing/block_tokenizer_tests.py
+  # Regression tests
   - wget "https://github.com/a1arick/spbsu-programming-homework/archive/master.zip"
   - mv master.zip tokenizers/master.zip
   - echo "master.zip" > tokenizers/project-list.txt
@@ -30,4 +34,3 @@ script:
   - cat results.pairs
   - cp tokenizers/master.zip .
   - ./prettify_results.py --resultsFile=results.pairs --statsFiles=tokenizers/blocks_stats/files-stats-0.stats
-#  - python3 -m unittest tokenizers/tokenizing/file_tokenizer_tests.py
