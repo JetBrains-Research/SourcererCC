@@ -221,14 +221,15 @@ def results_to_map(results_file, stats_files):
     results = get_results(results_file)
     for block_id, block_id_list in results.items():
         block_info_map = formatted_titles[block_id]
-        full_results[block_info_map["file"]] = {
+        full_results[block_id] = {
             "clones": [formatted_titles[clone_id] for clone_id in block_id_list],
             "start_line": block_info_map["start_line"],
             "end_line": block_info_map["end_line"],
             "content": block_info_map["content"]
+            "file": block_info_map["file"]
         }
         print(f"{block_id}: {block_id_list}")
-        print(full_results[block_info_map["file"]])
+        print(full_results[block_id])
     return full_results
 
 
