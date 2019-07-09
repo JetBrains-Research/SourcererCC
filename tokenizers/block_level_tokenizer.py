@@ -108,7 +108,7 @@ if __name__ == '__main__':
     print("[INFO] *** No more projects to process. Waiting for children to finish...")
     while active_process_count(processes) > 0:
         pid, n_files_processed = global_queue.get()
-        kill_child(processes, pid, n_files_processed)
+        kill_child(processes, pid, n_files_processed, tokenizer)
 
     p_elapsed = dt.datetime.now() - p_start
     print(f"[INFO] *** All done. {tokenizer.get_file_count()} files in {p_elapsed}")
