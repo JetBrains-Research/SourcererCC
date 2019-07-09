@@ -13,6 +13,41 @@ import extract_java_functions
 import extract_python_functions
 
 
+def read_language_config(config):
+    result = {}
+    result["separators"] = config.get('Language', 'separators').strip('"').split(' ')
+    result["comment_inline"] = re.escape(config.get('Language', 'comment_inline'))
+    result["comment_open_tag"] = re.escape(config.get('Language', 'comment_open_tag'))
+    result["comment_close_tag"] = re.escape(config.get('Language', 'comment_close_tag'))
+    result["extensions"] = config.get('Language', 'File_extensions').split(' ')
+
+    result["comment_inline_pattern"] = result["comment_inline"] + '.*?$'
+    result["comment_open_close_pattern"] = result["comment_open_tag"] + '.*?' + result["comment_close_tag"]
+    return result
+
+
+def read_inner_config(config):
+    result = {}
+    # Get info from config.ini into global variables
+    result["N_PROCESSES"] = config.getint('Main', 'N_PROCESSES')
+    result["PROJECTS_BATCH"] = config.getint('Main', 'PROJECTS_BATCH')
+    result["FILE_projects_list"] = config.get('Main', 'FILE_projects_list')
+    # Reading config settings
+    result["init_file_id"] = config.getint('Config', 'init_file_id')
+    result["init_proj_id"] = config.getint('Config', 'init_proj_id')
+    # flag before proj_id
+    result["proj_id_flag"] = config.getint('Config', 'init_proj_id')
+    return result
+
+
+def read_dirs_config(config):
+    result = {}
+    result["stats_folder"] = config.get('Folders/Files', 'PATH_stats_folder')
+    result["bookkeeping_folder"] = config.get('Folders/Files', 'PATH_bookkeeping_folder')
+    result["tokens_folder"] = config.get('Folders/Files', 'PATH_tokens_folder')
+    return result
+
+
 class Tokenizer():
     def __init__(self, config_filename):
         config = ConfigParser()
@@ -22,46 +57,11 @@ class Tokenizer():
             print(f"[ERROR] - Config file {config_filename} is not found")
             sys.exit(1)
 
-        self.language_config = self.read_language_config(config)
-        self.inner_config = self.read_inner_config(config)
+        self.language_config = read_language_config(config)
+        self.inner_config = read_inner_config(config)
         self.inner_config["MULTIPLIER"] = 50000000
-        self.dirs_config = self.read_dirs_config(config)
+        self.dirs_config = read_dirs_config(config)
         self.file_count = 0
-
-
-    def read_language_config(self, config):
-        result = {}
-        result["separators"] = config.get('Language', 'separators').strip('"').split(' ')
-        result["comment_inline"] = re.escape(config.get('Language', 'comment_inline'))
-        result["comment_open_tag"] = re.escape(config.get('Language', 'comment_open_tag'))
-        result["comment_close_tag"] = re.escape(config.get('Language', 'comment_close_tag'))
-        result["extensions"] = config.get('Language', 'File_extensions').split(' ')
-
-        result["comment_inline_pattern"] = result["comment_inline"] + '.*?$'
-        result["comment_open_close_pattern"] = result["comment_open_tag"] + '.*?' + result["comment_close_tag"]
-        return result
-
-
-    def read_inner_config(self, config):
-        result = {}
-        # Get info from config.ini into global variables
-        result["N_PROCESSES"] = config.getint('Main', 'N_PROCESSES')
-        result["PROJECTS_BATCH"] = config.getint('Main', 'PROJECTS_BATCH')
-        result["FILE_projects_list"] = config.get('Main', 'FILE_projects_list')
-        # Reading config settings
-        result["init_file_id"] = config.getint('Config', 'init_file_id')
-        result["init_proj_id"] = config.getint('Config', 'init_proj_id')
-        # flag before proj_id
-        result["proj_id_flag"] = config.getint('Config', 'init_proj_id')
-        return result
-
-
-    def read_dirs_config(self, config):
-        result = {}
-        result["stats_folder"] = config.get('Folders/Files', 'PATH_stats_folder')
-        result["bookkeeping_folder"] = config.get('Folders/Files', 'PATH_bookkeeping_folder')
-        result["tokens_folder"] = config.get('Folders/Files', 'PATH_tokens_folder')
-        return result
 
 
     def get_configs(self):
