@@ -119,7 +119,7 @@ class Tokenizer():
         if '.py' in self.language_config["extensions"]:
             (block_linenos, blocks) = extract_python_functions.get_functions(file_string, file_path)
             return (block_linenos, blocks, "PYTHON_FUNCTION_SIGNATURE_NOT_IMPLEMENTED")
-        elif '.java' in self.language_config["extensions"]:
+        if '.java' in self.language_config["extensions"]:
             # Workaround with replacing is needed because javalang counts things like String[]::new as syntax errors
             tmp_file_string = file_string.replace("[]::", "::")
             comment_inline_pattern = self.language_config["comment_inline_pattern"]
