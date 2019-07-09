@@ -39,7 +39,7 @@ def start_child(processes, threads_queue, proj_paths, batch, tokenizer):
     pid, n_files_processed = threads_queue.get()
     # OK, one of the processes finished. Let's get its data and kill it
     tokenizer.increase_file_count(n_files_processed)
-    kill_child(processes, pid, n_files_processed)
+    kill_child(processes, pid, n_files_processed, tokenizer)
 
     # Get a new batch of project paths ready
     paths_batch = proj_paths[:batch]
@@ -55,7 +55,7 @@ def kill_child(processes, pid, n_files_processed):
     if processes[pid][0] is not None:
         processes[pid][0] = None
         processes[pid][1] += n_files_processed
-        print(f"[INFO] Process {pid} finished, {n_files_processed} files processed {processes[pid][1]}. Current total: {file_count}")
+        print(f"[INFO] Process {pid} finished, {n_files_processed} files processed {processes[pid][1]}. Current total: {tokenizer.get_file_count()}")
 
 
 def active_process_count(processes):
@@ -109,4 +109,4 @@ if __name__ == '__main__':
         kill_child(processes, pid, n_files_processed)
 
     p_elapsed = dt.datetime.now() - p_start
-    print("[INFO] *** All done. %s files in %s" % (file_count, p_elapsed))
+    print(f"[INFO] *** All done. {tokenizer.get_file_count()} files in {p_elapsed}")
