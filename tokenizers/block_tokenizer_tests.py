@@ -19,9 +19,7 @@ class TestParser(unittest.TestCase):
         return tokenizer.process_tokenizer(source_content)
 
     def assert_common_properties(self, list_tokens_string):
-        """ Input is something like: @#@print@@::@@1,include@@::@@1,sys@@::@@1 """
-        self.assertTrue(list_tokens_string.startswith('@#@'))
-
+        """ Input is something like: print@@::@@1,include@@::@@1,sys@@::@@1 """
         if len(list_tokens_string) > 3:
             split = list_tokens_string[3:].split(',')
             for pair in split:
