@@ -20,6 +20,8 @@ class TestParser(unittest.TestCase):
 
     def assert_common_properties(self, tokens_list_str):
         """ Input is something like: print@@::@@1,include@@::@@1,sys@@::@@1 """
+        if tokens_list_str == "":
+            return
         tokens_list = tokens_list_str.split(",")
         for pair in tokens_list:
             self.assertTrue(REGEX.match(pair))
