@@ -85,7 +85,7 @@ class Tokenizer():
         lines = count_lines(string)
 
         string_lines = remove_lines(string, is_line_empty)
-        loc = count_lines(string)
+        loc = count_lines(string_lines)
 
         string_lines, remove_comments_time = remove_comments(string_lines, self.language_config)
         code = remove_lines(string_lines, is_line_empty)
