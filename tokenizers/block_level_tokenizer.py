@@ -30,7 +30,7 @@ def process_projects(process_num, list_projects, base_file_id, threads_queue, to
     print(f"[INFO] Process {process_num} finished. {tokenizer.get_file_count()} files in {p_elapsed} s")
 
     # Let parent know
-    threads_queue.put((process_num, file_count))
+    threads_queue.put((process_num, tokenizer.get_file_count()))
     sys.exit(0)
 
 
