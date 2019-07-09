@@ -28,7 +28,7 @@ script:
   - ./block_level_tokenizer.py
   - mv blocks_tokens/* ../clone-detector/input/dataset/blocks.file
   - cd ../clone-detector
-  - ./controller.py
+  - time ./controller.py
   - cat NODE_*/output8.0/query*.txt > ../results.pairs
   - cd ..
   - cat results.pairs
