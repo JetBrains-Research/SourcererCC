@@ -129,8 +129,8 @@ def get_stats_info(stats_files_path):
                 stats = parse_file_line(line_parts[1:])
             elif line.startswith("b"):
                 stats = parse_block_line(line_parts[1:])
-                stats["relative_id"] = code_id[:5]
-                stats["file_id"] = code_id[5:]
+                stats["relative_id"] = line_parts[2][:5]
+                stats["file_id"] = line_parts[2][5:]
             if code_id in stats_info:
                 print(f"[NOTIFY] intersection on id {code_id}")
                 print(f"old: {stats_info[code_id]}")
