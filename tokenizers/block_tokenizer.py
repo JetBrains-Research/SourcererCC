@@ -154,7 +154,7 @@ class Tokenizer():
         return (file_hash, lines, LOC, SLOC), blocks_data, times
 
 
-    def process_file_contents(file_string, proj_id, file_id, container_path, file_path, file_bytes, out_files):
+    def process_file_contents(self, file_string, proj_id, file_id, container_path, file_path, file_bytes, out_files):
         (tokens_file, _, stats_file) = out_files
 
         print(f"[INFO] Started process_file_contents on {file_path}")
@@ -196,7 +196,7 @@ class Tokenizer():
         return times
 
 
-    def print_times(project_info, elapsed, times):
+    def print_times(self, project_info, elapsed, times):
         print(f"[INFO] Finished {project_info}")
         print(f"[INFO] Total: {elapsed} ms")
         for time_name, time in times.items():
@@ -246,7 +246,7 @@ class Tokenizer():
                         print(f"[WARNING] File {file_path} can't be read")
                     times["file_time"] += (dt.datetime.now() - f_time).microseconds
 
-                    file_times = process_file_contents(file_string, proj_id, file_id, zip_file, file_path, file_bytes, out_files)
+                    file_times = self.process_file_contents(file_string, proj_id, file_id, zip_file, file_path, file_bytes, out_files)
                     for time_name, time in file_times.items():
                         times[time_name] += time
         except zipfile.BadZipFile as e:
