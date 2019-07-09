@@ -18,12 +18,11 @@ class TestParser(unittest.TestCase):
             source_content = fd.read()
         return tokenizer.process_tokenizer(source_content)
 
-    def assert_common_properties(self, list_tokens_string):
+    def assert_common_properties(self, tokens_list_str):
         """ Input is something like: print@@::@@1,include@@::@@1,sys@@::@@1 """
-        if len(list_tokens_string) > 3:
-            split = list_tokens_string[3:].split(',')
-            for pair in split:
-                self.assertTrue(REGEX.match(pair))
+        tokens_list = tokens_list_str.split(",")
+        for pair in tokens_list:
+            self.assertTrue(REGEX.match(pair))
 
     def assert_line_counts(self, res, lines, LOC, SLOC):
         (line_stats, _, _) = res
