@@ -272,4 +272,4 @@ class Tokenizer():
         bookkeeping_file.write(f'{proj_id},"{proj_path}"\n')
 
         elapsed_time = dt.datetime.now() - start_time
-        print_times(project_info, elapsed_time, times)
+        self.print_times(project_info, elapsed_time, times)
