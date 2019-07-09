@@ -61,15 +61,15 @@ class Tokenizer():
         result["bookkeeping_folder"] = config.get('Folders/Files', 'PATH_bookkeeping_folder')
         result["tokens_folder"] = config.get('Folders/Files', 'PATH_tokens_folder')
         return result
-    
+
 
     def get_configs(self):
         return self.language_config, self.inner_config, self.dirs_config
-    
+
 
     def get_file_count(self):
         return self.file_count
-    
+
 
     def increase_file_count(self, files_number):
         self.file_count += files_number
