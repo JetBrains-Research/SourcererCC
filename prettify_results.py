@@ -228,8 +228,6 @@ def results_to_map(results_file, stats_files):
             "content": block_info_map["content"],
             "file": block_info_map["file"]
         }
-        print(f"{block_id}: {block_id_list}")
-        print(full_results[block_id])
     return full_results
 
 
