@@ -220,7 +220,7 @@ class Tokenizer():
                     if not os.path.splitext(code_file.filename)[1] in self.language_config["extensions"]:
                         continue
 
-                    file_id = process_num * self.inner_config["MULTIPLIER"] + base_file_id + file_count
+                    file_id = process_num * self.inner_config["MULTIPLIER"] + base_file_id + self.file_count
                     file_bytes = str(code_file.file_size)
                     file_path = code_file.filename
                     full_code_file_path = os.path.join(zip_file, file_path)
