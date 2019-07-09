@@ -51,7 +51,7 @@ def start_child(processes, threads_queue, proj_paths, batch, tokenizer):
     p.start()
 
 
-def kill_child(processes, pid, n_files_processed):
+def kill_child(processes, pid, n_files_processed, tokenizer):
     if processes[pid][0] is not None:
         processes[pid][0] = None
         processes[pid][1] += n_files_processed
