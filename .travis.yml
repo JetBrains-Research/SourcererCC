@@ -19,9 +19,7 @@ script:
   - pylint tokenizers/separate-file-block-stats.py --exit-zero
   - pylint clone-detector/*.py --exit-zero
   # Unit tests
-  - cd tokenizers
-  - python3 -m unittest block_tokenizer_tests.py
-  - cd ..
+  - cd tokenizers; python3 -m unittest block_tokenizer_tests.py; cd ..
   # Regression tests
   - wget "https://github.com/a1arick/spbsu-programming-homework/archive/master.zip"
   - cp master.zip tokenizers/master.zip
