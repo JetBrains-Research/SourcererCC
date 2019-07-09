@@ -2,7 +2,7 @@ language: python
 python:
   - "3.6"
 before_install:
-  - sudo apt install openjdk-8-jdk
+  #- sudo apt install openjdk-8-jdk
   - sudo apt-get install ant
   - pip3 install pylint
 install:
@@ -19,7 +19,7 @@ script:
   - pylint tokenizers/separate-file-block-stats.py --exit-zero
   - pylint clone-detector/*.py --exit-zero
   # Unit tests
-  - python3 -m unittest tokenizers/tokenizing/block_tokenizer_tests.py
+  - python3 -m unittest tokenizers/block_tokenizer_tests.py
   # Regression tests
   - wget "https://github.com/a1arick/spbsu-programming-homework/archive/master.zip"
   - mv master.zip tokenizers/master.zip
