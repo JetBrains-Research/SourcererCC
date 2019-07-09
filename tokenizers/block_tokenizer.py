@@ -144,6 +144,7 @@ class Tokenizer():
 
         file_hash, hash_time = hash_measuring_time(file_string)
         file_string, lines, LOC, SLOC, re_time = self.get_lines_stats(file_string)
+        times["regex_time"] += re_time
 
         blocks_data = []
         for i, block_string in enumerate(blocks):
@@ -254,7 +255,7 @@ class Tokenizer():
                     file_times = self.process_file_contents(file_string, proj_id, file_id, zip_file, file_path, file_bytes, out_files)
                     for time_name, time in file_times.items():
                         times[time_name] += time
-        except zipfile.BadZipFile as e:
+        except zipfile.BadZipFile as _:
             print(f"[ERROR] Incorrect zip file {zip_file}")
 
         print(f"[INFO] Successfully ran process_zip_ball {zip_file}")
