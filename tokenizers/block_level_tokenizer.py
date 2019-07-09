@@ -27,7 +27,7 @@ def process_projects(process_num, list_projects, base_file_id, threads_queue, to
             tokenizer.process_one_project(process_num, str(proj_id), proj_path, base_file_id, out_files)
 
     p_elapsed = (dt.datetime.now() - p_start).seconds
-    print(f"[INFO] Process {process_num} finished. {file_count} files in {p_elapsed} s")
+    print(f"[INFO] Process {process_num} finished. {tokenizer.get_file_count()} files in {p_elapsed} s")
 
     # Let parent know
     threads_queue.put((process_num, file_count))
