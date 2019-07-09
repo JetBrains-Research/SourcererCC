@@ -24,6 +24,8 @@ def process_projects(process_num, list_projects, base_file_id, threads_queue, to
         out_files = (tokens_file, bookkeeping_file, stats_file)
         p_start = dt.datetime.now()
         for proj_id, proj_path in list_projects:
+            if proj_path == "":
+                continue
             tokenizer.process_one_project(process_num, str(proj_id), proj_path, base_file_id, out_files)
 
     p_elapsed = (dt.datetime.now() - p_start).seconds
