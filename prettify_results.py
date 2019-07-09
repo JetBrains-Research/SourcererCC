@@ -225,7 +225,7 @@ def results_to_map(results_file, stats_files):
             "clones": [formatted_titles[clone_id] for clone_id in block_id_list],
             "start_line": block_info_map["start_line"],
             "end_line": block_info_map["end_line"],
-            "content": block_info_map["content"]
+            "content": block_info_map["content"],
             "file": block_info_map["file"]
         }
         print(f"{block_id}: {block_id_list}")
