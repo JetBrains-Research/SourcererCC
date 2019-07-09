@@ -12,7 +12,7 @@ script:
   - pylint prettify_results.py --exit-zero
   - pylint tokenizers/block_level_tokenizer.py --exit-zero
   - pylint tokenizers/extract_java_functions.py --exit-zero
-  - pylint tokenizers/file_tokenizer_tests.py --exit-zero
+  - pylint tokenizers/block_tokenizer_tests.py --exit-zero
   - pylint tokenizers/utils.py --exit-zero
   - pylint tokenizers/block_tokenizer.py --exit-zero
   - pylint tokenizers/extract_python_functions.py --exit-zero
