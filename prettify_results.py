@@ -220,13 +220,14 @@ def results_to_map(results_file, stats_files):
             formatted_titles[block_id] = get_block_info(stats, block_info)
     results = get_results(results_file)
     for block_id, block_id_list in results.items():
-        print(f"{block_id}: {block_id_list}")
-    for block_id, block_id_list in results.items():
-        full_results[formatted_titles[block_id]["file"]] = {
-            "clones": list(map(lambda x: formatted_titles[x], block_id_list))
+        block_info_map = formatted_titles[block_id]
+        full_results[block_id] = {
+            "clones": [formatted_titles[clone_id] for clone_id in block_id_list],
+            "start_line": block_info_map["start_line"],
+            "end_line": block_info_map["end_line"],
+            "content": block_info_map["content"],
+            "file": block_info_map["file"]
         }
-        for key in ["start_line", "end_line", "content"]:
-            full_results[formatted_titles[block_id]["file"]][key] = formatted_titles[block_id][key]
     return full_results
 
 

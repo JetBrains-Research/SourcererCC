@@ -2,12 +2,12 @@ import os
 import re
 import unittest
 
-from .file_tokenizer import read_config, tokenize_files
-from .utils import md5_hash
+from block_tokenizer import Tokenizer
+from utils import md5_hash
 
 
 REGEX = re.compile(r".+@@::@@\d+")
-read_config("file_config.ini")
+tokenizer = Tokenizer("block_config.ini")
 
 
 class TestParser(unittest.TestCase):
@@ -16,20 +16,19 @@ class TestParser(unittest.TestCase):
         source_content = ""
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), file_name), "r", encoding="utf-8") as fd:
             source_content = fd.read()
-        return tokenize_files(source_content)
+        return tokenizer.process_tokenizer(source_content)
 
-    def assert_common_properties(self, list_tokens_string):
-        """ Input is something like: @#@print@@::@@1,include@@::@@1,sys@@::@@1 """
-        self.assertTrue(list_tokens_string.startswith('@#@'))
-
-        if len(list_tokens_string) > 3:
-            split = list_tokens_string[3:].split(',')
-            for pair in split:
-                self.assertTrue(REGEX.match(pair))
+    def assert_common_properties(self, tokens_list_str):
+        """ Input is something like: print@@::@@1,include@@::@@1,sys@@::@@1 """
+        if tokens_list_str == "":
+            return
+        tokens_list = tokens_list_str.split(",")
+        for pair in tokens_list:
+            self.assertTrue(REGEX.match(pair))
 
     def assert_line_counts(self, res, lines, LOC, SLOC):
-        (final_stats, _, _) = res
-        (_, actual_lines, actual_LOC, actual_SLOC) = final_stats
+        (line_stats, _, _) = res
+        (_, actual_lines, actual_LOC, actual_SLOC) = line_stats
 
         self.assertEqual(actual_lines, lines)
         self.assertEqual(actual_LOC, LOC)
@@ -49,7 +48,7 @@ class TestParser(unittest.TestCase):
         input_str = """ line 1
                         line 2
                         line 3 """
-        res = tokenize_files(input_str)
+        res = tokenizer.process_tokenizer(input_str)
         self.assert_line_counts(res, lines=3, LOC=3, SLOC=3)
 
     def test_line_counts_2(self):
@@ -57,7 +56,7 @@ class TestParser(unittest.TestCase):
                         line 2
                         line 3
                     """
-        res = tokenize_files(input_str)
+        res = tokenizer.process_tokenizer(input_str)
         self.assert_line_counts(res, lines=4, LOC=3, SLOC=3)
 
     def test_line_counts_3(self):
@@ -66,18 +65,18 @@ class TestParser(unittest.TestCase):
                     // line 2
                     line 3 
                 """
-        res = tokenize_files(input_str)
+        res = tokenizer.process_tokenizer(input_str)
         self.assert_line_counts(res, lines=5, LOC=3, SLOC=2)
 
     def test_comments(self):
         input_str = """// Hello
          // World"""
-        res = tokenize_files(input_str)
+        res = tokenizer.process_tokenizer(input_str)
         self.assert_tokenization_results(res, lines=2, LOC=2, SLOC=0, total_tokens=0, unique_tokens=0)
 
     def test_multiline_comment(self):
         input_str = '/* this is a \n comment */ /* Last one */ '
-        res = tokenize_files(input_str)
+        res = tokenizer.process_tokenizer(input_str)
         self.assert_tokenization_results(res, lines=2, LOC=2, SLOC=0, total_tokens=0, unique_tokens=0)
 
     def test_simple_file(self):
@@ -93,7 +92,7 @@ class TestParser(unittest.TestCase):
                        }
                        printf("%s", "asciiじゃない文字");
                      }"""
-        res = tokenize_files(string)
+        res = tokenizer.process_tokenizer(string)
         (_, final_tokens, _) = res
         (_, _, token_hash, tokens) = final_tokens
         self.assert_tokenization_results(res, lines=12, LOC=11, SLOC=9, total_tokens=27, unique_tokens=21)
@@ -102,9 +101,8 @@ class TestParser(unittest.TestCase):
                        'glfw_key_callback@@::@@2', 'mod@@::@@1', 'if@@::@@1', 'glfw3@@::@@1', 'scancode@@::@@1',
                        'h@@::@@1', 'GLFW_INCLUDE_GLU@@::@@1', 'input_event_queue@@::@@1', 'GLFW@@::@@1', 'push@@::@@1',
                        'inputaction@@::@@1', 'include@@::@@3', 'asciiじゃない文字@@::@@1', 'printf@@::@@1', 's@@::@@1'}
-        tokens_str = tokens[3:]
-        self.assertSetEqual(set(tokens_str.split(',')), set(hard_tokens))
-        self.assertEqual(md5_hash(tokens_str), token_hash)
+        self.assertSetEqual(set(tokens.split(',')), set(hard_tokens))
+        self.assertEqual(md5_hash(tokens), token_hash)
 
     def test_recursion_limit_light(self):
         """ Test tokenizer on file which can break tokenizer because of lots of
