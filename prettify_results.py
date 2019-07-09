@@ -62,8 +62,8 @@ def get_results(results_file):
     """
     results_pairs = []
     for line in get_file_lines(results_file):
-        _, code_id_1, _, code_id_2 = line.split(",")
-        results_pairs.append((code_id_1, code_id_2))
+        project_id_1, block_id_1, project_id_2, block_id_2 = line.split(",")
+        results_pairs.append((project_id_1 + "_" + block_id_1, project_id_2 + "_" + block_id_2))
     results = squash_edges(results_pairs)
     return results
 
@@ -220,13 +220,15 @@ def results_to_map(results_file, stats_files):
             formatted_titles[block_id] = get_block_info(stats, block_info)
     results = get_results(results_file)
     for block_id, block_id_list in results.items():
-        print(f"{block_id}: {block_id_list}")
-    for block_id, block_id_list in results.items():
-        full_results[formatted_titles[block_id]["file"]] = {
-            "clones": list(map(lambda x: formatted_titles[x], block_id_list))
+        block_info_map = formatted_titles[block_id]
+        full_results[block_info_map["file"]] = {
+            "clones": [formatted_titles[clone_id] for clone_id in block_id_list],
+            "start_line": block_info_map["start_line"],
+            "end_line": block_info_map["end_line"],
+            "content": block_info_map["content"]
         }
-        for key in ["start_line", "end_line", "content"]:
-            full_results[formatted_titles[block_id]["file"]][key] = formatted_titles[block_id][key]
+        print(f"{block_id}: {block_id_list}")
+        print(full_results[block_info_map["file"]])
     return full_results
 
 
