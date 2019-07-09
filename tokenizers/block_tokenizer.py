@@ -111,7 +111,7 @@ class Tokenizer():
         block_linenos = None
         blocks = None
         function_name = ''
-        if '.py' in language_config["extensions"]:
+        if '.py' in self.language_config["extensions"]:
             (block_linenos, blocks) = extract_python_functions.get_functions(file_string, file_path)
             return (block_linenos, blocks, "PYTHON_FUNCTION_SIGNATURE_NOT_IMPLEMENTED")
         elif '.java' in self.language_config["extensions"]:
