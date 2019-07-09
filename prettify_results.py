@@ -62,8 +62,8 @@ def get_results(results_file):
     """
     results_pairs = []
     for line in get_file_lines(results_file):
-        project_id_1, block_id_1, project_id_2, block_id_2 = line.split(",")
-        results_pairs.append((project_id_1 + "_" + block_id_1, project_id_2 + "_" + block_id_2))
+        _, code_id_1, _, code_id_2 = line.split(",")
+        results_pairs.append((code_id_1, code_id_2))
     results = squash_edges(results_pairs)
     return results
 
@@ -124,13 +124,13 @@ def get_stats_info(stats_files_path):
         for line in get_file_lines(stats_file):
             line_parts = line.split(",")
             stats = {}
-            code_id = line_parts[1] + "_" + line_parts[2]
+            code_id = line_parts[2]
             if line.startswith("f"):
                 stats = parse_file_line(line_parts[1:])
             elif line.startswith("b"):
                 stats = parse_block_line(line_parts[1:])
-                stats["relative_id"] = line_parts[2][:5]
-                stats["file_id"] = line_parts[2][5:]
+                stats["relative_id"] = code_id[:5]
+                stats["file_id"] = code_id[5:]
             if code_id in stats_info:
                 print(f"[NOTIFY] intersection on id {code_id}")
                 print(f"old: {stats_info[code_id]}")
@@ -220,12 +220,13 @@ def results_to_map(results_file, stats_files):
             formatted_titles[block_id] = get_block_info(stats, block_info)
     results = get_results(results_file)
     for block_id, block_id_list in results.items():
+    for block_id, block_id_list in results.items():
         block_info_map = formatted_titles[block_id]
         full_results[block_info_map["file"]] = {
             "clones": [formatted_titles[clone_id] for clone_id in block_id_list],
-            "start_line": block_info_map["start_line"],
-            "end_line": block_info_map["end_line"],
-            "content": block_info_map["content"]
+            "start_line" = block_info_map["start_line"],
+            "end_line" = block_info_map["end_line"],
+            "content" = block_info_map["content"]
         }
         print(f"{block_id}: {block_id_list}")
         print(full_results[block_info_map["file"]])
