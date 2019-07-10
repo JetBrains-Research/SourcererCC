@@ -196,7 +196,7 @@ def results_to_map(results_file, stats_files):
     """Print nice formatted results.
 
     Return map with results parameters in following json format:
-        "full_file_path": {
+        "block_id": {
             clones: [
                 file: "{{full_file_path}}"
                 start_line: {{first_line_of_block}}
@@ -206,6 +206,7 @@ def results_to_map(results_file, stats_files):
             start_line: {{first_line_of_block}}
             end_line: {{last_line_of_block}}
             content: "{{block_content}}"
+            file: "{{full_file_path}}"
         }
 
     Arguments:
