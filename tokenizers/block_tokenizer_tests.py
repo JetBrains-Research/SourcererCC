@@ -68,6 +68,11 @@ class TestParser(unittest.TestCase):
         res = tokenizer.process_tokenizer(input_str)
         self.assert_line_counts(res, lines=5, LOC=3, SLOC=2)
 
+    def test_line_counts_4(self):
+        input_str = """line 1\r// line 2\rline 3"""
+        res = tokenizer.process_tokenizer(input_str)
+        self.assert_line_counts(res, lines=3, LOC=3, SLOC=2)
+
     def test_comments(self):
         input_str = """// Hello
          // World"""
