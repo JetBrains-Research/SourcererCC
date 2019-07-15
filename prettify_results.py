@@ -64,7 +64,6 @@ def get_results(results_file):
     for line in get_file_lines(results_file):
         _, code_id_1, _, code_id_2 = line.split(",")
         results_pairs.append((code_id_1, code_id_2))
-    results = squash_edges(results_pairs)
     return results
 
 
@@ -192,6 +191,15 @@ def get_block_info(stats, block_info):
     }
 
 
+def get_block_info_map(stats_files):
+    stats = get_stats_info(stats_files)
+    full_results = {}
+    blocks_info_map = {}
+    for block_id, block_info in stats.items():
+        if "start_line" in block_info:
+            blocks_info_map[block_id] = get_block_info(stats, block_info)
+    return blocks_info_map
+
 def results_to_map(results_file, stats_files):
     """Print nice formatted results.
 
@@ -213,17 +221,12 @@ def results_to_map(results_file, stats_files):
     results_file -- file with SourcererCC results
     stats_files -- file or directory with stats files
     """
-    stats = get_stats_info(stats_files)
-    full_results = {}
-    formatted_titles = {}
-    for block_id, block_info in stats.items():
-        if "start_line" in block_info:
-            formatted_titles[block_id] = get_block_info(stats, block_info)
-    results = get_results(results_file)
+    blocks_info_map = get_block_info_map(stats_files)
+    results = squash_edges(get_results(results_file))
     for block_id, block_id_list in results.items():
-        block_info_map = formatted_titles[block_id]
+        block_info_map = blocks_info_map[block_id]
         full_results[block_id] = {
-            "clones": [formatted_titles[clone_id] for clone_id in block_id_list],
+            "clones": [blocks_info_map[clone_id] for clone_id in block_id_list],
             "original": block_info_map
         }
     return full_results
