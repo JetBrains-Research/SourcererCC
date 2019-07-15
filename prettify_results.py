@@ -64,7 +64,7 @@ def get_results(results_file):
     for line in get_file_lines(results_file):
         _, code_id_1, _, code_id_2 = line.split(",")
         results_pairs.append((code_id_1, code_id_2))
-    return results
+    return results_pairs
 
 
 def filter_files(path, extension):
