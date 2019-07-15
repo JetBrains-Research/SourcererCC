@@ -223,6 +223,7 @@ def results_to_map(results_file, stats_files):
     """
     blocks_info_map = get_block_info_map(stats_files)
     results = squash_edges(get_results(results_file))
+    full_results = {}
     for block_id, block_id_list in results.items():
         block_info_map = blocks_info_map[block_id]
         full_results[block_id] = {
