@@ -163,7 +163,6 @@ class Tokenizer():
     def process_file_contents(self, file_string, proj_id, file_id, container_path, file_path, file_bytes, out_files):
         (tokens_file, _, stats_file) = out_files
 
-        print(f"[INFO] Started process_file_contents on {file_path}")
         self.file_count += 1
 
         file_path = os.path.join(container_path, file_path)
@@ -197,7 +196,6 @@ class Tokenizer():
         except Exception as e:
             print("[WARNING] Error on step3 of process_file_contents")
             print(e)
-        print(f"[INFO] Successfully ran process_file_contents {os.path.join(container_path, file_path)}")
         times["write_time"] = (dt.datetime.now() - start_time).microseconds
         return times
 
@@ -210,7 +208,6 @@ class Tokenizer():
 
 
     def process_zip_ball(self, process_num, proj_id, zip_file, base_file_id, out_files):
-        print(f"[INFO] Started zip ball {zip_file}")
         times = {
             "zip_time": 0,
             "file_time": 0,
@@ -258,7 +255,6 @@ class Tokenizer():
         except zipfile.BadZipFile as _:
             print(f"[ERROR] Incorrect zip file {zip_file}")
 
-        print(f"[INFO] Successfully ran process_zip_ball {zip_file}")
         return times
 
 
