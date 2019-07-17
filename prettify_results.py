@@ -130,30 +130,22 @@ def get_stats_info(stats_files_path):
                 stats = parse_block_line(line_parts[1:])
                 stats["relative_id"] = code_id[:5]
                 stats["file_id"] = code_id[5:]
-            if code_id in stats_info:
-                print(f"[NOTIFY] intersection on id {code_id}")
-                print(f"old: {stats_info[code_id]}")
-                print(f"new: {stats}")
             stats_info[code_id] = stats
     return stats_info
 
 
-def get_lines(zip_file_path, start_line, end_line, source_file):
+def get_lines(repo_archive, start_line, end_line, source_filename):
     """Read specified lines of file from archive.
 
     Arguments:
-    zip_file_path -- project zip archive
+    repo_archive -- project zip archive
     start_line -- first line number of code to read
     end_line -- last line number of code to read, -1 for all lines
-    source_file -- path to file to read
+    source_filename -- path to file to read
     """
     result = ""
-    with zipfile.ZipFile(zip_file_path, "r") as repo:
-        for code_file in repo.infolist():
-            if source_file != code_file.filename:
-                continue
-            with repo.open(code_file) as code_file:
-                result = code_file.read().decode("utf-8").split("\n")
+    with repo_archive.open(source_filename) as source_file:
+        result = source_file.read().decode("utf-8").split("\n")
     return "\n".join(result[start_line - 1 : end_line])
 
 def split_zip_file_path(file_path):
@@ -182,7 +174,8 @@ def get_block_info(stats, block_info):
     repo_zip_filename, source_file = split_zip_file_path(file_path.strip("\""))
     start_line = block_info["start_line"]
     end_line = block_info["end_line"]
-    code_content = get_lines(repo_zip_filename, start_line, end_line, source_file)
+    with zipfile.ZipFile(repo_zip_filename, "r") as repo_archive:
+        code_content = get_lines(repo_archive, start_line, end_line, source_file)
     return {
         "file": filename,
         "start_line": start_line,
@@ -193,7 +186,6 @@ def get_block_info(stats, block_info):
 
 def get_block_info_map(stats_files):
     stats = get_stats_info(stats_files)
-    full_results = {}
     blocks_info_map = {}
     for block_id, block_info in stats.items():
         if "start_line" in block_info:
