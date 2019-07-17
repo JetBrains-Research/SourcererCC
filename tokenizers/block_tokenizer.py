@@ -8,7 +8,7 @@ import sys
 from configparser import ConfigParser
 
 
-from utils import *
+from utils import count_lines, hash_measuring_time, remove_comments, tokenize_string, format_tokens
 import extract_java_functions
 import extract_python_functions
 
@@ -115,7 +115,6 @@ class Tokenizer():
     def parse_blocks(self, file_string, file_path):
         block_linenos = None
         blocks = None
-        function_name = ''
         if '.py' in self.language_config["extensions"]:
             (block_linenos, blocks) = extract_python_functions.get_functions(file_string, file_path)
             return (block_linenos, blocks, "PYTHON_FUNCTION_SIGNATURE_NOT_IMPLEMENTED")
