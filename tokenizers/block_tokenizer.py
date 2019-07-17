@@ -138,7 +138,7 @@ class Tokenizer():
 
         block_linenos, blocks, function_name = self.parse_blocks(file_string, file_path)
         if block_linenos is None:
-            print(f"[INFO] Returning None on tokenize_blocks for file {file_path}")
+            print(f"[INFO] Incorrect file {file_path}")
             return None, None, None
 
         file_hash, hash_time = hash_measuring_time(file_string)
@@ -168,7 +168,6 @@ class Tokenizer():
         (final_stats, blocks_data, times) = self.tokenize_blocks(file_string, file_path)
 
         if (final_stats is None) or (blocks_data is None) or (times is None):
-            print(f"[WARNING] Problems tokenizing file {file_path}")
             return {}
 
         if len(blocks_data) > 90000:
