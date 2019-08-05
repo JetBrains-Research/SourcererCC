@@ -185,6 +185,7 @@ def get_block_info(stats, block_info):
 
 
 def get_block_info_map(stats_files):
+    """Get blocks info map from .stats files"""
     stats = get_stats_info(stats_files)
     blocks_info_map = {}
     for block_id, block_info in stats.items():
