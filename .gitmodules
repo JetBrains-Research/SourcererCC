@@ -1,0 +1,12 @@
+[submodule "tokenizers/block-level/tree-sitter/tree-sitter-c-sharp"]
+	path = tokenizers/block-level/tree-sitter/tree-sitter-c-sharp
+	url = https://github.com/tree-sitter/tree-sitter-c-sharp
+[submodule "tokenizers/block-level/tree-sitter/tree-sitter-c"]
+	path = tokenizers/block-level/tree-sitter/tree-sitter-c
+	url = https://github.com/tree-sitter/tree-sitter-c
+[submodule "tokenizers/block-level/tree-sitter/tree-sitter-cpp"]
+	path = tokenizers/block-level/tree-sitter/tree-sitter-cpp
+	url = https://github.com/tree-sitter/tree-sitter-cpp
+[submodule "tokenizers/block-level/tree-sitter/tree-sitter-java"]
+	path = tokenizers/block-level/tree-sitter/tree-sitter-java
+	url = https://github.com/tree-sitter/tree-sitter-java
