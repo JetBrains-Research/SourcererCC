@@ -10,7 +10,7 @@ import zipfile
 from configparser import ConfigParser
 from multiprocessing import Process, Queue
 
-from . import extractJavaFunction
+from . import java_function_extractor
 from . import extractPythonFunction
 
 MULTIPLIER = 50000000
@@ -178,7 +178,7 @@ def tokenize_blocks(file_string, comment_inline_pattern, comment_open_close_patt
         (block_linenos, blocks) = extractPythonFunction.getFunctions(file_string, file_path)
     # Notice workaround with replacing. It is needed because javalang counts things like String[]::new as syntax errors
     if '.java' in file_extensions:
-        (block_linenos, blocks, experimental_values) = extractJavaFunction.get_functions(file_string)
+        (block_linenos, blocks, experimental_values) = java_function_extractor.get_functions(file_string)
 
     if block_linenos is None:
         print("[INFO] Returning None on tokenize_blocks for file {}".format(file_path))
