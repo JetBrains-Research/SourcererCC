@@ -1,113 +1,127 @@
-import re
-import javalang
-import itertools
+"""
+Functionality to extract functions and related metadata for Java.
+"""
+from typing import List, Tuple, Union
 
-global found_parent
+import tree_sitter
+from .parsers.utils import get_parser
 
-re_string = re.escape("\"") + '.*?' + re.escape("\"")
+
+def get_func_args(func_node: tree_sitter.Node, content: Union[bytes, str]) -> Union[bytes, str]:
+    """
+    Extract arguments given function node and file content.
+
+    :param func_node: function node.
+    :param content: file content that was used for parsing.
+    :return: bytes/str for function arguments.
+    """
+    for node in func_node.children:
+        if node.type == "formal_parameters":
+            return content[node.start_byte:node.end_byte]
 
 
-def getFunctions(filestring, file_path, separators, comment_inline_pattern):
-    method_string = []
-    method_pos = []
-    method_name = []
+def get_func_name(func_node: tree_sitter.Node, content: Union[bytes, str]) -> Union[bytes, str]:
+    """
+    Extract function name given function node and file content.
 
-    global found_parent
-    found_parent = []
+    :param func_node: function node.
+    :param content: file content that was used for parsing.
+    :return: bytes/str for function name.
+    """
+    assert func_node.type in ["constructor_declaration", "method_declaration"]
+    for node in func_node.children:
+        if node.type == "identifier":
+            return content[node.start_byte:node.end_byte]
 
-    tree = None
 
+def get_package_name(root_node: tree_sitter.Node, content: Union[bytes, str]) -> Union[bytes, str]:
+    """
+    Extract package name given root node and file content.
+
+    :param root_node: root node after parsing of content.
+    :param content: file content that was used for parsing.
+    :return: bytes/str for Java package declaration or "JHawkDefaultPackage" for missed one as default.
+    """
+    for ch in root_node.children:
+        if ch.type == "package_declaration":
+            for ch_ in ch.children:
+                if ch_.type == "scoped_identifier":
+                    return content[ch_.start_byte:ch_.end_byte]
+    return "JHawkDefaultPackage"
+
+
+def get_lines(node: tree_sitter.Node) -> Tuple[int, int]:
+    """
+    Extract start and end line.
+    :param node: function node.
+    :return: (start line, end line)
+    """
+    start_line = node.start_point[0]
+    end_line = node.end_point[0]
+    return start_line, end_line
+
+
+def get_positional_bytes(node: tree_sitter.Node) -> Tuple[int, int]:
+    """
+    Extract start and end byte.
+    :param node: function node.
+    :return: (start line, end line)
+    """
+    start = node.start_byte
+    end = node.end_byte
+    return start, end
+
+
+def get_function_meta(func_node: tree_sitter.Node, package_name: Union[bytes, str], content: Union[bytes, str]) -> str:
+    """
+    Extract function metadata - package, name, arguments.
+
+    :param func_node: function node.
+    :param package_name: package name.
+    :param content: file content that was used for parsing.
+    :return:
+    """
+    assert isinstance(package_name, (bytes, str))
     try:
-        tree = javalang.parse.parse(filestring)
-        package = tree.package
-        if package is None:
-            package = 'JHawkDefaultPackage'
-        else:
-            package = package.name
-    except:
-        print(f"[WARNING] File {file_path} possibly contains syntax error and therefore won't be parsed")
-        return None, None, []
+        package_name = package_name.decode("utf-8")
+    except AttributeError:
+        pass
+    return (package_name + "." +
+            get_func_name(func_node, content).decode("utf-8") +
+            get_func_args(func_node, content).decode("utf-8"))
 
-    file_string_split = filestring.split('\n')
-    nodes = itertools.chain(tree.filter(javalang.tree.ConstructorDeclaration), tree.filter(javalang.tree.MethodDeclaration))
 
+def get_functions(content: Union[bytes, str]) -> Tuple[List[Tuple[int, int]], List[bytes], List[str]]:
+    """
+    Parse and extract function given content.
+    :param content: java-file content.
+    :return: 3 lists. First contains list of tuples with start and end line number.
+             Second contains functions itself.
+             Third contains function metadata (package, name, arguments).
+
+    """
+    assert isinstance(content, (bytes, str))
     try:
-        for path, node in nodes:
-            name = '.' + node.name
-            for i, var in enumerate(reversed(path)):
-                if isinstance(var, javalang.tree.ClassDeclaration):
-                    if len(path) - 3 == i:  # Top most
-                        name = '.' + var.name + check_repetition(var, var.name) + name
-                    else:
-                        name = '$' + var.name + check_repetition(var, var.name) + name
-                if isinstance(var, javalang.tree.ClassCreator):
-                    name = '$' + var.type.name + check_repetition(var, var.type.name) + name
-                if isinstance(var, javalang.tree.InterfaceDeclaration):
-                    name = '$' + var.name + check_repetition(var, var.name) + name
-            args = []
-            for t in node.parameters:
-                dims = []
-                if len(t.type.dimensions) > 0:
-                    for _ in t.type.dimensions:
-                        dims.append("[]")
-                dims = "".join(dims)
-                args.append(t.type.name + dims)
-            args = ",".join(args)
+        content = content.encode()
+    except AttributeError:
+        pass
+    tree = get_parser("java").parse(content)
+    func_types = set(['constructor_declaration', 'method_declaration'])
+    root = tree.root_node
+    package = get_package_name(root, content)
 
-            fqn = "%s%s(%s)" % (package, name, args)
+    func_lines = []
+    func_bodies = []
+    func_meta = []
 
-            init_line = node.position[0]
-            method_body = []
-            closed = 0
-            openned = 0
-
-            for line in file_string_split[init_line - 1:]:
-                if len(line) == 0:
-                    continue
-                line_re = re.sub(comment_inline_pattern, '', line, flags=re.MULTILINE)
-                line_re = re.sub(re_string, '', line_re, flags=re.DOTALL)
-
-                closed += line_re.count('}')
-                openned += line_re.count('{')
-                if (closed - openned) == 0:
-                    method_body.append(line)
-                    break
-                else:
-                    method_body.append(line)
-
-            end_line = init_line + len(method_body) - 1
-            method_body = '\n'.join(method_body)
-
-            method_pos.append((init_line, end_line))
-            method_string.append(method_body)
-
-            method_name.append(fqn)
-    except RecursionError:
-        print("[WARNING] Stack recursion limit exceeded, file will not be processed")
-        return None, None, method_name
-
-    if len(method_pos) != len(method_string):
-        print(f"[WARNING] File {file_path} cannot be parsed due to Java Syntax error")
-        return None, None, method_name
-    else:
-        return method_pos, method_string, method_name
-
-
-def check_repetition(node, name):
-    before = -1
-    i = 0
-    for (obj, n, value) in found_parent:
-        if obj is node:
-            if value == -1:
-                return ''
-            else:
-                return '_' + str(value)
-        else:
-            i += 1
-        if n == name:
-            before += 1
-    found_parent.append((node, name, before))
-    if before == -1:
-        return ''
-    else:
-        return '_' + str(before)
+    def add_children_nodes(node):
+        for child in node.children:
+            if child.type in func_types:
+                func_meta.append(get_function_meta(child, package))
+                func_lines.append(get_lines(child))
+                start, end = get_positional_bytes(child)
+                func_bodies.append(content[start:end])
+            if len(child.children) != 0:
+                add_children_nodes(child)
+    add_children_nodes(root)
+    return func_lines, func_bodies, func_meta

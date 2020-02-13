@@ -3,7 +3,6 @@
 import collections
 import datetime as dt
 import hashlib
-import io
 import os
 import re
 import sys
@@ -11,8 +10,8 @@ import zipfile
 from configparser import ConfigParser
 from multiprocessing import Process, Queue
 
-import extractJavaFunction
-import extractPythonFunction
+from . import extractJavaFunction
+from . import extractPythonFunction
 
 MULTIPLIER = 50000000
 
@@ -179,7 +178,7 @@ def tokenize_blocks(file_string, comment_inline_pattern, comment_open_close_patt
         (block_linenos, blocks) = extractPythonFunction.getFunctions(file_string, file_path)
     # Notice workaround with replacing. It is needed because javalang counts things like String[]::new as syntax errors
     if '.java' in file_extensions:
-        (block_linenos, blocks, experimental_values) = extractJavaFunction.getFunctions(file_string.replace("[]::", "::"), file_path, separators, comment_inline_pattern)
+        (block_linenos, blocks, experimental_values) = extractJavaFunction.get_functions(file_string)
 
     if block_linenos is None:
         print("[INFO] Returning None on tokenize_blocks for file {}".format(file_path))
@@ -389,8 +388,11 @@ if __name__ == '__main__':
     proj_paths = list(enumerate(proj_paths, start=1))
     # it will diverge the process flow on process_file()
 
-    if os.path.exists(PATH_stats_file_folder) or os.path.exists(PATH_bookkeeping_proj_folder) or os.path.exists(PATH_tokens_file_folder):
-        print('[ERROR] ERROR - Folder [{}] or [{}] or [{}] already exists!'.format(PATH_stats_file_folder, PATH_bookkeeping_proj_folder, PATH_tokens_file_folder))
+    if os.path.exists(PATH_stats_file_folder) or os.path.exists(PATH_bookkeeping_proj_folder) or \
+            os.path.exists(PATH_tokens_file_folder):
+        print('[ERROR] ERROR - Folder [{}] or [{}] or [{}] already exists!'.format(
+            PATH_stats_file_folder, PATH_bookkeeping_proj_folder, PATH_tokens_file_folder
+        ))
         sys.exit(1)
     else:
         os.makedirs(PATH_stats_file_folder)
