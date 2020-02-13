@@ -6,6 +6,8 @@ import os
 
 from tree_sitter import Language, Parser
 
+PARSERS = {}
+
 
 def get_tree_sitter_dir() -> str:
     """
@@ -61,6 +63,11 @@ def get_parser(lang: str) -> Parser:
     :param lang: language to use.
     :return: parser.
     """
-    parser = Parser()
-    parser.set_language(Language(get_tree_sitter_so(), lang))
+    global PARSERS
+    if lang not in PARSERS:
+        parser = Parser()
+        parser.set_language(Language(get_tree_sitter_so(), lang))
+        PARSERS[lang] = parser
+    else:
+        parser = PARSERS[lang]
     return parser
