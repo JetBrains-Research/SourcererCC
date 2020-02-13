@@ -47,7 +47,8 @@ def hash_measuring_time(string):
 def read_config():
     global N_PROCESSES, PROJECTS_BATCH
     global PATH_stats_file_folder, PATH_bookkeeping_proj_folder, PATH_tokens_file_folder
-    global separators, comment_inline, comment_inline_pattern, comment_open_tag, comment_close_tag, comment_open_close_pattern
+    global separators, comment_inline, comment_inline_pattern, comment_open_tag, comment_close_tag, \
+        comment_open_close_pattern
     global file_extensions
 
     global init_file_id
@@ -146,9 +147,12 @@ def get_lines_stats(string, comment_open_close_pattern, comment_inline_pattern):
 def process_tokenizer(string, comment_open_close_pattern, comment_inline_pattern, separators):
     hashsum, hash_time = hash_measuring_time(string)
 
-    string, lines, lines_of_code, source_lines_of_code, remove_comments_time = get_lines_stats(string, comment_open_close_pattern, comment_inline_pattern)
+    string, lines, lines_of_code, source_lines_of_code, remove_comments_time = get_lines_stats(
+        string, comment_open_close_pattern, comment_inline_pattern
+    )
 
-    tokens_bag, tokens_count_total, tokens_count_unique, tokenization_time = tokenize_string(string, separators)  # get tokens bag
+    # get tokens bag
+    tokens_bag, tokens_count_total, tokens_count_unique, tokenization_time = tokenize_string(string, separators)
     tokens, format_time = format_tokens(tokens_bag)  # make formatted string with tokens
 
     tokens_hash, hash_delta_time = hash_measuring_time(tokens)
@@ -188,7 +192,8 @@ def tokenize_blocks(file_string, comment_inline_pattern, comment_open_close_patt
     token_time = 0
     blocks_data = []
     file_hash, hash_time = hash_measuring_time(file_string)
-    file_string, lines, LOC, SLOC, re_time = get_lines_stats(file_string, comment_open_close_pattern, comment_inline_pattern)
+    file_string, lines, LOC, SLOC, re_time = get_lines_stats(file_string, comment_open_close_pattern,
+                                                             comment_inline_pattern)
     final_stats = (file_hash, lines, LOC, SLOC)
 
     for i, block_string in enumerate(blocks):
@@ -205,19 +210,22 @@ def tokenize_blocks(file_string, comment_inline_pattern, comment_open_close_patt
     return final_stats, blocks_data, [se_time, token_time, hash_time, re_time]
 
 
-def process_file_contents(file_string, proj_id, file_id, container_path, file_path, file_bytes, proj_url, file_tokens_file, file_stats_file):
+def process_file_contents(file_string, proj_id, file_id, container_path, file_path, file_bytes, proj_url,
+                          file_tokens_file, file_stats_file):
     print(f"[INFO] Started process_file_contents on {file_path}")
     global file_count
     file_count += 1
 
     print(f"[INFO] Started tokenizing blocks on {file_path}")
-    (final_stats, blocks_data, file_parsing_times) = tokenize_blocks(file_string, comment_inline_pattern, comment_open_close_pattern, separators, os.path.join(container_path, file_path))
+    (final_stats, blocks_data, file_parsing_times) = tokenize_blocks(file_string, comment_inline_pattern,
+                                                                     comment_open_close_pattern, separators, os.path.join(container_path, file_path))
     if (final_stats is None) or (blocks_data is None) or (file_parsing_times is None):
         print("[WARNING] " + 'Problems tokenizing file ' + os.path.join(container_path, file_path))
         return [0] * 5
 
     if len(blocks_data) > 90000:
-        print("[WARNING] " + 'File ' + os.path.join(container_path, file_path) + ' has ' + str(len(blocks_data)) + ' blocks, more than 90000. Range MUST be increased.')
+        print("[WARNING] " + 'File ' + os.path.join(container_path, file_path) + ' has ' + str(len(blocks_data)) +
+              ' blocks, more than 90000. Range MUST be increased.')
         return [0] * 5
 
     # write file stats
@@ -226,7 +234,8 @@ def process_file_contents(file_string, proj_id, file_id, container_path, file_pa
 
     # file stats start with a letter 'f'
     (file_hash, lines, LOC, SLOC) = final_stats
-    file_stats_file.write('f,{},{},\"{}\",\"{}\",\"{}\",{},{},{},{}\n'.format(proj_id, file_id, file_path, file_url, file_hash, file_bytes, lines, LOC, SLOC))
+    file_stats_file.write('f,{},{},\"{}\",\"{}\",\"{}\",{},{},{},{}\n'.format(proj_id, file_id, file_path, file_url,
+                                                                              file_hash, file_bytes, lines, LOC, SLOC))
     blocks_data = zip(range(10000, 99999), blocks_data)
 
     ww_time = dt.datetime.now()
@@ -240,7 +249,8 @@ def process_file_contents(file_string, proj_id, file_id, container_path, file_pa
             (tokens_count_total, tokens_count_unique, token_hash, tokens) = blocks_tokens
 
             # Adjust the blocks stats written to the files, file stats start with a letter 'b'
-            file_stats_file.write('b,{},{},\"{}\",{},{},{},{},{}\n'.format(proj_id, block_id, block_hash, block_lines, block_LOC, block_SLOC, start_line, end_line))
+            file_stats_file.write('b,{},{},\"{}\",{},{},{},{},{}\n'.format(proj_id, block_id, block_hash, block_lines,
+                                                                           block_LOC, block_SLOC, start_line, end_line))
             file_tokens_file.write(','.join([proj_id, block_id, str(tokens_count_total), str(tokens_count_unique)]))
             if len(experimental_values) != 0:
                 file_tokens_file.write("," + experimental_values.replace(",", ";"))
@@ -272,7 +282,8 @@ def process_zip_ball(process_num, proj_id, proj_path, proj_url, base_file_id, fi
                 zip_time += (dt.datetime.now() - z_time).microseconds
 
                 if my_zip_file is None:
-                    print("[WARNING] Unable to open file (2) <{}> (process {})".format(os.path.join(proj_path, file), process_num))
+                    print("[WARNING] Unable to open file (2) <{}> (process {})".format(os.path.join(proj_path, file),
+                                                                                       process_num))
                     continue
 
                 file_string = ""
@@ -286,7 +297,8 @@ def process_zip_ball(process_num, proj_id, proj_path, proj_url, base_file_id, fi
                 file_id = process_num * MULTIPLIER + base_file_id + file_count
                 file_path = file.filename
                 file_bytes = str(file.file_size)
-                times = process_file_contents(file_string, proj_id, file_id, proj_path, file_path, file_bytes, proj_url, file_tokens_file, file_stats_file)
+                times = process_file_contents(file_string, proj_id, file_id, proj_path, file_path, file_bytes, proj_url,
+                                              file_tokens_file, file_stats_file)
                 string_time += times[0]
                 tokens_time += times[1]
                 hash_time += times[2]
@@ -299,13 +311,15 @@ def process_zip_ball(process_num, proj_id, proj_path, proj_url, base_file_id, fi
     return zip_time, file_time, string_time, tokens_time, write_time, hash_time, regex_time
 
 
-def process_one_project(process_num, proj_id, proj_path, base_file_id, file_tokens_file, file_bookkeeping_proj, file_stats_file):
+def process_one_project(process_num, proj_id, proj_path, base_file_id, file_tokens_file, file_bookkeeping_proj,
+                        file_stats_file):
     p_start = dt.datetime.now()
 
     proj_url = 'NULL'
     proj_id = str(proj_id_flag) + proj_id
     if not os.path.isfile(proj_path):
-        print("[WARNING] " + 'Unable to open project <' + proj_id + ',' + proj_path + '> (process ' + str(process_num) + ')')
+        print("[WARNING] " + 'Unable to open project <' + proj_id + ',' + proj_path + '> (process ' + str(process_num) +
+              ')')
         return
     times = process_zip_ball(process_num, proj_id, proj_path, proj_url, base_file_id, file_tokens_file, file_stats_file)
     if times is None:
@@ -327,16 +341,20 @@ def process_one_project(process_num, proj_id, proj_path, base_file_id, file_toke
 
 def process_projects(process_num, list_projects, base_file_id, global_queue):
     file_files_tokens_file = os.path.join(PATH_tokens_file_folder, 'files-tokens-{}.tokens'.format(process_num))
-    file_bookkeeping_proj_name = os.path.join(PATH_bookkeeping_proj_folder, 'bookkeeping-proj-{}.projs'.format(process_num))
+    file_bookkeeping_proj_name = os.path.join(PATH_bookkeeping_proj_folder,
+                                              'bookkeeping-proj-{}.projs'.format(process_num))
     file_files_stats_file = os.path.join(PATH_stats_file_folder, 'files-stats-{}.stats'.format(process_num))
 
     global file_count
     file_count = 0
     print("[INFO] Process {} starting".format(process_num))
-    with open(file_files_tokens_file, 'a+', encoding="utf-8") as tokens_file, open(file_bookkeeping_proj_name, 'a+', encoding="utf-8") as bookkeeping_file, open(file_files_stats_file, 'a+', encoding="utf-8") as stats_file:
+    with open(file_files_tokens_file, 'a+', encoding="utf-8") as tokens_file, \
+            open(file_bookkeeping_proj_name, 'a+', encoding="utf-8") as bookkeeping_file, \
+            open(file_files_stats_file, 'a+', encoding="utf-8") as stats_file:
         p_start = dt.datetime.now()
         for proj_id, proj_path in list_projects:
-            process_one_project(process_num, str(proj_id), proj_path, base_file_id, tokens_file, bookkeeping_file, stats_file)
+            process_one_project(process_num, str(proj_id), proj_path, base_file_id, tokens_file, bookkeeping_file,
+                                stats_file)
 
     p_elapsed = (dt.datetime.now() - p_start).seconds
     print("[INFO] " + 'Process {} finished. {} files in {} s'.format(process_num, file_count, p_elapsed))
@@ -357,7 +375,8 @@ def start_child(processes, global_queue, proj_paths, batch):
     del proj_paths[:batch]
 
     print("[INFO] Starting new process {}".format(pid))
-    p = Process(name='Process ' + str(pid), target=process_projects, args=(pid, paths_batch, processes[pid][1], global_queue))
+    p = Process(name='Process ' + str(pid), target=process_projects, args=(pid, paths_batch, processes[pid][1],
+                                                                           global_queue))
     processes[pid][0] = p
     p.start()
 
@@ -368,7 +387,8 @@ def kill_child(processes, pid, n_files_processed):
     if processes[pid][0] is not None:
         processes[pid][0] = None
         processes[pid][1] += n_files_processed
-        print("[INFO] Process {} finished, {} files processed {}. Current total: {}".format(pid, n_files_processed, processes[pid][1], file_count))
+        print("[INFO] Process {} finished, {} files processed {}. Current total: {}".format(pid, n_files_processed,
+                                                                                            processes[pid][1], file_count))
 
 
 def active_process_count(processes):
