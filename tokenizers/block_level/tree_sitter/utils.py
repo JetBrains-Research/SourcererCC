@@ -4,7 +4,7 @@ Tree-sitter related functionality.
 
 import os
 
-from tree_sitter import Language
+from tree_sitter import Language, Parser
 
 
 def get_tree_sitter_dir() -> str:
@@ -52,3 +52,15 @@ def main() -> None:
             java_grammar_loc
         ]
     )
+
+
+def get_parser(lang: str) -> Parser:
+    """
+    Initialize parser for specific language.
+
+    :param lang: language to use.
+    :return: parser.
+    """
+    parser = Parser()
+    parser.set_language(Language(get_tree_sitter_so(), lang))
+    return parser
