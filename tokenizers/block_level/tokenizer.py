@@ -177,9 +177,22 @@ def tokenize_blocks(file_string, comment_inline_pattern, comment_open_close_patt
     block_linenos = None
     blocks = None
     experimental_values = ''
-    # Notice workaround with replacing. It is needed because javalang counts things like String[]::new as syntax errors
-    if '.java' in file_extensions:
+    if ".java" in file_extensions:
         block_linenos, blocks = FunctionExtractor.get_functions(content=file_string, lang="java")
+    if ".cs" in file_extensions:
+        block_linenos, blocks = FunctionExtractor.get_functions(content=file_string, lang="csharp")
+
+    cpp_extensions = ".cpp .h .C .hpp .c++ .cxx .CPP".split()
+    for extension in cpp_extensions:
+        if extension in file_extensions:
+            block_linenos, blocks = FunctionExtractor.get_functions(content=file_string, lang="cpp")
+            break
+
+    c_extensions = ".c .h .cc".split()
+    for extension in c_extensions:
+        if extension in file_extensions:
+            block_linenos, blocks = FunctionExtractor.get_functions(content=file_string, lang="c")
+            break
 
     if block_linenos is None:
         print("[INFO] Returning None on tokenize_blocks for file {}".format(file_path))
