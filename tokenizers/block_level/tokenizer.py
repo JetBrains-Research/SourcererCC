@@ -11,7 +11,6 @@ from configparser import ConfigParser
 from multiprocessing import Process, Queue
 
 from .function_extractor import FunctionExtractor
-from . import extractPythonFunction
 
 MULTIPLIER = 50000000
 
@@ -178,8 +177,6 @@ def tokenize_blocks(file_string, comment_inline_pattern, comment_open_close_patt
     block_linenos = None
     blocks = None
     experimental_values = ''
-    if '.py' in file_extensions:
-        (block_linenos, blocks) = extractPythonFunction.getFunctions(file_string, file_path)
     # Notice workaround with replacing. It is needed because javalang counts things like String[]::new as syntax errors
     if '.java' in file_extensions:
         block_linenos, blocks = FunctionExtractor.get_functions(content=file_string, lang="java")
