@@ -7,49 +7,6 @@ import tree_sitter
 from .parsers.utils import get_parser
 
 
-def get_func_args(func_node: tree_sitter.Node, content: Union[bytes, str]) -> Union[bytes, str]:
-    """
-    Extract arguments given function node and file content.
-
-    :param func_node: function node.
-    :param content: file content that was used for parsing.
-    :return: bytes/str for function arguments.
-    """
-    for node in func_node.children:
-        if node.type == "formal_parameters":
-            return content[node.start_byte:node.end_byte]
-
-
-def get_func_name(func_node: tree_sitter.Node, content: Union[bytes, str]) -> Union[bytes, str]:
-    """
-    Extract function name given function node and file content.
-
-    :param func_node: function node.
-    :param content: file content that was used for parsing.
-    :return: bytes/str for function name.
-    """
-    assert func_node.type in ["constructor_declaration", "method_declaration"]
-    for node in func_node.children:
-        if node.type == "identifier":
-            return content[node.start_byte:node.end_byte]
-
-
-def get_package_name(root_node: tree_sitter.Node, content: Union[bytes, str]) -> Union[bytes, str]:
-    """
-    Extract package name given root node and file content.
-
-    :param root_node: root node after parsing of content.
-    :param content: file content that was used for parsing.
-    :return: bytes/str for Java package declaration or "JHawkDefaultPackage" for missed one as default.
-    """
-    for ch in root_node.children:
-        if ch.type == "package_declaration":
-            for ch_ in ch.children:
-                if ch_.type == "scoped_identifier":
-                    return content[ch_.start_byte:ch_.end_byte]
-    return "JHawkDefaultPackage"
-
-
 def get_lines(node: tree_sitter.Node) -> Tuple[int, int]:
     """
     Extract start and end line.
@@ -72,9 +29,96 @@ def get_positional_bytes(node: tree_sitter.Node) -> Tuple[int, int]:
     return start, end
 
 
+class FunctionExtractor:
+    """Multi-language function extractor."""
+    FUNC_TYPE = {"java": set(["constructor_declaration", "method_declaration"]),
+                 "c": set(['function_definition']),
+                 "csharp": set(['method_declaration', 'indexer_declaration', 'property_declaration']),
+                 "cpp": set(['function_definition'])}
+
+    @classmethod
+    def get_functions(cls, content: Union[bytes, str], lang: str) -> \
+            Tuple[List[Tuple[int, int]], List[bytes]]:
+        """
+        Parse and extract function given content.
+        :param content: file content.
+        :param lang: language to use.
+        :return: 2 lists. First contains list of tuples with start and end line number.
+                 Second contains functions itself.
+        """
+        assert isinstance(content, (bytes, str))
+        try:
+            content = content.encode()
+        except AttributeError:
+            pass
+        tree = get_parser(lang).parse(content)
+        root = tree.root_node
+
+        func_lines = []
+        func_bodies = []
+
+        def traverse_tree(node):
+            """
+            Traverse tree and check for functions.
+            """
+            for child in node.children:
+                if child.type in cls.FUNC_TYPE[lang]:
+                    func_lines.append(get_lines(child))
+                    start, end = get_positional_bytes(child)
+                    func_bodies.append(content[start:end])
+                if len(child.children) != 0:
+                    traverse_tree(child)
+
+        traverse_tree(root)
+        return func_lines, func_bodies
+
+
+def get_func_args(func_node: tree_sitter.Node, content: Union[bytes, str]) -> Union[bytes, str]:
+    """
+    Java specific: Extract arguments given function node and file content.
+
+    :param func_node: function node.
+    :param content: file content that was used for parsing.
+    :return: bytes/str for function arguments.
+    """
+    for node in func_node.children:
+        if node.type == "formal_parameters":
+            return content[node.start_byte:node.end_byte]
+
+
+def get_func_name(func_node: tree_sitter.Node, content: Union[bytes, str]) -> Union[bytes, str]:
+    """
+    Java specific: Extract function name given function node and file content.
+
+    :param func_node: function node.
+    :param content: file content that was used for parsing.
+    :return: bytes/str for function name.
+    """
+    assert func_node.type in ["constructor_declaration", "method_declaration"]
+    for node in func_node.children:
+        if node.type == "identifier":
+            return content[node.start_byte:node.end_byte]
+
+
+def get_package_name(root_node: tree_sitter.Node, content: Union[bytes, str]) -> Union[bytes, str]:
+    """
+    Java specific: extract package name given root node and file content.
+
+    :param root_node: root node after parsing of content.
+    :param content: file content that was used for parsing.
+    :return: bytes/str for Java package declaration or "JHawkDefaultPackage" for missed one as default.
+    """
+    for ch in root_node.children:
+        if ch.type == "package_declaration":
+            for ch_ in ch.children:
+                if ch_.type == "scoped_identifier":
+                    return content[ch_.start_byte:ch_.end_byte]
+    return "JHawkDefaultPackage"
+
+
 def get_function_meta(func_node: tree_sitter.Node, package_name: Union[bytes, str], content: Union[bytes, str]) -> str:
     """
-    Extract function metadata - package, name, arguments.
+    Java specific: Extract function metadata - package, name, arguments.
 
     :param func_node: function node.
     :param package_name: package name.
@@ -93,7 +137,7 @@ def get_function_meta(func_node: tree_sitter.Node, package_name: Union[bytes, st
 
 def get_functions(content: Union[bytes, str]) -> Tuple[List[Tuple[int, int]], List[bytes], List[str]]:
     """
-    Parse and extract function given content.
+    Java specific: Parse and extract function given content.
     :param content: java-file content.
     :return: 3 lists. First contains list of tuples with start and end line number.
              Second contains functions itself.
