@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # run this script on master
-
 realpath() {
     [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
 }
