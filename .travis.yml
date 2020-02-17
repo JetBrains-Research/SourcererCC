@@ -1,0 +1,35 @@
+language: python
+python:
+  - "3.6"
+before_install:
+  #- sudo apt install openjdk-8-jdk
+  - sudo apt-get install ant
+  - pip3 install pylint
+install:
+  - pip3 install -r requirements.txt
+script:
+  # Linting
+  - pylint prettify_results.py --exit-zero
+  - pylint tokenizers/block_level_tokenizer.py --exit-zero
+  - pylint tokenizers/extract_java_functions.py --exit-zero
+  - pylint tokenizers/block_tokenizer_tests.py --exit-zero
+  - pylint tokenizers/utils.py --exit-zero
+  - pylint tokenizers/block_tokenizer.py --exit-zero
+  - pylint tokenizers/extract_python_functions.py --exit-zero
+  - pylint tokenizers/separate-file-block-stats.py --exit-zero
+  - pylint clone-detector/*.py --exit-zero
+  # Unit tests
+  - cd tokenizers; python3 -m unittest block_tokenizer_tests.py; cd ..
+  # Regression tests
+  - wget "https://github.com/a1arick/spbsu-programming-homework/archive/master.zip"
+  - cp master.zip tokenizers/master.zip
+  - echo "master.zip" > tokenizers/project-list.txt
+  - cd tokenizers
+  - ./block_level_tokenizer.py
+  - mv blocks_tokens/* ../clone-detector/input/dataset/blocks.file
+  - cd ../clone-detector
+  - time ./controller.py
+  - cat NODE_*/output8.0/query*.txt > ../results.pairs
+  - cd ..
+  - cat results.pairs
+  - ./prettify_results.py --resultsFile=results.pairs --statsFiles=tokenizers/blocks_stats/files-stats-0.stats
