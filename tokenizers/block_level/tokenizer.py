@@ -10,7 +10,9 @@ import zipfile
 from configparser import ConfigParser
 from multiprocessing import Process, Queue
 
-from .function_extractor import FunctionExtractor
+from tokenizers.block_level.function_extractor import FunctionExtractor
+
+
 
 MULTIPLIER = 50000000
 
@@ -216,7 +218,8 @@ def tokenize_blocks(file_string, comment_inline_pattern, comment_open_close_patt
         se_time += tmp["times"][0]
         token_time += tmp["times"][1]
         re_time += tmp["times"][3]
-        blocks_data.append((block_tokens, block_stats, experimental_values[i]))
+        # TODO: add function name (or delete it)
+        blocks_data.append((block_tokens, block_stats, "fix_me"))
     return final_stats, blocks_data, [se_time, token_time, hash_time, re_time]
 
 

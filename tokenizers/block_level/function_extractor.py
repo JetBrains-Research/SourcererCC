@@ -65,7 +65,7 @@ class FunctionExtractor:
                 if child.type in cls.FUNC_TYPE[lang]:
                     func_lines.append(get_lines(child))
                     start, end = get_positional_bytes(child)
-                    func_bodies.append(content[start:end])
+                    func_bodies.append(content[start:end].decode("utf-8"))
                 if len(child.children) != 0:
                     traverse_tree(child)
 
