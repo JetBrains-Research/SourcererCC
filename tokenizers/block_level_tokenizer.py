@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-
 import datetime as dt
 import os
 import sys
 from multiprocessing import Process, Queue
 
-from block_tokenizer import Tokenizer
+from .block_tokenizer import Tokenizer
 
 
 def process_projects(process_num, list_projects, base_file_id, threads_queue, tokenizer):
@@ -65,7 +64,7 @@ def active_process_count(processes):
 
 
 if __name__ == '__main__':
-    tokenizer = Tokenizer("block_config.ini")
+    tokenizer = Tokenizer(os.path.join(os.path.abspath(os.path.dirname(__file__)), "block_config.ini"))
     language_config, inner_config, dirs_config = tokenizer.get_configs()
     PATH_stats_file_folder = dirs_config["stats_folder"]
     PATH_bookkeeping_proj_folder = dirs_config["bookkeeping_folder"]
