@@ -19,15 +19,14 @@ script:
   - pylint tokenizers/separate-file-block-stats.py --exit-zero
   - pylint clone-detector/*.py --exit-zero
   # Unit tests
-  - cd tokenizers; python3 -m unittest block_tokenizer_tests.py; cd ..
+  - python3 -m tokenizers.parsers
+  - python3 -m unittest tokenizers.block_tokenizer_tests
   # Regression tests
   - wget "https://github.com/a1arick/spbsu-programming-homework/archive/master.zip"
-  - cp master.zip tokenizers/master.zip
-  - echo "master.zip" > tokenizers/project-list.txt
-  - cd tokenizers
-  - ./block_level_tokenizer.py
-  - mv blocks_tokens/* ../clone-detector/input/dataset/blocks.file
-  - cd ../clone-detector
+  - echo "master.zip" > project-list.txt
+  - python3 -m tokenizers.block_level_tokenizer
+  - mv blocks_tokens/* clone-detector/input/dataset/blocks.file
+  - cd clone-detector
   - time ./controller.py
   - cat NODE_*/output8.0/query*.txt > ../results.pairs
   - cd ..

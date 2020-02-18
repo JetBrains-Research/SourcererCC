@@ -6,7 +6,7 @@ import sys
 from typing import List, Tuple, Union
 import zipfile
 
-from tokenizers.function_extractor import FunctionExtractor
+from .function_extractor import FunctionExtractor
 from .utils import count_lines, hash_measuring_time, remove_comments, tokenize_string, format_tokens
 
 # TODO: fix style.
