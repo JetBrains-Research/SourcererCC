@@ -1,16 +1,15 @@
-import datetime as dt
-import zipfile
-import re
-import collections
-import hashlib
-import os
-import sys
 from configparser import ConfigParser
+import datetime as dt
+import os
+import re
+import sys
+from typing import List, Tuple, Union
+import zipfile
 
+from tokenizers.function_extractor import FunctionExtractor
+from .utils import count_lines, hash_measuring_time, remove_comments, tokenize_string, format_tokens
 
-from utils import count_lines, hash_measuring_time, remove_comments, tokenize_string, format_tokens
-import extract_java_functions
-import extract_python_functions
+# TODO: fix style.
 
 
 def read_language_config(config):
@@ -62,19 +61,42 @@ class Tokenizer():
         self.inner_config["MULTIPLIER"] = 50000000
         self.dirs_config = read_dirs_config(config)
         self.file_count = 0
+        self._lang = None
 
+    @property
+    def lang(self) -> str:
+        """
+        Programming language (based on heuristics).
+        # TODO: replace with proper language classification.
+        :return:  language.
+        """
+        if self._lang is None:
+            if ".java" in self.language_config["extensions"]:
+                self._lang = "java"
+                return self._lang
+            elif ".cs" in self.language_config["extensions"]:
+                self._lang = "csharp"
+                return self._lang
+            cpp_extensions = ".cpp .h .C .hpp .c++ .cxx .CPP".split()
+            for extension in cpp_extensions:
+                if extension in self.language_config["extensions"]:
+                    self._lang = "cpp"
+                    return self._lang
+            c_extensions = ".c .h .cc".split()
+            for extension in c_extensions:
+                if extension in self.language_config["extensions"]:
+                    self._lang = "c"
+                    return self._lang
+        return self._lang
 
     def get_configs(self):
         return self.language_config, self.inner_config, self.dirs_config
 
-
     def get_file_count(self):
         return self.file_count
 
-
     def increase_file_count(self, files_number):
         self.file_count += files_number
-
 
     def get_lines_stats(self, string):
         def is_line_empty(line):
@@ -99,7 +121,8 @@ class Tokenizer():
 
         string, lines, loc, sloc, remove_comments_time = self.get_lines_stats(string)
 
-        tokens_bag, tokens_count_total, tokens_count_unique = tokenize_string(string, self.language_config)  # get tokens bag
+        # get tokens bag
+        tokens_bag, tokens_count_total, tokens_count_unique = tokenize_string(string, self.language_config)
         tokens, format_time = format_tokens(tokens_bag)  # make formatted string with tokens
 
         tokens_hash, hash_delta_time = hash_measuring_time(tokens)
@@ -111,20 +134,21 @@ class Tokenizer():
             "string_time": remove_comments_time
         }
 
-
-    def parse_blocks(self, file_string, file_path):
-        block_linenos = None
-        blocks = None
-        if '.py' in self.language_config["extensions"]:
-            (block_linenos, blocks) = extract_python_functions.get_functions(file_string, file_path)
-            return (block_linenos, blocks, "PYTHON_FUNCTION_SIGNATURE_NOT_IMPLEMENTED")
-        if '.java' in self.language_config["extensions"]:
-            # Workaround with replacing is needed because javalang counts things like String[]::new as syntax errors
-            tmp_file_string = file_string.replace("[]::", "::")
-            comment_inline_pattern = self.language_config["comment_inline_pattern"]
-            return extract_java_functions.get_functions(tmp_file_string, file_path, comment_inline_pattern)
-        return (None, None, None)
-
+    def parse_blocks(self, content: Union[bytes, str]) -> Tuple[List[Tuple[int, int]], List[bytes], List[str]]:
+        """
+        Parse source code and extract functions, start & end lines,
+        :param content: content of file.
+        :return: 3 lists: each element in first list contains start and end line number,
+                          second list contains function bodies,
+                          third list should contain function names/metadata.
+        """
+        try:
+            block_linenos, blocks = FunctionExtractor.get_functions(content=content, lang=self.lang)
+            # TODO: add functionality to extract function metadata
+            return block_linenos, blocks, "FIXME"
+        except Exception:
+            # dummy fix to make pipeline resistant to bugs :)
+            return None, None, None
 
     def tokenize_blocks(self, file_string, file_path):
         times = {
@@ -136,7 +160,7 @@ class Tokenizer():
             "regex_time": 0
         }
 
-        block_linenos, blocks, function_name = self.parse_blocks(file_string, file_path)
+        block_linenos, blocks, function_name = self.parse_blocks(file_string)
         if block_linenos is None:
             print(f"[INFO] Incorrect file {file_path}")
             return None, None, None

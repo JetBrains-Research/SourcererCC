@@ -3,3 +3,5 @@ venv/
 .vscode/*
 __pycache__/*
 *.pyc
+__pycache__/
+tokenizers/parsers/build/
