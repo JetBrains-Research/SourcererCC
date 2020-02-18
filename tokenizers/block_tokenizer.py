@@ -145,7 +145,7 @@ class Tokenizer():
         try:
             block_linenos, blocks = FunctionExtractor.get_functions(content=content, lang=self.lang)
             # TODO: add functionality to extract function metadata
-            return block_linenos, blocks, "FIXME"
+            return block_linenos, blocks, ["FIXME"] * len(block_linenos)
         except Exception:
             # dummy fix to make pipeline resistant to bugs :)
             return None, None, None
