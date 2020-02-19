@@ -31,4 +31,4 @@ script:
   - cat NODE_*/output8.0/query*.txt > ../results.pairs
   - cd ..
   - cat results.pairs
-  - ./prettify_results.py --resultsFile=results.pairs --statsFiles=tokenizers/blocks_stats/files-stats-0.stats
+  - ./prettify_results.py --resultsFile=results.pairs --statsFiles=blocks_stats/files-stats-0.stats
