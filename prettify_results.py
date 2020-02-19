@@ -234,24 +234,15 @@ def results_to_map(results_file, stats_files):
 if __name__ == "__main__":
     PARSER = ArgumentParser()
     PARSER.add_argument("-r", "--resultsFile", dest="results_file",\
-        default=False, help="File with results of SourcererCC (results.pairs).")
+        required=True, help="File with results of SourcererCC (results.pairs).")
     PARSER.add_argument("-s", "--statsFiles", dest="stats_files",\
-        default=False, help="File or folder with stats files (*.stats).")
+        required=True, help="File or folder with stats files (*.stats).")
 
     if len(sys.argv) == 1:
         print("No arguments were passed. Try running with '--help'.")
         sys.exit(0)
 
     OPTIONS = PARSER.parse_args(sys.argv[1:])
-
-    if not OPTIONS.stats_files:
-        print("No stats files specified. Exiting")
-        sys.exit(0)
-
-    if not OPTIONS.results_file:
-        print("No results files specified. Exiting")
-        sys.exit(0)
-
     TIME_START = dt.datetime.now()
 
     RESULTS_MAP = results_to_map(OPTIONS.results_file, OPTIONS.stats_files)
