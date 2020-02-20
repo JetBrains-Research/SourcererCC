@@ -242,7 +242,7 @@ if __name__ == "__main__":
         print("No arguments were passed. Try running with '--help'.")
         sys.exit(0)
 
-    OPTIONS = PARSER.parse_args(sys.argv[1:])
+    OPTIONS = PARSER.parse_args()
     TIME_START = dt.datetime.now()
 
     RESULTS_MAP = results_to_map(OPTIONS.results_file, OPTIONS.stats_files)
