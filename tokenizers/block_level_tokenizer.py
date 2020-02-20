@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import argparse
 import datetime as dt
 import os
 import sys
@@ -64,7 +65,11 @@ def active_process_count(processes):
 
 
 if __name__ == '__main__':
-    tokenizer = Tokenizer(os.path.join(os.path.abspath(os.path.dirname(__file__)), "block_config.ini"))
+    deafult_config = os.path.join(os.path.abspath(os.path.dirname(__file__)), "block_config.ini")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--input", default=deafult_config, help="Path to config.")
+    args = parser.parse_args()
+    tokenizer = Tokenizer(args.input)
     language_config, inner_config, dirs_config = tokenizer.get_configs()
     PATH_stats_file_folder = dirs_config["stats_folder"]
     PATH_bookkeeping_proj_folder = dirs_config["bookkeeping_folder"]
