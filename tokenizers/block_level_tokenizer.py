@@ -65,7 +65,7 @@ def active_process_count(processes):
 
 
 if __name__ == '__main__':
-    deafult_config = os.path.join(os.path.abspath(os.path.dirname(__file__)), "block_config.ini")
+    deafult_config = os.path.join(os.path.abspath(os.path.dirname(__file__)), "configs/java.ini")
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", default=deafult_config, help="Path to config.")
     args = parser.parse_args()
