@@ -238,10 +238,6 @@ if __name__ == "__main__":
     PARSER.add_argument("-s", "--statsFiles", dest="stats_files",\
         required=True, help="File or folder with stats files (*.stats).")
 
-    if len(sys.argv) == 1:
-        print("No arguments were passed. Try running with '--help'.")
-        sys.exit(0)
-
     OPTIONS = PARSER.parse_args()
     TIME_START = dt.datetime.now()
 
