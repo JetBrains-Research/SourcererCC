@@ -7,7 +7,7 @@ from .utils import md5_hash
 
 
 REGEX = re.compile(r".+@@::@@\d+")
-config_loc = os.path.join(os.path.abspath(os.path.dirname(__file__)), "block_config.ini")
+config_loc = os.path.join(os.path.abspath(os.path.dirname(__file__)), "configs/java.ini")
 tokenizer = Tokenizer(config_loc)
 
 
