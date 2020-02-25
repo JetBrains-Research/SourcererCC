@@ -167,13 +167,14 @@ namespace CalculatorUITestFramework {
         }
     }
 }"""
+        prop_body = "public static WindowsElement Window => session.FindElementByClassName();"
         fun_body = """        public int AddNumbers(int number1, int number2) {
             int result = number1 + number2;
             return result;
         }"""
         fun_lines, fun = FunctionExtractor.get_functions(string, "c_sharp")
-        self.assertEqual(fun_lines, [(13, 16)])
-        self.assertEqual(fun, [fun_body])
+        self.assertEqual(fun_lines, [(7, 7), (13, 16)])
+        self.assertEqual(fun, [prop_body, fun_body])
 
     def test_csharp_file_with_main(self):
         string = """using OpenQA.Selenium;
@@ -206,5 +207,5 @@ namespace CalculatorUITestFramework {
             return 0;
         }"""
         fun_lines, fun = FunctionExtractor.get_functions(string, "c_sharp")
-        self.assertEqual(fun_lines, [(10, 13), (17, 19)])
-        self.assertEqual(fun, [fun_body, main_body])
+        self.assertEqual(fun_lines, [(7, 7), (10, 13), (17, 19)])
+        self.assertEqual(fun, [prop_body, fun_body, main_body])
