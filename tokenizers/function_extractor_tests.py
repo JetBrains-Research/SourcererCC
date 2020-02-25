@@ -124,7 +124,7 @@ int main() {
     return 0;
 }"""
         fun_lines, fun = FunctionExtractor.get_functions(string, "cpp")
-        self.assertEqual(fun_lines, [(7, 12), (15, 23)])
+        self.assertEqual(fun_lines, [(8, 13), (15, 23)])
         self.assertEqual(fun, [fun_body, main_body])
 
     def test_java_file(self):
@@ -137,10 +137,10 @@ int main() {
     	return "Hello, World!";
     }
 }"""
-        main_body = """    public static void main(String[] args) {
+        main_body = """public static void main(String[] args) {
         System.out.println(приветМир());
     }"""
-        fun_body = """    private static String приветМир() {
+        fun_body = """private static String приветМир() {
     	return "Hello, World!";
     }"""
         fun_lines, fun = FunctionExtractor.get_functions(string, "java")
