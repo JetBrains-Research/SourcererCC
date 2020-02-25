@@ -25,8 +25,8 @@ class TestParser(unittest.TestCase):
                        printf("%s", "asciiじゃない文字");
                      }"""
         fun_lines, fun = FunctionExtractor.get_functions(string, "cpp")
-        self.assertEqual(fun_lines, [4, 10])
-        self.assertEqual(fun, fun_body)
+        self.assertEqual(fun_lines, [(4, 10)])
+        self.assertEqual(fun, [fun_body])
 
     def test_simple_file_with_main(self):
         string = """#include GLFW_INCLUDE_GLU
@@ -53,5 +53,5 @@ class TestParser(unittest.TestCase):
                        printf("%s", "asciiじゃない文字");
                      }"""
         fun_lines, fun = FunctionExtractor.get_functions(string, "cpp")
-        self.assertEqual(fun_lines, [4, 10])
+        self.assertEqual(fun_lines, [(4, 10), (12, 15)])
         self.assertEqual(fun, fun_body)
