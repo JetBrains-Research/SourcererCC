@@ -52,6 +52,10 @@ class TestParser(unittest.TestCase):
                        }
                        printf("%s", "asciiじゃない文字");
                      }"""
+        main_body = """int main() {
+                       printf("Hello, world!");
+                       return 0;
+                     }"""
         fun_lines, fun = FunctionExtractor.get_functions(string, "cpp")
         self.assertEqual(fun_lines, [(4, 10), (12, 15)])
-        self.assertEqual(fun, fun_body)
+        self.assertEqual(fun, [fun_body, main_body])
