@@ -1,4 +1,3 @@
-
 import unittest
 
 from .function_extractor import FunctionExtractor
@@ -208,5 +207,5 @@ namespace CalculatorUITestFramework {
             return 0;
         }"""
         fun_lines, fun = FunctionExtractor.get_functions(string, "c_sharp")
-        self.assertEqual(fun_lines, [(7, 7), (10, 13), (17, 19)])
+        self.assertEqual(fun_lines, [(6, 6), (10, 13), (17, 19)])
         self.assertEqual(fun, [prop_body, fun_body, main_body])
