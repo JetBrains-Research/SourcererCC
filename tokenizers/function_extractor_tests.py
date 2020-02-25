@@ -168,7 +168,7 @@ namespace CalculatorUITestFramework {
     }
 }"""
         prop_body = "public static WindowsElement Window => session.FindElementByClassName();"
-        fun_body = """        public int AddNumbers(int number1, int number2) {
+        fun_body = """public int AddNumbers(int number1, int number2) {
             int result = number1 + number2;
             return result;
         }"""
@@ -199,11 +199,12 @@ namespace CalculatorUITestFramework {
         }
     }
 }"""
-        fun_body = """        public int AddNumbers(int number1, int number2) {
+        prop_body = "public static WindowsElement Window => session.FindElementByClassName();"
+        fun_body = """public int AddNumbers(int number1, int number2) {
             int result = number1 + number2;
             return result;
         }"""
-        main_body = """        public static void int main(String[] args) {
+        main_body = """public static void int main(String[] args) {
             return 0;
         }"""
         fun_lines, fun = FunctionExtractor.get_functions(string, "c_sharp")
