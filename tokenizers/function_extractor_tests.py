@@ -171,7 +171,7 @@ namespace CalculatorUITestFramework {
             int result = number1 + number2;
             return result;
         }"""
-        fun_lines, fun = FunctionExtractor.get_functions(string, "c sharp")
+        fun_lines, fun = FunctionExtractor.get_functions(string, "c_sharp")
         self.assertEqual(fun_lines, [(13, 16)])
         self.assertEqual(fun, [fun_body])
 
@@ -205,6 +205,6 @@ namespace CalculatorUITestFramework {
         main_body = """        public static void int main(String[] args) {
             return 0;
         }"""
-        fun_lines, fun = FunctionExtractor.get_functions(string, "c sharp")
+        fun_lines, fun = FunctionExtractor.get_functions(string, "c_sharp")
         self.assertEqual(fun_lines, [(10, 13), (17, 19)])
         self.assertEqual(fun, [fun_body, main_body])
