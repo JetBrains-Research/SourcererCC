@@ -25,7 +25,7 @@ class TestParser(unittest.TestCase):
                        printf("%s", "asciiじゃない文字");
                      }"""
         fun_lines, fun = FunctionExtractor.get_functions(string, "cpp")
-        self.assertSetEqual(fun_lines, [4, 10])
+        self.assertEqual(fun_lines, [4, 10])
         self.assertEqual(fun, fun_body)
 
     def test_simple_file_with_main(self):
