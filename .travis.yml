@@ -20,8 +20,7 @@ script:
   - pylint clone-detector/*.py --exit-zero
   # Unit tests
   - python3 -m tokenizers.parsers
-  - python3 -m unittest tokenizers.block_tokenizer_tests
-  - python3 -m unittest tokenizers.function_extractor_tests
+  - python3 -m unittest discover
   # Regression tests
   - wget "https://github.com/a1arick/spbsu-programming-homework/archive/master.zip"
   - echo "master.zip" > project-list.txt
