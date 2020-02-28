@@ -1,5 +1,4 @@
 from hashlib import md5
-import os
 import datetime as dt
 import re
 from collections import Counter
