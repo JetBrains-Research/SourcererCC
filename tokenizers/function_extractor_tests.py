@@ -1,49 +1,31 @@
 import unittest
+import os
 
 from .function_extractor import FunctionExtractor
 
 
+def read_file(filename):
+    res = None
+    with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), filename), "r", encoding="utf-8") as fd:
+        res = fd.read()
+    return res
+
 class TestParser(unittest.TestCase):
     def test_c_file(self):
-        string = """#include GLFW_INCLUDE_GLU
-#include <GLFW/glfw3.h>
-#include <cstdio>
-/* Random function */
-static void glfw_key_callback(int key, int scancode, int action, int mod){
-  if(glfw_key_callback){
-    // Comment here
-    input_event_queue->push(inputaction);   
-  }
-  printf("%s", "asciiじゃない文字");
-}"""
+        string = read_file("tests/fun.c")
         fun_body = """static void glfw_key_callback(int key, int scancode, int action, int mod){
   if(glfw_key_callback){
     // Comment here
-    input_event_queue->push(inputaction);   
+    input_event_queue->push(inputaction);
   }
   printf("%s", "asciiじゃない文字");
 }"""
-        fun_lines, fun = FunctionExtractor.get_functions(string, "cpp")
+        fun_lines, fun = FunctionExtractor.get_functions(string, "c")
         self.assertEqual(fun_lines, [(4, 10)])
         self.assertEqual(fun, [fun_body])
 
     def test_c_file_with_main(self):
-        string = """#include GLFW_INCLUDE_GLU
-#include <GLFW/glfw3.h>
-#include <cstdio>
-/* Random function */
-static void glfw_key_callback(int key, int scancode, int action, int mod){
-  if(glfw_key_callback){
-    // Comment here
-    input_event_queue->push(inputaction);   
-  }
-  printf("%s", "asciiじゃない文字");
-}
-
-int main() {
-  printf("Hello, world!");
-  return 0;
-}"""
+        string = read_file("tests/main.c")
         fun_body = """static void glfw_key_callback(int key, int scancode, int action, int mod){
   if(glfw_key_callback){
     // Comment here
@@ -60,53 +42,19 @@ int main() {
         self.assertEqual(fun, [fun_body, main_body])
 
     def test_cpp_file(self):
-        string = """#include <vector>
-
-using namespace std;
-
-vector<int> t;
-
-void dfs(int v) {
-    for (int to : g[v]) {
-        t.push_back(to);
-        dfs(to);
-    }
-}"""
+        string = read_file("tests/fun.cpp")
         fun_body = """void dfs(int v) {
     for (int to : g[v]) {
         t.push_back(to);
         dfs(to);
     }
 }"""
-        fun_lines, fun = FunctionExtractor.get_functions(string, "c")
+        fun_lines, fun = FunctionExtractor.get_functions(string, "cpp")
         self.assertEqual(fun_lines, [(6, 11)])
         self.assertEqual(fun, [fun_body])
 
     def test_cpp_file_with_main(self):
-        string = """#include <vector>
-#include <iostream>
-
-using namespace std;
-
-vector<int> t;
-vector<vector<int>> g;
-
-void dfs(int v) {
-    for (int to : g[v]) {
-        t.push_back(to);
-        dfs(to);
-    }
-}
-
-int main() {
-    int n;
-    cin >> n;
-    g = vector<vector<int>>(n);
-    for (int i = 0; i < n; i++) {
-        g[i].append(i);
-    }
-    return 0;
-}"""
+        string = read_file("tests/main.cpp")
         fun_body = """void dfs(int v) {
     for (int to : g[v]) {
         t.push_back(to);
@@ -127,15 +75,7 @@ int main() {
         self.assertEqual(fun, [fun_body, main_body])
 
     def test_java_file(self):
-        string = """public class Main {
-    public static void main(String[] args) {
-        System.out.println(приветМир());
-    }
-    
-    private static String приветМир() {
-    	return "Hello, World!";
-    }
-}"""
+        string = read_file("tests/main.java")
         main_body = """public static void main(String[] args) {
         System.out.println(приветМир());
     }"""
@@ -147,25 +87,7 @@ int main() {
         self.assertEqual(fun, [main_body, fun_body])
 
     def test_csharp_file(self):
-        string = """using OpenQA.Selenium;
-
-namespace CalculatorUITestFramework {
-    /// <summary>
-    /// This class contains.
-    /// </summary>
-    public static class CalculatorApp {
-        public static WindowsElement Window => session.FindElementByClassName();
-
-        /// <summary>
-        /// Gets sum of two numbers
-        /// </summary>
-        /// <returns>The sum of two numbers wow.</returns>
-        public int AddNumbers(int number1, int number2) {
-            int result = number1 + number2;
-            return result;
-        }
-    }
-}"""
+        string = read_file("tests/fun.cs")
         prop_body = "public static WindowsElement Window => session.FindElementByClassName();"
         fun_body = """public int AddNumbers(int number1, int number2) {
             int result = number1 + number2;
@@ -176,28 +98,7 @@ namespace CalculatorUITestFramework {
         self.assertEqual(fun, [prop_body, fun_body])
 
     def test_csharp_file_with_main(self):
-        string = """using OpenQA.Selenium;
-
-namespace CalculatorUITestFramework {
-    /// <summary>
-    /// </summary>
-    public static class CalculatorApp {
-        public static WindowsElement Window => session.FindElementByClassName();
-
-        /// <summary>
-        /// <returns>The sum of two numbers wow.</returns>
-        public int AddNumbers(int number1, int number2) {
-            int result = number1 + number2;
-            return result;
-        }
-
-        /// <summary>
-        /// <returns>The sum of two numbers wow.</returns>
-        public static void int main(String[] args) {
-            return 0;
-        }
-    }
-}"""
+        string = read_file("tests/main.cs")
         prop_body = "public static WindowsElement Window => session.FindElementByClassName();"
         fun_body = """public int AddNumbers(int number1, int number2) {
             int result = number1 + number2;
