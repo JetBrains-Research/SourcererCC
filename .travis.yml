@@ -14,7 +14,6 @@ script:
   - pylint tokenizers/block_tokenizer_tests.py --exit-zero
   - pylint tokenizers/utils.py --exit-zero
   - pylint tokenizers/block_tokenizer.py --exit-zero
-  - pylint tokenizers/extract_python_functions.py --exit-zero
   - pylint tokenizers/separate-file-block-stats.py --exit-zero
   - pylint clone-detector/*.py --exit-zero
   # Unit tests
