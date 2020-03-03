@@ -105,11 +105,11 @@ class TestParser(unittest.TestCase):
     	return "Hello, World!";
     }"""
         fun_infos = [{
-            "body": fun_body,
+            "body": main_body,
             "start_line": 1,
             "end_line": 3
         },{
-            "body": main_body,
+            "body": fun_body,
             "start_line": 5,
             "end_line": 7
         }]
@@ -126,7 +126,7 @@ class TestParser(unittest.TestCase):
             "start_line": 7,
             "end_line": 7
         },{
-            "body": main_body,
+            "body": fun_body,
             "start_line": 13,
             "end_line": 16
         }]
