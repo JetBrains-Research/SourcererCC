@@ -10,7 +10,7 @@ def read_file(filename):
     return res
 
 class TestParser(unittest.TestCase):
-    def fun_case(lang, filename, fun_infos):
+    def fun_case(self, lang, filename, fun_infos):
         content = read_file(filename)
         fun_lines, fun = FunctionExtractor.get_functions(content, lang)
         funcs_bounds = [(fun_info["start_line"], fun_info["end_line"]) for fun_info in fun_infos]
