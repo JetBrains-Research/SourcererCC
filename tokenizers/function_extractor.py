@@ -33,7 +33,7 @@ class FunctionExtractor:
     """Multi-language function extractor."""
     FUNC_TYPE = {"java": set(["constructor_declaration", "method_declaration"]),
                  "c": set(['function_definition']),
-                 "csharp": set(['method_declaration', 'indexer_declaration', 'property_declaration']),
+                 "c_sharp": set(['method_declaration', 'indexer_declaration', 'property_declaration']),
                  "cpp": set(['function_definition'])}
 
     @classmethod

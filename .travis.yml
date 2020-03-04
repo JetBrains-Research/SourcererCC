@@ -11,16 +11,14 @@ script:
   # Linting
   - pylint prettify_results.py --exit-zero
   - pylint tokenizers/block_level_tokenizer.py --exit-zero
-  - pylint tokenizers/extract_java_functions.py --exit-zero
   - pylint tokenizers/block_tokenizer_tests.py --exit-zero
   - pylint tokenizers/utils.py --exit-zero
   - pylint tokenizers/block_tokenizer.py --exit-zero
-  - pylint tokenizers/extract_python_functions.py --exit-zero
   - pylint tokenizers/separate-file-block-stats.py --exit-zero
   - pylint clone-detector/*.py --exit-zero
   # Unit tests
   - python3 -m tokenizers.parsers
-  - python3 -m unittest tokenizers.block_tokenizer_tests
+  - python3 -m unittest discover -p "*tests.py"
   # Regression tests
   - wget "https://github.com/a1arick/spbsu-programming-homework/archive/master.zip"
   - echo "master.zip" > project-list.txt
