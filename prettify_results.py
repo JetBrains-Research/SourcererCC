@@ -1,70 +1,43 @@
 #!/usr/bin/env python3
-"""This module print results of SourcererCC in nicer way when ran.
-Other functions are used to transform SourcererCC output to json format for
-further processing."""
-
-import datetime as dt
+"""Transform SourcererCC results into machine-readable format JSON."""
 from argparse import ArgumentParser
-import sys
-import os
-import re
+from collections import defaultdict, namedtuple
+import datetime as dt
 import json
+import os
+import sys
+from typing import Iterator, List, Tuple
 import zipfile
 
+from tqdm import tqdm
 
-def get_file_name(file_path):
-    """Get file name from path of archive.
+# block information available after parsing result file from SourcererCC with pairs
+PairBlock = namedtuple("PairBlock", ["proj_id", "block_id"])
 
-    Arguments:
-    file_path -- path to file in archive
+
+def get_line_iterator(filename: str) -> Iterator[str]:
     """
-    full_path = file_path.strip("\"").replace("--", "/")
-    result = re.sub(r"\.zip/[a-zA-Z0-9-.]+-master/", "/tree/master/", full_path)
-    result = re.sub(r"/.*/([^/]+/[^/]+/tree/master/)", r"\1", result)
-    return result
-
-
-def get_file_lines(filename):
-    """Read lines from specified file. Return generator yielding lines.
-
-    Arguments:
-    filename -- file to read
+    Return line (without newline) iterator for filename.
+    :param filename: path to file.
+    :return: line iterator.
     """
-    with open(filename, "r", encoding="utf-8") as file_descr:
+    with open(filename, encoding="utf-8") as file_descr:
         for line in file_descr:
             yield line.strip("\n")
 
 
-def squash_edges(edges):
-    """Transforms list of edges into sparse graph.
-    For example [(1, 2), (1, 3), (2, 3)] is transformed to
-    {1: [2, 3], 2: [3]}
-
-    Return map {(x): [all (y) similar to (x)]}
-
-    Arguments:
-    edges -- edges list
+def get_results(results_file: str) -> List[Tuple[PairBlock, PairBlock]]:
     """
-    result = {vertex: [] for vertex, _ in edges}
-    for parent, child in edges:
-        result[parent].append(child)
-    return result
-
-
-def get_results(results_file):
-    """Parse results from results file.
-
-    Return map where keys are (block/file id) and value
-    is list of ids which are clones of that block
-
-    Arguments:
-    results_file -- file with SourcererCC results
+    Parse result file with pairs from SourcererCC.
+    :param results_file: path to file with result from SourcererCC.
+    :return: list of tuples where each tuple contains Block for first and second element in pair.
     """
-    results_pairs = []
-    for line in get_file_lines(results_file):
-        _, code_id_1, _, code_id_2 = line.split(",")
-        results_pairs.append((code_id_1, code_id_2))
-    return results_pairs
+    result_pairs = []
+    for line in get_line_iterator(results_file):
+        proj_id1, block_id1, proj_id2, block_id2 = line.split(",")
+        result_pairs.append((PairBlock(proj_id=proj_id1, block_id=block_id1),
+                             PairBlock(proj_id=proj_id2, block_id=block_id2)))
+    return result_pairs
 
 
 def filter_files(path, extension):
@@ -88,6 +61,30 @@ def filter_files(path, extension):
     return res
 
 
+def parse_file_line(line_parts):
+    return {
+        "project_id": line_parts[0],
+        "file_path": line_parts[2],
+        "file_hash": line_parts[3],
+        "file_size": line_parts[4],
+        "lines": line_parts[5],
+        "LOC": line_parts[6],
+        "SLOC": line_parts[7]
+    }
+
+
+def parse_block_line(line_parts):
+    return {
+        "project_id": line_parts[0],
+        "block_hash": line_parts[2],
+        "block_lines": line_parts[3],
+        "block_LOC": line_parts[4],
+        "block_SLOC": line_parts[5],
+        "start_line": int(line_parts[6]),
+        "end_line": int(line_parts[7])
+    }
+
+
 def get_stats_info(stats_files_path):
     """Parse stats.
 
@@ -97,30 +94,10 @@ def get_stats_info(stats_files_path):
     Arguments:
     stats_files_path -- file or directory with stats
     """
-    def parse_file_line(line_parts):
-        return {
-            "project_id": line_parts[0],
-            "file_path": line_parts[2],
-            "file_hash": line_parts[3],
-            "file_size": line_parts[4],
-            "lines": line_parts[5],
-            "LOC": line_parts[6],
-            "SLOC": line_parts[7]
-        }
-    def parse_block_line(line_parts):
-        return {
-            "project_id": line_parts[0],
-            "block_hash": line_parts[2],
-            "block_lines": line_parts[3],
-            "block_LOC": line_parts[4],
-            "block_SLOC": line_parts[5],
-            "start_line": int(line_parts[6]),
-            "end_line": int(line_parts[7])
-        }
     files = filter_files(stats_files_path, ".stats")
     stats_info = {}
     for stats_file in files:
-        for line in get_file_lines(stats_file):
+        for line in get_line_iterator(stats_file):
             line_parts = line.split(",")
             stats = {}
             code_id = line_parts[2]
@@ -143,10 +120,10 @@ def get_lines(repo_archive, start_line, end_line, source_filename):
     end_line -- last line number of code to read, -1 for all lines
     source_filename -- path to file to read
     """
-    result = ""
     with repo_archive.open(source_filename) as source_file:
         result = source_file.read().decode("utf-8").split("\n")
-    return "\n".join(result[start_line - 1 : end_line])
+    return "\n".join(result[start_line - 1: end_line])
+
 
 def split_zip_file_path(file_path):
     """Split filename of source file in zip archive into zip filename and
@@ -158,8 +135,8 @@ def split_zip_file_path(file_path):
     Arguments:
     file_path -- path to file inside zip archive
     """
-    ext_index = file_path.index(".zip") + len(".zip")
-    return file_path[:ext_index], file_path[ext_index + 1:]
+    split_index = file_path.find(".zip") + len(".zip")
+    return file_path[:split_index], file_path[split_index + 1:]
 
 
 def get_block_info(stats, block_info):
@@ -170,30 +147,57 @@ def get_block_info(stats, block_info):
     block_info -- map with block info from stats
     """
     file_path = stats[block_info["file_id"]]["file_path"]
-    filename = get_file_name(file_path)
     repo_zip_filename, source_file = split_zip_file_path(file_path.strip("\""))
     start_line = block_info["start_line"]
     end_line = block_info["end_line"]
     with zipfile.ZipFile(repo_zip_filename, "r") as repo_archive:
         code_content = get_lines(repo_archive, start_line, end_line, source_file)
     return {
-        "file": filename,
+        "project": os.path.basename(repo_zip_filename),
+        "file": source_file,
         "start_line": start_line,
         "end_line": end_line,
         "content": code_content
     }
 
 
-def get_block_info_map(stats_files):
+def update_info_map(stats, block_ids, blocks_info_map):
+    for block_id in block_ids:
+        file_path = stats[stats[block_id]["file_id"]]["file_path"]
+        repo_zip_filename, _ = split_zip_file_path(file_path.strip("\""))
+        break
+    with zipfile.ZipFile(repo_zip_filename, "r") as repo_archive:
+        for block_id in tqdm(block_ids, desc="processing project"):
+            file_path = stats[stats[block_id]["file_id"]]["file_path"]
+            repo_zip_filename, source_file = split_zip_file_path(file_path.strip("\""))
+            start_line = stats[block_id]["start_line"]
+            end_line = stats[block_id]["end_line"]
+            code_content = get_lines(repo_archive, start_line, end_line, source_file)
+            block_info = {
+                "project": os.path.basename(repo_zip_filename),
+                "file": source_file,
+                "start_line": start_line,
+                "end_line": end_line,
+                "content": code_content
+            }
+            blocks_info_map[block_id] = block_info
+
+
+def get_block_info_map(stats_files, blocks_to_use):
     """Get blocks info map from .stats files"""
     stats = get_stats_info(stats_files)
+
+    # aggregate blocks per project - optimize archive opening
+    proj2block_ids = defaultdict(set)
+    for block in blocks_to_use:
+        proj2block_ids[block.proj_id].add(block.block_id)
     blocks_info_map = {}
-    for block_id, block_info in stats.items():
-        if "start_line" in block_info:
-            blocks_info_map[block_id] = get_block_info(stats, block_info)
+    for proj in tqdm(proj2block_ids, desc="projects"):
+        update_info_map(stats=stats, block_ids=proj2block_ids[proj], blocks_info_map=blocks_info_map)
     return blocks_info_map
 
-def results_to_map(results_file, stats_files):
+
+def prettify_sourcererCC_results(results_file: str, stats_files: str) -> List[Tuple]:
     """Print nice formatted results.
 
     Return map with results parameters in following json format:
@@ -214,16 +218,19 @@ def results_to_map(results_file, stats_files):
     results_file -- file with SourcererCC results
     stats_files -- file or directory with stats files
     """
-    blocks_info_map = get_block_info_map(stats_files)
-    results = squash_edges(get_results(results_file))
-    full_results = {}
-    for block_id, block_id_list in results.items():
-        block_info_map = blocks_info_map[block_id]
-        full_results[block_id] = {
-            "clones": [blocks_info_map[clone_id] for clone_id in block_id_list],
-            "original": block_info_map
-        }
-    return full_results
+    pairs = get_results(results_file)
+    blocks_to_use = []
+    for pair in pairs:
+        blocks_to_use.append(pair[0])
+        blocks_to_use.append(pair[1])
+    blocks_info_map = get_block_info_map(stats_files, blocks_to_use)
+
+    for pair in tqdm(pairs, desc="result preparation"):
+        el1 = blocks_info_map[pair[0].block_id]
+        el1["proj_id"] = pair[0].proj_id
+        el2 = blocks_info_map[pair[1].block_id]
+        el2["proj_id"] = pair[1].proj_id
+        print(json.dumps((el1, el2)))
 
 
 # Print SourcererCC results conveniently
@@ -232,16 +239,11 @@ def results_to_map(results_file, stats_files):
 # resultsFile -- file with results paris (first project id, first block/file,
 # second project id, second block/file id) usually it is results.pairs
 if __name__ == "__main__":
-    PARSER = ArgumentParser()
-    PARSER.add_argument("-r", "--resultsFile", dest="results_file",\
-        required=True, help="File with results of SourcererCC (results.pairs).")
-    PARSER.add_argument("-s", "--statsFiles", dest="stats_files",\
-        required=True, help="File or folder with stats files (*.stats).")
+    parser = ArgumentParser()
+    parser.add_argument("-r", "--results-file", required=True, help="File with results of SourcererCC (results.pairs).")
+    parser.add_argument("-s", "--stats-files", required=True, help="File or folder with stats files (*.stats).")
 
-    OPTIONS = PARSER.parse_args()
-    TIME_START = dt.datetime.now()
+    args = parser.parse_args()
+    start_time = dt.datetime.now()
 
-    RESULTS_MAP = results_to_map(OPTIONS.results_file, OPTIONS.stats_files)
-    print(json.dumps(RESULTS_MAP, indent=4))
-
-    print(f"Processed printing in {dt.datetime.now() - TIME_START}")
+    prettify_sourcererCC_results(args.results_file, args.stats_files)
