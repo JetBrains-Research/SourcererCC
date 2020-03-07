@@ -29,4 +29,4 @@ script:
   - cat NODE_*/output8.0/query*.txt > ../results.pairs
   - cd ..
   - cat results.pairs
-  - ./prettify_results.py --resultsFile=results.pairs --statsFiles=blocks_stats/
+  - ./prettify_results.py --results-file=results.pairs --stats-files=blocks_stats/
