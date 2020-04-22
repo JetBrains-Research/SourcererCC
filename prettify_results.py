@@ -15,6 +15,17 @@ from tqdm import tqdm
 PairBlock = namedtuple("PairBlock", ["proj_id", "block_id"])
 # block information available in JSON
 Block = namedtuple("Block", ["project", "filepath", "start_line", "end_line", "content"])
+BlockMeta = namedtuple("BlockMeta", ["project", "filepath", "start_line", "end_line"])
+
+
+def convert_block2meta(block: Block) -> BlockMeta:
+    """
+    Convert Block to BlockMeta.
+    :param block: block that should be converted.
+    :return: metainformation of block only (without content).
+    """
+    return BlockMeta(project=block.project, filepath=block.filepath, start_line=block.start_line,
+                     end_line=block.end_line)
 
 
 def get_line_iterator(filename: str) -> Iterator[str]:
@@ -187,6 +198,23 @@ def get_block_metainfo(metainfo_filepath: str, block_ids: Set[str]) -> Dict[str,
     return block2metainfo
 
 
+def dump_connected_component(output_dir: str, connected_component: Dict, cc_id: int) -> None:
+    """
+    Create subdirectory, save JSON with connected component and html with statistics about connected component and
+    several examples of pairs.
+    :param output_dir: base directory to store results.
+    :param connected_component: connected component.
+    :param cc_id: id of connected component.
+    :return: None.
+    """
+    res_dir = os.path.join(output_dir, "cc_%s" % cc_id)
+    os.makedirs(res_dir, exist_ok=True)  # it should not exist
+    json_loc = os.path.join(res_dir, "connected_component.json")
+    with open(json_loc, "w") as f:
+        json.dump(connected_component, f)
+    # TODO: add converter to html
+
+
 def main(results_file: str, stats_files: str) -> Generator[str, None, None]:
     """
     Convert SourcererCC output format to JSON.
@@ -194,6 +222,7 @@ def main(results_file: str, stats_files: str) -> Generator[str, None, None]:
     :param stats_files: meta information for blocks from SourcererCC - different ids, paths, start/end line, etc.
     :return: generator with one JSON per row.
     """
+    # parse results of SourcererCC
     pairs = get_results(results_file)
     blocks_to_use = []
     for pair in pairs:
@@ -201,27 +230,205 @@ def main(results_file: str, stats_files: str) -> Generator[str, None, None]:
         blocks_to_use.append(pair[1])
     blocks_info_map = get_block_metainfo(stats_files, blocks_to_use)
 
-    for pair in tqdm(pairs, desc="result preparation"):
+    # find connected components
+    ccc = ConnectedCodeClones()
+    for pair in tqdm(pairs, desc="Find connected components"):
         el1 = blocks_info_map[pair[0].block_id]
         el2 = blocks_info_map[pair[1].block_id]
-        yield json.dumps((el1, el2))
+        # yield json.dumps((el1, el2))
+        ccc.union(block1=el1, block2=el2)
+    print("Number of unique connected components %s" % ccc.n_connected_components())
+
+    # postprocessing of ConnectedCodeClones
+    # store each connected component separately. It should contain 3 substructures
+    # contents: {content_id: content}
+    # blocks: {block_id: (BlockMeta, content_id)}
+    # pairs: [(block_id1, block_id2), ...]
+    pairs.sort(key=lambda pair: ccc.get_block_parent(blocks_info_map[pair[0].block_id]))
+
+    def _new_cc():
+        # new connected component
+        new_cc = {"contents": {}, "blocks": {}, "pairs": []}
+        content2id = {}
+        block2id = {}
+        return new_cc, content2id, block2id
+
+    current_cc_id = ccc.get_block_parent(blocks_info_map[pairs[0][0]])
+    current_cc, content2id, block2id = _new_cc()
+    for pair in tqdm(pairs, desc="Postprocess connected components"):
+        el1 = blocks_info_map[pair[0].block_id]
+        el2 = blocks_info_map[pair[1].block_id]
+        if ccc.get_block_parent(el1) != ccc.get_block_parent(el2):
+            raise ValueError("Expected parents to be equal.")
+        cc_id = ccc.get_block_parent(el1)
+        if cc_id != current_cc_id:
+            yield current_cc, current_cc_id
+            current_cc_id = cc_id
+            current_cc, content2id, block2id = _new_cc()
+
+        for el in [el1, el2]:
+            # update contents
+            if content2id.setdefault(el.content, len(content2id)) not in current_cc["contents"]:
+                current_cc["contents"][content2id[el.content]] = el.content
+            # update blocks
+            meta = convert_block2meta(el)
+            if block2id.setdefault(meta, len(block2id)) not in current_cc["blocks"]:
+                current_cc["blocks"][block2id[meta]] = (meta, content2id[el.content])
+        # update pairs
+        current_cc["pairs"].append((block2id[convert_block2meta(el1)], block2id[convert_block2meta(el2)]))
+    yield current_cc, current_cc_id
+
+
+class WeightedQuickUnionPathCompressionUF:
+    """
+    Class that implements functionality for connected components.
+    """
+
+    def __init__(self, n_components: int = 0):
+        self.parent = []
+        self.size = []
+        for i in range(n_components):
+            self.add_component()
+
+    def n_components(self):
+        assert len(self.parent) == len(self.size), \
+            "n_parents (%s) != n_sizes (%s)" % (len(self.parent), len(self.size))
+        return len(self.parent)
+
+    def add_component(self):
+        """
+        Add new component.
+        """
+        self.parent.append(len(self.parent))  # parent is itself
+        self.size.append(1)
+
+    def union(self, id1: int, id2: int):
+        """
+        Union 2 components with indexes id1 & id2.
+
+        :param id1: index of first component.
+        :param id2: index of second component.
+        """
+        p1 = self.find(id1)
+        p2 = self.find(id2)
+        if p1 == p2:
+            return  # nothing to do - common parent already
+        # put smallest subtree below biggest
+        if self.size[p1] > self.size[p2]:
+            self.parent[p2] = p1
+            self.size[p1] += self.size[p2]
+        else:
+            self.parent[p1] = p2
+            self.size[p2] += self.size[p1]
+
+    def validate(self, index: int) -> bool:
+        """
+        Check that index is valid. If not - raise ValueError.
+
+        :param index: index to check.
+        """
+        if not (0 <= index < len(self.parent)) or not (type(index) == int):
+            raise ValueError("Not valid index %s with type %s, size of parents list is %s" %
+                             (index, type(index), len(self.parent)))
+
+    def find(self, index: int) -> int:
+        """
+        Find parent for given index.
+
+        :param index: index of element to search.
+        :return: index of parent.
+        """
+        self.validate(index)
+        root = index
+        while root != self.parent[root]:
+            self.parent[root] = self.parent[self.parent[root]]
+            root = self.parent[root]
+        return root
+
+    def connected(self, id1: int, id2: int) -> bool:
+        """
+        Check if 2 components are connected.
+
+        :param id1: index of first component.
+        :param id2: index of second component.
+        :return: True if connected and False if not connected.
+        """
+        return self.find(id1) == self.find(id2)
+
+
+class ConnectedCodeClones:
+    """Union-Find adapted for code clones."""
+    def __init__(self, n_components: int = 0):
+        self.uf = WeightedQuickUnionPathCompressionUF(n_components=n_components)
+        self._block_id2meta = defaultdict(set)  # {block_id: set((project, filepath, start_line, end_line), ...)
+        self._block2parent = {}
+        self._block2id = {}  # unique id per block
+        self._id2block = {}
+
+    def n_connected_components(self) -> int:
+        """
+        Number of unique connected components.
+        :return: Number of unique connected components
+        """
+        return len(set(self._block2parent.values()))
+
+    def add_block(self, block: Block) -> None:
+        """
+        Check if block is already presented. If not - increase number of components and store metadata for new one.
+        :param block: object that contains "project", "filepath", "start_line", "end_line", "content".
+        :return: None.
+        """
+
+        if block.content not in self._blocks:
+            self._blocks[block.content].add(BlockMeta(project=block.project, filepath=block.filepath,
+                                                      start_line=block.start_line, end_line=block.end_line))
+            self.uf.add_component()
+            self._block2id[block.content] = self.uf.parent[-1]
+        else:
+            self._blocks[block.content].add(BlockMeta(project=block.project, filepath=block.filepath,
+                                                      start_line=block.start_line, end_line=block.end_line))
+    @property
+    def block2id(self, block: Block):
+        return self._block2id[block.content]
+
+    def get_block_parent(self, block: Block) -> int:
+        """
+        Return parent id.
+        :param block: object that contains "project", "filepath", "start_line", "end_line", "content".
+        :return: parent id.
+        """
+        return self.uf.find(self._block2parent[block.content])
+
+    def union(self, block1: Block, block2: Block) -> None:
+        """
+        Connect 2 blocks.
+        :param block1: object that contains "project", "filepath", "start_line", "end_line", "content".
+        :param block2: object that contains "project", "filepath", "start_line", "end_line", "content".
+        :return: None.
+        """
+        self.add_block(block1)
+        self.add_block(block2)
+        self.uf.union(self.get_block_parent(block1), self.get_block_parent(block2))
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-r", "--results-file", required=True, help="File with results of SourcererCC (results.pairs).")
     parser.add_argument("-s", "--stats-files", required=True, help="File or folder with stats files (*.stats).")
-    parser.add_argument("-o", "--output", default=None, help="Output file location. If None - print JSONs, "
-                                                             "else - write to file.")
+    parser.add_argument("-o", "--output", default=None,
+                        help="Output directory. If None - print JSONs, else - create subdirectory for each connected "
+                             "component, save JSON and html.")
 
     args = parser.parse_args()
     start_time = dt.datetime.now()
 
     res = main(args.results_file, args.stats_files)
     if args.output is None:
-        for pair in res:
-            print(pair)
+        for connected_component, _ in res:
+            print(connected_component)
     else:
+        for connected_component, cc_id in res:
+            dump_connected_component(output_dir=args.output, connected_component=connected_component, cc_id=cc_id)
         with open(args.output, "w") as f:
             for pair in res:
                 f.write(res + "\n")
