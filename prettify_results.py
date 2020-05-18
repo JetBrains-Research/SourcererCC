@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Transform SourcererCC results into machine-readable format JSON."""
+import argparse
 from argparse import ArgumentParser
 from collections import defaultdict, namedtuple
 import datetime as dt
@@ -258,6 +259,7 @@ def main(results_file: str, stats_files: str, filter_repos: Union[List[str], Non
     if filter_repos:
         filter_repos = set(filter_repos)
         proj_ids = _get_project_ids(project_names=filter_repos, bookkeeping_folder=bookkeeping_folder)
+
         def _is_good_pair(pr1, pr2):
             check1 = pr1 in proj_ids
             check2 = pr2 in proj_ids
@@ -458,6 +460,24 @@ class ConnectedCodeClones:
         self.uf.union(self.get_block_parent(block1), self.get_block_parent(block2))
 
 
+def pipeline(args: argparse.Namespace) -> None:
+    """
+
+    :param args: all required arguments to launch pipeline.
+    :return: None.
+    """
+    start_time = dt.datetime.now()
+    res = main(results_file=args.results_file, stats_files=args.stats_files, filter_repos=args.filter,
+               bookkeeping_folder=args.bookkeeping_folder)
+    if args.output is None:
+        for connected_component, _ in res:
+            print(connected_component)
+    else:
+        for connected_component, cc_id in res:
+            dump_connected_component(output_dir=args.output, connected_component=connected_component, cc_id=cc_id)
+    print("Duration:", dt.datetime.now() - start_time)
+
+
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-r", "--results-file", required=True, help="File with results of SourcererCC (results.pairs).")
@@ -484,13 +504,4 @@ if __name__ == "__main__":
             print(args.b)
             raise ValueError("In case of `versus` mode - both args `--filter` and `--bookkeeping-folder` required.")
 
-    start_time = dt.datetime.now()
-    res = main(results_file=args.results_file, stats_files=args.stats_files, filter_repos=args.filter,
-               bookkeeping_folder=args.bookkeeping_folder)
-    if args.output is None:
-        for connected_component, _ in res:
-            print(connected_component)
-    else:
-        for connected_component, cc_id in res:
-            dump_connected_component(output_dir=args.output, connected_component=connected_component, cc_id=cc_id)
-    print("Duration:", dt.datetime.now() - start_time)
+    pipeline(args)

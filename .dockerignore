@@ -1,0 +1,11 @@
+clone-detector/
+!clone-detector/*.sh
+!clone-detector/src
+!clone-detector/res
+!clone-detector/lib
+!clone-detector/*.py
+!clone-detector/*.xml
+!clone-detector/*.properties
+!clone-detector/templates
+tokenizers/parsers/build
+tokenizers/parsers/tree-sitter*
