@@ -74,8 +74,8 @@ class Tokenizer():
             if ".java" in self.language_config["extensions"]:
                 self._lang = "java"
                 return self._lang
-            elif ".cs" in self.language_config["extensions"]:
-                self._lang = "csharp"
+            elif ".cs" in self.language_config["extensions"] or ".csx" in self.language_config["extensions"]:
+                self._lang = "c_sharp"
                 return self._lang
             cpp_extensions = ".cpp .h .C .hpp .c++ .cxx .CPP".split()
             for extension in cpp_extensions:
