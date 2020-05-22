@@ -4,12 +4,14 @@ import argparse
 from argparse import ArgumentParser
 from collections import defaultdict, namedtuple
 import datetime as dt
+import difflib
 import json
 import os
 import sys
 from typing import Callable, Dict, Iterator, Generator, List, Set, Tuple, Union
 import zipfile
 
+from tabulate import tabulate
 from tqdm import tqdm
 
 # block information available after parsing result file from SourcererCC with pairs
@@ -211,6 +213,38 @@ def get_block_metainfo(metainfo_filepath: str, proj_block_ids: Set[PairBlock]) -
     return block2metainfo
 
 
+def generate_html(cc: Dict, html_loc: str, next_html_loc: str) -> None:
+    """
+    Generate HTML diff for connected component, put some statistics,
+    :param cc: connected component.
+    :param html_loc: html location.
+    :param next_html_loc: next html location.
+    """
+    # Connected component structure
+    # contents: {content_id: content}
+    # blocks: {block_id: (BlockMeta, content_id)}
+    # pairs: [(block_id1, block_id2), ...]
+    block_id1, block_id2 = cc["pairs"][0]
+    content_id1 = cc["blocks"][block_id1][1]
+    content_id2 = cc["blocks"][block_id2][1]
+    content1 = cc["contents"][content_id1]
+    content2 = cc["contents"][content_id2]
+    diff_html = difflib.HtmlDiff().make_file(content1.splitlines(), content2.splitlines())
+
+    # metainformation
+    meta1 = cc["blocks"][block_id1][0]
+    meta2 = cc["blocks"][block_id2][0]
+    table = []
+    for row1, row2 in zip(meta1, meta2):
+        table.append((row1, row2))
+    meta_table = tabulate(table, tablefmt="html")
+
+    next_html_link = '<a href="%s">NEXT</a>' % next_html_loc
+
+    with open(html_loc, "w") as f:
+        f.write("\n".join([next_html_link, meta_table, diff_html]))
+
+
 def dump_connected_component(output_dir: str, connected_component: Dict, cc_id: int) -> None:
     """
     Create subdirectory, save JSON with connected component and html with statistics about connected component and
@@ -225,7 +259,12 @@ def dump_connected_component(output_dir: str, connected_component: Dict, cc_id: 
     json_loc = os.path.join(res_dir, "connected_component.json")
     with open(json_loc, "w") as f:
         json.dump(connected_component, f)
-    # TODO: add converter to html
+    html_loc = os.path.join(res_dir, "diff.html")
+
+    next_cc_id = cc_id + 1
+    next_res_dir = os.path.join("..", "cc_%s" % next_cc_id)
+    next_html_loc = os.path.join(next_res_dir, "diff.html")
+    generate_html(cc=connected_component, html_loc=html_loc, next_html_loc=next_html_loc)
 
 
 def _get_project_ids(project_names: Set[str], bookkeeping_folder: str):
@@ -304,14 +343,15 @@ def main(results_file: str, stats_files: str, filter_repos: Union[List[str], Non
         block2id = {}
         return new_cc, content2id, block2id
 
-    current_cc_id = ccc.get_block_parent(blocks_info_map[pairs[0][0].block_id])
+    # convert all keys/ids to str because of JSON limitation
+    current_cc_id = str(ccc.get_block_parent(blocks_info_map[pairs[0][0].block_id]))
     current_cc, content2id, block2id = _new_cc()
     for pair in tqdm(pairs, desc="Postprocess connected components"):
         el1 = blocks_info_map[pair[0].block_id]
         el2 = blocks_info_map[pair[1].block_id]
         if ccc.get_block_parent(el1) != ccc.get_block_parent(el2):
             raise ValueError("Expected parents to be equal.")
-        cc_id = ccc.get_block_parent(el1)
+        cc_id = str(ccc.get_block_parent(el1))
         if cc_id != current_cc_id:
             yield current_cc, current_cc_id
             current_cc_id = cc_id
@@ -319,12 +359,12 @@ def main(results_file: str, stats_files: str, filter_repos: Union[List[str], Non
 
         for el in [el1, el2]:
             # update contents
-            if content2id.setdefault(el.content, len(content2id)) not in current_cc["contents"]:
-                current_cc["contents"][content2id[el.content]] = el.content
+            if content2id.setdefault(el.content, str(len(content2id))) not in current_cc["contents"]:
+                current_cc["contents"][str(content2id[el.content])] = el.content
             # update blocks
             meta = convert_block2meta(el)
-            if block2id.setdefault(meta, len(block2id)) not in current_cc["blocks"]:
-                current_cc["blocks"][block2id[meta]] = (meta, content2id[el.content])
+            if block2id.setdefault(meta, str(len(block2id))) not in current_cc["blocks"]:
+                current_cc["blocks"][str(block2id[meta])] = (meta, str(content2id[el.content]))
         # update pairs
         current_cc["pairs"].append((block2id[convert_block2meta(el1)], block2id[convert_block2meta(el2)]))
     yield current_cc, current_cc_id
@@ -473,8 +513,8 @@ def pipeline(args: argparse.Namespace) -> None:
         for connected_component, _ in res:
             print(connected_component)
     else:
-        for connected_component, cc_id in res:
-            dump_connected_component(output_dir=args.output, connected_component=connected_component, cc_id=cc_id)
+        for i, (connected_component, cc_id) in enumerate(res):
+            dump_connected_component(output_dir=args.output, connected_component=connected_component, cc_id=i)
     print("Duration:", dt.datetime.now() - start_time)
 
 
