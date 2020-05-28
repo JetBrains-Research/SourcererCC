@@ -53,6 +53,7 @@ def get_result_pairs(results_file: str, filter_f: Callable = None) -> List[Tuple
         def filter_f(): return True
 
     result_pairs = []
+    i = -1
     for i, line in enumerate(get_line_iterator(results_file)):
         proj_id1, block_id1, proj_id2, block_id2 = line.split(",")
         if filter_f(proj_id1, proj_id2):
