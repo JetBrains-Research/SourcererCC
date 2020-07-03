@@ -10,22 +10,36 @@ docker build -t  plagiate .
 ## Prepare data
 ```shell script
 # create directories to share
-mkdir -p /path/to/input/dir
-mkdir -p /path/to/output/dir
+mkdir -p data/input data/output
 
 # download repositories to check
-cd ~/java/input
-wget https://github.com/org1/repo1/archive/master.zip -O org1_repo1.zip
-wget https://github.com/org2/repo2/archive/master.zip -O org2_repo2.zip
+cd data/input
+wget https://github.com/org1/repo1 -O org1_repo1.zip
+wget https://github.com/org2/repo2 -O org2_repo2.zip
 # you can download more that 2 repositories
 ```
 
-## launch plagiarism detector
+## Launch plagiarism detector
+**One versus all other**
+
 ```shell script
-docker run -it --rm -v /path/to/input/dir:/input -v /path/to/output/dir:/output \
+# provide absolute paths to your folders 
+docker run -it --rm \
+-v absolute/path/to/input:/input \
+-v absolute/path/to/output:/output \
 plagiate -e .java \
 -m versus -f org1_repo1.zip
 
 # `-e` specify extensions - Java/C#/C++/C languages supported
 # `-f` specify list of repositories that should be compared against another repositories (not in this list)  
+```
+
+**Each one to each other**
+
+```shell script
+docker run -it --rm \
+-v absolute/path/to/input:/input \
+-v absolute/path/to/output:/output \
+plagiate -e .java \
+-m all-to-all 
 ```
